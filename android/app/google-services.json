@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "750025511558",
+    "project_id": "tracure-11d4a",
+    "storage_bucket": "tracure-11d4a.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:750025511558:android:880837546f741784fdb707",
+        "android_client_info": {
+          "package_name": "com.tracure.main"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "750025511558-bshap9qg560h6kn3i26lbnqmdsr5l1e2.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.tracure.main",
+            "certificate_hash": "32f81fba262a9d9ca7deee8160589299af55e2ec"
+          }
+        },
+        {
+          "client_id": "750025511558-n8nrbj9k4c8149ivlm04qvmodjsltegg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCDRgl-NBJnLndLu6__NYS6SRkAHMPMDIk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "750025511558-1e61mkg7g3th6j9470b4rei5q6s2dmit.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
