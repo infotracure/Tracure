@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:tracure/utils/constant/color_constants.dart';
 import 'package:tracure/utils/custom_text.dart';
 import 'package:tracure/utils/extensions.dart';
@@ -63,19 +62,19 @@ class CommonWidget {
             // isDense: true,
             contentPadding: contentPadding,
             focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10.r),
+              borderRadius: BorderRadius.circular(10),
               borderSide: const BorderSide(color: ColorConstant.primaryColor),
             ),
             enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10.r),
+              borderRadius: BorderRadius.circular(10),
               borderSide: BorderSide(color: Colors.grey.shade400),
             ),
             focusedErrorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10.r),
+              borderRadius: BorderRadius.circular(10),
               borderSide: BorderSide(color: ColorConstant.red),
             ),
             errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10.r),
+              borderRadius: BorderRadius.circular(10),
               borderSide: BorderSide(color: ColorConstant.red),
             ),
           ),
@@ -113,19 +112,19 @@ class CommonWidget {
         contentPadding:
             const EdgeInsets.symmetric(vertical: 14, horizontal: 15),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10.r),
+          borderRadius: BorderRadius.circular(10),
           borderSide: const BorderSide(color: ColorConstant.primaryColor),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10.r),
+          borderRadius: BorderRadius.circular(10),
           borderSide: const BorderSide(color: ColorConstant.primaryColor),
         ),
         focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10.r),
+          borderRadius: BorderRadius.circular(10),
           borderSide: BorderSide(color: ColorConstant.red),
         ),
         errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10.r),
+          borderRadius: BorderRadius.circular(10),
           borderSide: BorderSide(color: ColorConstant.red),
         ),
       ),
@@ -144,11 +143,11 @@ class CommonWidget {
     return ElevatedButton(
         style: ElevatedButton.styleFrom(
             backgroundColor: bgColor,
-            // minimumSize: Size(120.w, 40.h),
+            // minimumSize: Size(120.w, 40),
             padding: padding ??
-                EdgeInsets.symmetric(vertical: 12.h, horizontal: 42.w),
+                EdgeInsets.symmetric(vertical: 12, horizontal: 42),
             shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(borderRadius.r))),
+                borderRadius: BorderRadius.circular(borderRadius))),
         onPressed: onTap,
         child:
             CustomText.title(text: title, color: titleColor, size: textsize));
@@ -161,16 +160,16 @@ class CommonWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 5.h, vertical: 5.h),
-        margin: EdgeInsets.symmetric(horizontal: 10.h, vertical: 20.h),
+        padding: EdgeInsets.symmetric(horizontal: 5, vertical: 5),
+        margin: EdgeInsets.symmetric(horizontal: 10, vertical: 20),
         decoration: BoxDecoration(
             color: ColorConstant.primaryColor,
-            borderRadius: BorderRadius.circular(30.r)),
+            borderRadius: BorderRadius.circular(30)),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              padding: EdgeInsets.all(12.h),
+              padding: EdgeInsets.all(12),
               decoration: const BoxDecoration(
                   color: Colors.white, shape: BoxShape.circle),
               child: Image.asset(
@@ -192,7 +191,7 @@ class CommonWidget {
       {String? imgUrl, Color? color, double radius = 10}) {
     return BoxDecoration(
         color: color ?? Colors.white,
-        borderRadius: BorderRadius.circular(radius.r),
+        borderRadius: BorderRadius.circular(radius),
         image: (imgUrl != null)
             ? DecorationImage(fit: BoxFit.cover, image: NetworkImage(imgUrl))
             : null,

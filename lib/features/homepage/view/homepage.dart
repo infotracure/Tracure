@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:tracure/features/homepage/view/CircularProgressWidget.dart'
     show CircularProgressWidget;
 import 'package:tracure/servies/health_service.dart';
@@ -209,9 +210,10 @@ class BookSpecialistCard extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(vertical: 4),
                   child: GestureDetector(
                     onTap: () async {
-                      final GoogleFitService fitService = GoogleFitService();
-                      await fitService.signIn();
-                      await fitService.fetchTodaySteps();
+                      await PermissionManager.requestActivityPermission();
+                      printTodaySteps();
+                      printWeeklySteps();
+                      printMonthlySteps();
                     },
                     child: Row(
                       mainAxisSize: MainAxisSize.min, // Wraps content tightly

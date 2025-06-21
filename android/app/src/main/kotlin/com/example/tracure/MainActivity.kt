@@ -17,8 +17,10 @@ import io.flutter.plugin.common.MethodChannel
 import java.time.LocalDate
 import java.time.ZoneId
 import java.util.concurrent.TimeUnit
+import io.flutter.embedding.android.FlutterFragmentActivity
 
-class MainActivity : FlutterActivity() {
+
+class MainActivity : FlutterFragmentActivity() {
     private val CHANNEL = "com.tracure.main/fit"
     private val REQUEST_OAUTH_REQUEST_CODE = 1001
     private var resultCallback: MethodChannel.Result? = null

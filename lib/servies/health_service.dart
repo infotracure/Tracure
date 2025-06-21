@@ -1,23 +1,10 @@
-import 'dart:convert';
 import 'dart:developer';
-import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
-import 'package:google_sign_in/google_sign_in.dart';
+
 import 'package:permission_handler/permission_handler.dart';
+import 'package:health/health.dart';
 
-class GoogleFitService {
-  final GoogleSignIn _googleSignIn = GoogleSignIn(
-    scopes: [
-      'email',
-      'profile',
-      'https://www.googleapis.com/auth/fitness.activity.read',
-    ],
-  );
-
-  GoogleSignInAccount? _currentUser;
-  String? _accessToken;
-
-  Future<void> requestActivityPermission() async {
+class PermissionManager {
+  static Future<void> requestActivityPermission() async {
     if (await Permission.activityRecognition.isDenied) {
       await Permission.activityRecognition.request();
     }
@@ -26,67 +13,119 @@ class GoogleFitService {
       openAppSettings();
     }
   }
+}
 
-  Future<void> signIn() async {
+class HealthDataService {
+  static final HealthDataService _instance = HealthDataService._internal();
+  factory HealthDataService() => _instance;
+  HealthDataService._internal();
+
+  final Health _health = Health();
+
+  bool _isAuthorized = false;
+  bool _isRequesting = false;
+
+  final List<HealthDataType> _dataTypes = [HealthDataType.STEPS];
+  final List<HealthDataAccess> _permissions = [HealthDataAccess.READ];
+
+  Future<bool> _authorize() async {
+    if (_isAuthorized || _isRequesting) return _isAuthorized;
+
+    _isRequesting = true;
+
     try {
-      await requestActivityPermission();
-      _currentUser = await _googleSignIn.signIn().onError((error, stackTrace) {
-        log('Uncaught async error: $error');
-        log('Stack trace: $stackTrace');
-      });
-      final auth = await _currentUser?.authentication;
-      _accessToken = auth?.accessToken;
-
-      print("Access Token: $_accessToken");
+      _isAuthorized = await _health.requestAuthorization(
+        _dataTypes,
+        permissions: _permissions,
+      );
     } catch (e) {
-      debugPrint(e.toString());
+      print("Authorization error: $e");
+      _isAuthorized = false;
+    } finally {
+      _isRequesting = false;
     }
+
+    return _isAuthorized;
   }
 
-  Future<void> fetchTodaySteps() async {
-    if (_accessToken == null) {
-      print("Not signed in.");
-      return;
-    }
+  Future<int> _fetchStepsForDay(DateTime date) async {
+    final start = DateTime(date.year, date.month, date.day);
+    final end = start.add(Duration(days: 1));
 
-    final now = DateTime.now();
-    final startTime = DateTime(
-      now.year,
-      now.month,
-      now.day,
-    ).millisecondsSinceEpoch;
-    final endTime = now.millisecondsSinceEpoch;
-
-    final url =
-        'https://www.googleapis.com/fitness/v1/users/me/dataset:aggregate';
-
-    final body = {
-      "aggregateBy": [
-        {
-          "dataTypeName": "com.google.step_count.delta",
-          "dataSourceId":
-              "derived:com.google.step_count.delta:com.google.android.gms:estimated_steps",
-        },
-      ],
-      "bucketByTime": {"durationMillis": 86400000},
-      "startTimeMillis": startTime,
-      "endTimeMillis": endTime,
-    };
-
-    final dio = Dio();
-
-    final response = await dio.post(
-      url,
-      data: jsonEncode(body),
-      options: Options(
-        headers: {
-          'Authorization': 'Bearer $_accessToken',
-          'Content-Type': 'application/json',
-        },
-      ),
+    final data = await _health.getHealthDataFromTypes(
+      startTime: start,
+      endTime: end,
+      types: _dataTypes,
     );
 
-    print("Google Fit Response:");
-    print(response.data);
+    final clean = _health.removeDuplicates(data);
+
+    return clean.fold<int>(0, (sum, d) {
+      if (d.type == HealthDataType.STEPS && d.value is NumericHealthValue) {
+        return sum + (d.value as NumericHealthValue).numericValue.toInt();
+      }
+      return sum;
+    });
+  }
+
+  Future<int> getTodaySteps() async {
+    if (!await _authorize()) return 0;
+    return await _fetchStepsForDay(DateTime.now());
+  }
+
+  Future<List<Map<String, dynamic>>> getWeeklySteps() async {
+    if (!await _authorize()) return [];
+
+    final now = DateTime.now();
+    List<Map<String, dynamic>> stepsData = [];
+
+    for (int i = 6; i >= 0; i--) {
+      final date = now.subtract(Duration(days: i));
+      final steps = await _fetchStepsForDay(date);
+      stepsData.add({'date': date, 'steps': steps});
+    }
+
+    return stepsData;
+  }
+
+  Future<List<Map<String, dynamic>>> getMonthlySteps() async {
+    if (!await _authorize()) return [];
+
+    final now = DateTime.now();
+    final firstDay = DateTime(now.year, now.month, 1);
+    final today = DateTime(now.year, now.month, now.day);
+    final days = today.difference(firstDay).inDays + 1;
+
+    List<Map<String, dynamic>> stepsData = [];
+
+    for (int i = 0; i < days; i++) {
+      final date = firstDay.add(Duration(days: i));
+      final steps = await _fetchStepsForDay(date);
+      stepsData.add({'date': date, 'steps': steps});
+    }
+
+    return stepsData;
+  }
+}
+
+void printTodaySteps() async {
+  final service = HealthDataService();
+  final todayStep = await service.getTodaySteps();
+  log(todayStep.toString());
+}
+
+void printWeeklySteps() async {
+  final service = HealthDataService();
+  final weekData = await service.getWeeklySteps();
+  for (var day in weekData) {
+    log("${day['date']}: ${day['steps']} steps");
+  }
+}
+
+void printMonthlySteps() async {
+  final service = HealthDataService();
+  final monthData = await service.getMonthlySteps();
+  for (var day in monthData) {
+    log("${day['date']}: ${day['steps']} steps");
   }
 }
