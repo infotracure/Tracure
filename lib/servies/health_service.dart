@@ -25,8 +25,16 @@ class HealthDataService {
   bool _isAuthorized = false;
   bool _isRequesting = false;
 
-  final List<HealthDataType> _dataTypes = [HealthDataType.STEPS];
-  final List<HealthDataAccess> _permissions = [HealthDataAccess.READ];
+  final List<HealthDataType> _dataTypes = [
+    HealthDataType.STEPS,
+    // HealthDataType.SLEEP_ASLEEP,
+    // HealthDataType.SLEEP_IN_BED,
+  ];
+  final List<HealthDataAccess> _permissions = [
+    HealthDataAccess.READ,
+    // HealthDataAccess.READ,
+    // HealthDataAccess.READ,
+  ];
 
   Future<bool> _authorize() async {
     if (_isAuthorized || _isRequesting) return _isAuthorized;
@@ -106,12 +114,34 @@ class HealthDataService {
 
     return stepsData;
   }
+
+  Future<void> fetchSleepData() async {
+    if (!await _authorize()) return;
+
+    final types = [HealthDataType.SLEEP_IN_BED, HealthDataType.SLEEP_ASLEEP];
+
+    final now = DateTime.now();
+    final yesterday = now.subtract(Duration(days: 1));
+
+    var sleepData = await _health.getHealthDataFromTypes(
+      types: types,
+      startTime: yesterday,
+      endTime: now,
+    );
+    sleepData = _health.removeDuplicates(sleepData);
+    for (var data in sleepData) {
+      print(
+        "Type: ${data.type}, Value: ${data.value}, Start: ${data.dateFrom}, End: ${data.dateTo}",
+      );
+    }
+  }
 }
 
-void printTodaySteps() async {
+Future<int> printTodaySteps() async {
   final service = HealthDataService();
   final todayStep = await service.getTodaySteps();
   log(todayStep.toString());
+  return todayStep;
 }
 
 void printWeeklySteps() async {

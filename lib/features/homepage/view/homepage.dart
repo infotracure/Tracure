@@ -1,18 +1,58 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:tracure/features/homepage/controller/home_controller.dart';
 import 'package:tracure/features/homepage/view/CircularProgressWidget.dart'
     show CircularProgressWidget;
 import 'package:tracure/servies/health_service.dart';
 
-class Homepage extends StatelessWidget {
+import '../../../servies/sleep_service.dart';
+
+class Homepage extends StatefulWidget {
   const Homepage({super.key});
+
+  @override
+  State<Homepage> createState() => _HomepageState();
+}
+
+class _HomepageState extends State<Homepage> {
+  final homeController = Get.put(HomeController());
+  @override
+  void initState() {
+    super.initState();
+    // WidgetsBinding.instance.addPostFrameCallback((context) async {
+    //   await PermissionManager.requestActivityPermission();
+    //   printTodaySteps();
+    //   // HealthDataService().fetchSleepData();
+    //   //  await SleepService.startTracking(
+    //   //     lSStartTime: '20:00',
+    //   //     lSEndTime: '07:00',
+    //   //     lSHardStopTime: '10:00',
+    //   //     sleepInterval: 60,
+    //   //     sleepDate: '2025-06-26',
+    //   //   );
+    //   // await SleepService.scheduleSleepTracking();
+    // });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color(0xFFF2F3F7),
       appBar: AppBar(
-        actions: [Icon(Icons.notifications), SizedBox(width: 10)],
+        actions: [
+          GestureDetector(
+            onTap: () async {
+              final date = DateFormat(
+                'yyyy-MM-dd',
+              ).format(DateTime.now().subtract(Duration(days: 0)));
+              await SleepService.getSleepDataForDate(date);
+            },
+            child: Icon(Icons.notifications),
+          ),
+          SizedBox(width: 10),
+        ],
         backgroundColor: Color(0xFFF2F3F7),
       ),
       drawer: Drawer(child: ListView()),
@@ -48,7 +88,8 @@ class WelcomeHeader extends StatelessWidget {
 }
 
 class SleepStepCalories extends StatelessWidget {
-  const SleepStepCalories({super.key});
+  SleepStepCalories({super.key});
+  final homeController = Get.find<HomeController>();
 
   @override
   Widget build(BuildContext context) {
@@ -95,32 +136,36 @@ class SleepStepCalories extends StatelessWidget {
           ),
           SizedBox(height: 10),
           Divider(height: 8, thickness: 1, color: Colors.grey.shade300),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: SizedBox(
-              height: 80,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  iconLabelCard(
-                    label: "Sleep",
-                    img: "assets/images/fluent-emoji_sleeping-face.png",
-                    color: 0xFF228BE6,
-                  ),
-                  VerticalDivider(thickness: 1, color: Colors.grey.shade300),
-                  iconLabelCard(
-                    label: "Calories",
-                    img: "assets/images/emojione_running-shoe.png",
-                    color: 0xFF40B8B2,
-                  ),
-                  VerticalDivider(thickness: 1, color: Colors.grey.shade300),
-
-                  iconLabelCard(
-                    label: "Steps",
-                    img: "assets/images/fluent-emoji_fire.png",
-                    color: 0xFFFAB005,
-                  ),
-                ],
+          Obx(
+            () => Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: SizedBox(
+                height: 80,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    iconLabelCard(
+                      label: "Steps",
+                      img: "assets/images/emojione_running-shoe.png",
+                      color: 0xFFFAB005,
+                      value: homeController.todayStep.value,
+                    ),
+                    iconLabelCard(
+                      label: "Sleep",
+                      img: "assets/images/fluent-emoji_sleeping-face.png",
+                      color: 0xFF228BE6,
+                      value: homeController.todaySleep.value,
+                    ),
+                    VerticalDivider(thickness: 1, color: Colors.grey.shade300),
+                    iconLabelCard(
+                      label: "Calories",
+                      img: "assets/images/fluent-emoji_fire.png",
+                      color: 0xFF40B8B2,
+                      value: homeController.todayCalories.value,
+                    ),
+                    VerticalDivider(thickness: 1, color: Colors.grey.shade300),
+                  ],
+                ),
               ),
             ),
           ),
@@ -133,6 +178,7 @@ class SleepStepCalories extends StatelessWidget {
     required String label,
     required String img,
     required int color,
+    required String value,
   }) {
     return Container(
       height: 80,
@@ -147,7 +193,7 @@ class SleepStepCalories extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                "8h 14m",
+                value,
                 style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
               ),
               Image.asset(img, height: 20, width: 20),
@@ -210,10 +256,13 @@ class BookSpecialistCard extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(vertical: 4),
                   child: GestureDetector(
                     onTap: () async {
-                      await PermissionManager.requestActivityPermission();
-                      printTodaySteps();
-                      printWeeklySteps();
-                      printMonthlySteps();
+                      // await PermissionManager.requestActivityPermission();
+                      // printTodaySteps();
+                      // HealthDataService().fetchSleepData();
+                      // getSleep();
+                      SleepService.getSleepDataForDate('2025-06-30');
+                      // printWeeklySteps();
+                      // printMonthlySteps();
                     },
                     child: Row(
                       mainAxisSize: MainAxisSize.min, // Wraps content tightly
