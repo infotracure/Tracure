@@ -19,6 +19,8 @@ import com.tracure.main.db.SleepSession
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import kotlin.math.abs
 import kotlin.math.sqrt
 
@@ -41,11 +43,16 @@ class SleepTrackingService : Service(), SensorEventListener {
     private var lastZ = 0f
     private var initialized = false
 
-    private val THRESHOLD = 2.0
+    private val THRESHOLD = 2f
+
+    companion object {
+        var isRunning = false
+    }
 
     override fun onCreate() {
         super.onCreate()
         Log.d("Abhay","OnCreate Started")
+        isRunning = true
         sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
         startForegroundService()
@@ -53,6 +60,7 @@ class SleepTrackingService : Service(), SensorEventListener {
             sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_NORMAL)
         }
         lastMovementTime = System.currentTimeMillis()
+        sleepStartTime = getCurrentTime()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -62,7 +70,7 @@ class SleepTrackingService : Service(), SensorEventListener {
         val endTimeStr = intent?.getStringExtra("lSEndTime") ?: "07:00"
         val hardStopStr = intent?.getStringExtra("lSHardStopTime") ?: "10:00"
         val intervalSecs = intent?.getIntExtra("sleepInterval", 1800) ?: 1800
-        val sleepDateStr = intent?.getStringExtra("sleepDate") ?: getTodayDate()
+        val sleepDateStr = computeSleepStartDate(endTimeStr)
 
         todayDate = sleepDateStr
 
@@ -71,10 +79,11 @@ class SleepTrackingService : Service(), SensorEventListener {
         hardStopTimeHour = hardStopStr.split(":").getOrNull(0)?.toIntOrNull() ?: 10
         idleDurationMs = (intervalSecs * 1000L).coerceAtLeast(60000L)
 
-        return START_STICKY
+        return START_NOT_STICKY
     }
 
     override fun onDestroy() {
+        super.onDestroy()
         sensorManager.unregisterListener(this)
         super.onDestroy()
     }
@@ -109,21 +118,27 @@ class SleepTrackingService : Service(), SensorEventListener {
         val movement = sqrt(deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ)
 
         // Log the movement for debugging
-        Log.d("Sensor", "Δ Movement: $movement")
+        Log.d("Sensor", "Δ Movement: $movement  : time: $sleepStartTime")
 
-        val THRESHOLD = 1.0f // Tune this based on real-world testing
+        if (isSleeping && isEndService) {
+            val sleepEnd = getCurrentTime()
+            sendSleepData(sleepStartTime ?: "Unknown", sleepEnd)
+            isEndService = false
+        }
 
         if (movement > THRESHOLD) {
             if (isSleeping) {
                 isSleeping = false
                 val sleepEnd = getCurrentTime()
                 sendSleepData(sleepStartTime ?: "Unknown", sleepEnd)
-                sleepStartTime = null
+//                sleepStartTime = null
             }
             lastMovementTime = now
+            sleepStartTime = getCurrentTime()
+
         } else if (!isSleeping && now - lastMovementTime > idleDurationMs) {
             isSleeping = true
-            sleepStartTime = getCurrentTime()
+            //sleepStartTime = getCurrentTime()
         }
     }
 
@@ -151,7 +166,35 @@ class SleepTrackingService : Service(), SensorEventListener {
         CoroutineScope(Dispatchers.IO).launch {
             val db = AppDatabase.getDatabase(applicationContext)
             db.sleepSessionDao().insert(session)
+            deletePast7daysEntries()
         }
+    }
+
+    private fun deletePast7daysEntries(){
+        CoroutineScope(Dispatchers.IO).launch {
+            val db = AppDatabase.getDatabase(applicationContext)
+            val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+            val cutoffDate = LocalDate.now().minusDays(7).format(formatter)
+            db.sleepSessionDao().deleteSessionsBefore(cutoffDate)
+        }
+    }
+
+    private fun computeSleepStartDate(endTimeStr: String): String {
+        val endHour = endTimeStr.split(":").getOrNull(0)?.toIntOrNull() ?: 7
+        val endMinute = endTimeStr.split(":").getOrNull(1)?.toIntOrNull() ?: 0
+
+        val now = Calendar.getInstance()
+        val currentHour = now.get(Calendar.HOUR_OF_DAY)
+        val currentMinute = now.get(Calendar.MINUTE)
+
+        val isBeforeEnd = currentHour < endHour || (currentHour == endHour && currentMinute < endMinute)
+
+        if (isBeforeEnd) {
+            now.add(Calendar.DATE, -1)
+        }
+
+        val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        return sdf.format(now.time)
     }
 
     private fun startForegroundService() {

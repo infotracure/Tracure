@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:tracure/features/homepage/controller/home_controller.dart';
 
 class SleepDataFetcher {
   static const platform = MethodChannel('com.tracure.main');
@@ -71,14 +72,12 @@ class SleepService {
     required String lSEndTime, // e.g., "07:00"
     required String lSHardStopTime, // e.g., "10:00"
     required int sleepInterval, // e.g., 1800 (seconds)
-    required String sleepDate, // e.g., "2025-06-23"
   }) async {
     await _channel.invokeMethod('startSleepTracking', {
       'lSStartTime': lSStartTime,
       'lSEndTime': lSEndTime,
       'lSHardStopTime': lSHardStopTime,
       'sleepInterval': sleepInterval,
-      'sleepDate': sleepDate,
     });
   }
 
@@ -94,14 +93,35 @@ class SleepService {
       "getSleepDataForDate",
       {"date": date},
     );
-    debugPrint(result.toString());
-    return result.cast<Map<String, dynamic>>();
+
+    // Safely cast each item
+    final List<Map<String, dynamic>> castedList = result.map((item) {
+      return Map<String, dynamic>.from(item as Map);
+    }).toList();
+
+    debugPrint(castedList.toString());
+    return castedList;
   }
 
   static scheduleSleepTracking() async {
-    await _channel.invokeMethod('scheduleSleepTracking', {
-      'lSStartTime': '09:48',
-      'lSEndTime': '12:00',
+    try {
+          await _channel.invokeMethod('scheduleSleepTracking', {
+      'lSStartTime': startTime,
+      'lSEndTime': endTime,
+      'lSInterval': '5',
     });
+    } catch (e) {
+      debugPrint(e.toString());
+    }
+
+  }
+
+  static Future<bool> requestAlarmPermission() async {
+   var isGranted = await _channel.invokeMethod('checkExactAlarmPermission');
+    return isGranted == true;
+  }
+  static Future<bool> checkAlarmPermission() async {
+   var isGranted = await _channel.invokeMethod('checkExactAlarmPermission');
+    return isGranted == true;
   }
 }

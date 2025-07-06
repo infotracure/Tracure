@@ -1,8 +1,10 @@
 package com.tracure.main
 
+import android.app.ActivityManager
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.util.Log
 import androidx.annotation.NonNull
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
@@ -13,6 +15,8 @@ import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import com.tracure.main.db.AppDatabase
 import kotlinx.coroutines.*
+
+var isEndService = false
 
 class SleepServicePlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     private lateinit var channel: MethodChannel
@@ -62,17 +66,26 @@ class SleepServicePlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 SleepAlarmScheduler.cancelSleepTracking(context)
                 result.success("Cancelled")
             }
+            "checkExactAlarmPermission" -> {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                   val isGranted = AlarmPermissionHelper.ensureExactAlarmPermission(context)
+                    result.success(isGranted)
+                } else {
+                    result.success(true)
+                }
+            }
 
             else -> result.notImplemented()
         }
     }
 
     private fun startSleepService(call: MethodCall) {
+
         val start = call.argument<String>("lSStartTime") ?: "22:00"
         val end = call.argument<String>("lSEndTime") ?: "07:00"
         val hardStop = call.argument<String>("lSHardStopTime") ?: "10:00"
         val interval = call.argument<Int>("sleepInterval") ?: 1800
-        val sleepDate = call.argument<String>("sleepDate") ?: getTodayDate()
+        val sleepDate = getTodayDate()
 
         // ✅ Save to SharedPreferences
         val prefs = context.getSharedPreferences("SleepPrefs", Context.MODE_PRIVATE)
@@ -101,6 +114,7 @@ class SleepServicePlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     }
 
     private fun stopSleepService() {
+        isEndService = true
         val intent = Intent(context, SleepTrackingService::class.java)
         context.stopService(intent)
     }
@@ -128,6 +142,7 @@ class SleepServicePlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         val sdf = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault())
         return sdf.format(java.util.Date())
     }
+
 
     override fun onAttachedToActivity(binding: ActivityPluginBinding) {}
     override fun onDetachedFromActivity() {}

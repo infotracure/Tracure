@@ -5,6 +5,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:tracure/features/homepage/controller/home_controller.dart';
 import 'package:tracure/features/homepage/view/CircularProgressWidget.dart'
     show CircularProgressWidget;
+import 'package:tracure/servies/app_permission.dart';
 import 'package:tracure/servies/health_service.dart';
 
 import '../../../servies/sleep_service.dart';
@@ -16,24 +17,33 @@ class Homepage extends StatefulWidget {
   State<Homepage> createState() => _HomepageState();
 }
 
-class _HomepageState extends State<Homepage> {
+class _HomepageState extends State<Homepage> with WidgetsBindingObserver {
   final homeController = Get.put(HomeController());
   @override
   void initState() {
     super.initState();
-    // WidgetsBinding.instance.addPostFrameCallback((context) async {
-    //   await PermissionManager.requestActivityPermission();
-    //   printTodaySteps();
-    //   // HealthDataService().fetchSleepData();
-    //   //  await SleepService.startTracking(
-    //   //     lSStartTime: '20:00',
-    //   //     lSEndTime: '07:00',
-    //   //     lSHardStopTime: '10:00',
-    //   //     sleepInterval: 60,
-    //   //     sleepDate: '2025-06-26',
-    //   //   );
-    //   // await SleepService.scheduleSleepTracking();
-    // });
+    WidgetsBinding.instance.addObserver(this); // start listening
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      homeController.setStepValue();
+      homeController.setSleepValue();
+      SleepService.requestAlarmPermission().then((isGranted) async {
+        if (isGranted) {
+          await homeController.scheduleSleep();
+        }
+        await PermissionManager.requestActivityPermission();
+        await AppPermission.requestNotificationPermission();
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this); // cleanup
+    super.dispose();
   }
 
   @override
@@ -44,10 +54,7 @@ class _HomepageState extends State<Homepage> {
         actions: [
           GestureDetector(
             onTap: () async {
-              final date = DateFormat(
-                'yyyy-MM-dd',
-              ).format(DateTime.now().subtract(Duration(days: 0)));
-              await SleepService.getSleepDataForDate(date);
+              await SleepService.stopTracking();
             },
             child: Icon(Icons.notifications),
           ),

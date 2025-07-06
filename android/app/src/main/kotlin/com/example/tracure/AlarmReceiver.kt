@@ -42,11 +42,13 @@ class AlarmReceiver : BroadcastReceiver() {
             }
             "STOP_SLEEP_TRACKING" -> {
                 showNotification(context, "Sleep Tracking", "Sleep service stopped from alarm")
-
+                isEndService = true
                 val stopIntent = Intent(context, SleepTrackingService::class.java)
                 context.stopService(stopIntent)
                 Log.d("AlarmReceiver", "SleepTrackingService STOPPED")
             }
+
+
         }
     }
 
