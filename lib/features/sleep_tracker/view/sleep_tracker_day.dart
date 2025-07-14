@@ -8,15 +8,15 @@ import 'package:tracure/utils/constant/color_constants.dart';
 import 'package:tracure/utils/custom_text.dart';
 import 'package:tracure/utils/extensions.dart';
 
-class StepTrackerDay extends StatefulWidget {
-  const StepTrackerDay({super.key});
+class SleepTrackerDay extends StatefulWidget {
+  const SleepTrackerDay({super.key});
 
   @override
-  State<StepTrackerDay> createState() => _StepTrackerDayState();
+  State<SleepTrackerDay> createState() => _SleepTrackerDayState();
 }
 
-class _StepTrackerDayState extends State<StepTrackerDay> {
-  final stepData = generateRandomDoubleList(48);
+class _SleepTrackerDayState extends State<SleepTrackerDay> {
+  final sleepData = generateRandomDoubleList(48);
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -42,17 +42,17 @@ class _StepTrackerDayState extends State<StepTrackerDay> {
               ),
               SizedBox(
                 height: 200,
-                child: DayBarChart(data: stepData).padOnly(l: 8),
+                child: DayBarChart(data: sleepData).padOnly(l: 8),
               ),
             ],
           ),
         ),
-        stepDistanceWidget().padSymm(horizontal: 8),
+        sleepTimeWidget().padSymm(horizontal: 8),
       ],
     ).padSymm(horizontal: 16, vertical: 16);
   }
 
-  Widget stepDistanceWidget() {
+  Widget sleepTimeWidget() {
     return GestureDetector(
       onTap: () {},
       child: SizedBox(
@@ -63,10 +63,10 @@ class _StepTrackerDayState extends State<StepTrackerDay> {
             children: [
               Expanded(
                 child: iconLabelCard(
-                  label: "Steps",
+                  label: "Goal",
                   img: "assets/images/emojione_running-shoe.png",
                   color: 0xFFFAB005,
-                  value: "14566",
+                  value: "09h 30m",
                 ),
               ),
               VerticalDivider(
@@ -77,10 +77,24 @@ class _StepTrackerDayState extends State<StepTrackerDay> {
               ),
               Expanded(
                 child: iconLabelCard(
-                  label: "Total Distance",
+                  label: "Sleep Time",
+                  img: "assets/images/emojione_running-shoe.png",
+                  color: 0xFFFAB005,
+                  value: "09h 00m",
+                ),
+              ),
+              VerticalDivider(
+                thickness: 1,
+                color: Colors.grey.shade300,
+                indent: 4,
+                endIndent: 4,
+              ),
+              Expanded(
+                child: iconLabelCard(
+                  label: "Wake-up",
                   img: "assets/images/emojione_running-shoe.png",
                   color: 0xFF40B8B2,
-                  value: "2.4 km",
+                  value: "08h 38m",
                 ),
               ),
             ],
@@ -126,9 +140,9 @@ List<String> generateTimeListWith4HourLabels({
   List<String> timeList = [];
   DateTime time = DateTime(0, 1, 1, 0, 0); // Start at 12:00 AM
 
-  int step = 0;
+  int sleep = 0;
   do {
-    if (step % 8 == 0) {
+    if (sleep % 8 == 0) {
       String period = time.hour < 12 ? "\nam" : "\npm";
       int hour = time.hour % 12 == 0 ? 12 : time.hour % 12;
       String minute = time.minute.toString().padLeft(2, '0');
@@ -142,7 +156,7 @@ List<String> generateTimeListWith4HourLabels({
     }
 
     time = time.add(gap);
-    step++;
+    sleep++;
   } while (time.day == 1);
   // timeList.last = "12\nam";
   return timeList;

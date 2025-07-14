@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:tracure/features/homepage/view/homepage.dart';
 import 'package:tracure/features/loginpage/view/login_page.dart';
+import 'package:tracure/features/sleep_tracker/view/sleep_tracker_day.dart';
+import 'package:tracure/features/sleep_tracker/view/sleep_tracker_screen.dart';
 import 'package:tracure/features/step_tracker/view/step_tracker_screen.dart';
 import 'package:tracure/utils/app_theme.dart';
 
@@ -20,7 +22,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetMaterialApp(
       theme: ThemeClass.lightTheme,
-      home: const StepTrackerScreen(),
+      home: const SleepTrackerScreen(),
     );
   }
 }

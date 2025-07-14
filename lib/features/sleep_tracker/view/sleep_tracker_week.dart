@@ -1,22 +1,20 @@
-import 'dart:math';
-
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-
+import 'package:tracure/features/sleep_tracker/view/sleep_tracker_day.dart';
 import 'package:tracure/utils/common_widget.dart';
 import 'package:tracure/utils/constant/color_constants.dart';
 import 'package:tracure/utils/custom_text.dart';
 import 'package:tracure/utils/extensions.dart';
 
-class StepTrackerDay extends StatefulWidget {
-  const StepTrackerDay({super.key});
+class SleepTrackerWeek extends StatefulWidget {
+  const SleepTrackerWeek({super.key});
 
   @override
-  State<StepTrackerDay> createState() => _StepTrackerDayState();
+  State<SleepTrackerWeek> createState() => _SleepTrackerWeekState();
 }
 
-class _StepTrackerDayState extends State<StepTrackerDay> {
-  final stepData = generateRandomDoubleList(48);
+class _SleepTrackerWeekState extends State<SleepTrackerWeek> {
+  final sleepData = [4000.0, 1000.0, 3000.0, 9000.0, 3000.0, 2000.0, 0.0];
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -40,19 +38,17 @@ class _StepTrackerDayState extends State<StepTrackerDay> {
                       .padSymm(horizontal: 10, vertical: 10),
                 ],
               ),
-              SizedBox(
-                height: 200,
-                child: DayBarChart(data: stepData).padOnly(l: 8),
-              ),
+              SizedBox(height: 8),
+              SizedBox(height: 150, child: WeekBarChart(data: sleepData)),
             ],
           ),
         ),
-        stepDistanceWidget().padSymm(horizontal: 8),
+        sleepTimeWidget().padSymm(horizontal: 8),
       ],
     ).padSymm(horizontal: 16, vertical: 16);
   }
 
-  Widget stepDistanceWidget() {
+  Widget sleepTimeWidget() {
     return GestureDetector(
       onTap: () {},
       child: SizedBox(
@@ -63,10 +59,10 @@ class _StepTrackerDayState extends State<StepTrackerDay> {
             children: [
               Expanded(
                 child: iconLabelCard(
-                  label: "Steps",
+                  label: "Goal",
                   img: "assets/images/emojione_running-shoe.png",
                   color: 0xFFFAB005,
-                  value: "14566",
+                  value: "09h 30m",
                 ),
               ),
               VerticalDivider(
@@ -77,10 +73,24 @@ class _StepTrackerDayState extends State<StepTrackerDay> {
               ),
               Expanded(
                 child: iconLabelCard(
-                  label: "Total Distance",
+                  label: "Sleep Time",
+                  img: "assets/images/emojione_running-shoe.png",
+                  color: 0xFFFAB005,
+                  value: "09h 00m",
+                ),
+              ),
+              VerticalDivider(
+                thickness: 1,
+                color: Colors.grey.shade300,
+                indent: 4,
+                endIndent: 4,
+              ),
+              Expanded(
+                child: iconLabelCard(
+                  label: "Wake-up",
                   img: "assets/images/emojione_running-shoe.png",
                   color: 0xFF40B8B2,
-                  value: "2.4 km",
+                  value: "08h 38m",
                 ),
               ),
             ],
@@ -120,82 +130,19 @@ class _StepTrackerDayState extends State<StepTrackerDay> {
   }
 }
 
-List<String> generateTimeListWith4HourLabels({
-  Duration gap = const Duration(minutes: 30),
-}) {
-  List<String> timeList = [];
-  DateTime time = DateTime(0, 1, 1, 0, 0); // Start at 12:00 AM
-
-  int step = 0;
-  do {
-    if (step % 8 == 0) {
-      String period = time.hour < 12 ? "\nam" : "\npm";
-      int hour = time.hour % 12 == 0 ? 12 : time.hour % 12;
-      String minute = time.minute.toString().padLeft(2, '0');
-
-      String formattedTime = minute == "00"
-          ? "$hour$period"
-          : "$hour:$minute$period";
-      timeList.add(formattedTime);
-    } else {
-      timeList.add("");
-    }
-
-    time = time.add(gap);
-    step++;
-  } while (time.day == 1);
-  // timeList.last = "12\nam";
-  return timeList;
-}
-
-List<double> generateRandomDoubleList(
-  int length, {
-  double min = 0,
-  double max = 10000,
-}) {
-  Random random = Random();
-  return List.generate(length, (_) {
-    double range = max - min;
-    return min + random.nextDouble() * range;
-  });
-}
-
-class LeftRightIconButton extends StatelessWidget {
-  const LeftRightIconButton({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 35,
-      width: 35,
-      padding: EdgeInsets.all(10),
-      decoration: CommonWidget.containerDecoration(
-        radius: 10,
-        color: ColorConstant.primaryColor,
-      ),
-      child: Image.asset(
-        "assets/images/arrow_back_black.png",
-        color: Colors.white,
-      ),
-    );
-  }
-}
-
-class DayBarChart extends StatelessWidget {
+class WeekBarChart extends StatelessWidget {
   final List<double> data;
 
-  const DayBarChart({super.key, required this.data});
+  const WeekBarChart({super.key, required this.data});
 
   @override
   Widget build(BuildContext context) {
-    final hourLabels = generateTimeListWith4HourLabels();
+    const hourLabels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
     const maxY = 10000.0;
     return BarChart(
       BarChartData(
         maxY: maxY,
         // minY: 0,
-        groupsSpace: 1,
-        alignment: BarChartAlignment.spaceEvenly,
         barTouchData: BarTouchData(enabled: true),
         gridData: FlGridData(
           show: true,
@@ -223,7 +170,6 @@ class DayBarChart extends StatelessWidget {
           leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
           bottomTitles: AxisTitles(
             sideTitles: SideTitles(
-              reservedSize: 34,
               showTitles: true,
               getTitlesWidget: (value, _) {
                 int index = value.toInt();
@@ -232,7 +178,6 @@ class DayBarChart extends StatelessWidget {
                 }
                 return Text(
                   hourLabels[index],
-                  textAlign: TextAlign.center,
                   style: const TextStyle(fontSize: 10),
                 );
               },
@@ -247,7 +192,7 @@ class DayBarChart extends StatelessWidget {
               BarChartRodData(
                 toY: data[i].isFinite ? data[i] : 0,
                 color: Colors.teal,
-                width: 2,
+                width: 16,
                 borderRadius: BorderRadius.circular(4),
               ),
             ],
