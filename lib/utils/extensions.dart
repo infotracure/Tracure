@@ -5,15 +5,12 @@ import 'constant/color_constants.dart';
 
 extension ExtendedWidget on Widget {
   Widget padSymm({double horizontal = 0, double vertical = 0}) => Padding(
-        padding: EdgeInsets.symmetric(
-            horizontal: horizontal, vertical: vertical),
-        child: this,
-      );
+    padding: EdgeInsets.symmetric(horizontal: horizontal, vertical: vertical),
+    child: this,
+  );
 
-  Widget padAll({double all = 0}) => Padding(
-        padding: EdgeInsets.all(all),
-        child: this,
-      );
+  Widget padAll({double all = 0}) =>
+      Padding(padding: EdgeInsets.all(all), child: this);
 
   Widget padOnly({double l = 0, double r = 0, double b = 0, double t = 0}) =>
       Padding(
@@ -25,39 +22,35 @@ extension ExtendedWidget on Widget {
       (isVisible) ? this : const SizedBox.shrink();
 
   Widget rotate(int degree) => RotationTransition(
-        turns: AlwaysStoppedAnimation(degree / 360),
-        child: this,
-      );
+    turns: AlwaysStoppedAnimation(degree / 360),
+    child: this,
+  );
 
-  ClipRRect clipR(double radius) => ClipRRect(
-        borderRadius: BorderRadius.circular(radius),
-        child: this,
-      );
+  ClipRRect clipR(double radius) =>
+      ClipRRect(borderRadius: BorderRadius.circular(radius), child: this);
 
   ClipRRect clipROnly({
     double botLeft = 0,
     double botRight = 0,
     double topLeft = 0,
     double topRight = 0,
-  }) =>
-      ClipRRect(
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(botLeft),
-          bottomRight: Radius.circular(botRight),
-          topLeft: Radius.circular(topLeft),
-          topRight: Radius.circular(topRight),
-        ),
-        child: this,
-      );
+  }) => ClipRRect(
+    borderRadius: BorderRadius.only(
+      bottomLeft: Radius.circular(botLeft),
+      bottomRight: Radius.circular(botRight),
+      topLeft: Radius.circular(topLeft),
+      topRight: Radius.circular(topRight),
+    ),
+    child: this,
+  );
 
-  Align align(AlignmentGeometry alignment) => Align(
-        alignment: alignment,
-        child: this,
-      );
+  Align align(AlignmentGeometry alignment) =>
+      Align(alignment: alignment, child: this);
+  Align center() => Center(child: this);
 
   Shimmer shimmer() => Shimmer.fromColors(
-        baseColor: Colors.transparent,
-        highlightColor: ColorConstant.primaryColor,
-        child: this,
-      );
+    baseColor: Colors.transparent,
+    highlightColor: ColorConstant.primaryColor,
+    child: this,
+  );
 }

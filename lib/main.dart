@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:tracure/features/homepage/view/homepage.dart';
+import 'package:tracure/features/loginpage/view/login_page.dart';
+import 'package:tracure/features/step_tracker/view/step_tracker_screen.dart';
+import 'package:tracure/utils/app_theme.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,11 +19,8 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-      ),
-      home: const Homepage(),
+      theme: ThemeClass.lightTheme,
+      home: const StepTrackerScreen(),
     );
   }
 }

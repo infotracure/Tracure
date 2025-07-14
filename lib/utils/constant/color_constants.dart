@@ -4,7 +4,7 @@ class ColorConstant {
   // static const Color primaryColor = Color(0xFF15320B);
   // static const Color primaryColor = Color(0xFFFE724C);
   static const Color primaryColor = Color(0xFF5B84D0);
-  static const Color bgWhite = Color(0xFFFFFFFF);
+  static const Color bgWhite = Color(0xFFF2F3F7);
   static const Color bgBlue = Color(0xFF191B2F);
   static Color red = Colors.red.shade700;
 

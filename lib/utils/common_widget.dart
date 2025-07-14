@@ -8,7 +8,9 @@ class CommonWidget {
   static Future<dynamic> pushTo(BuildContext context, Widget? screen) async {
     if (screen == null) return;
     return await Navigator.push(
-        context, MaterialPageRoute(builder: (context) => screen));
+      context,
+      MaterialPageRoute(builder: (context) => screen),
+    );
   }
 
   static Future<dynamic> pop(BuildContext context) async {
@@ -16,22 +18,31 @@ class CommonWidget {
   }
 
   static Future<dynamic> replaceWith(
-      BuildContext context, Widget? screen) async {
+    BuildContext context,
+    Widget? screen,
+  ) async {
     if (screen == null) return;
     return await Navigator.pushReplacement(
-        context, MaterialPageRoute(builder: (context) => screen));
+      context,
+      MaterialPageRoute(builder: (context) => screen),
+    );
   }
 
-  static Widget customTextFieldWithLabel(String label, String hint,
-      {TextInputType? keyboardType,
-      required TextEditingController controller,
-      Function(String, String)? validator,
-      String? initVal,
-      Color? labelColor = ColorConstant.primaryTextColor,
-      bool readOnly = false,
-      EdgeInsetsGeometry? contentPadding =
-          const EdgeInsets.symmetric(vertical: 14, horizontal: 15),
-      List<TextInputFormatter>? inputFormatters}) {
+  static Widget customTextFieldWithLabel(
+    String label,
+    String hint, {
+    TextInputType? keyboardType,
+    required TextEditingController controller,
+    Function(String, String)? validator,
+    String? initVal,
+    Color? labelColor = ColorConstant.primaryTextColor,
+    bool readOnly = false,
+    EdgeInsetsGeometry? contentPadding = const EdgeInsets.symmetric(
+      vertical: 14,
+      horizontal: 15,
+    ),
+    List<TextInputFormatter>? inputFormatters,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -57,8 +68,10 @@ class CommonWidget {
             fillColor: Colors.white,
             filled: true,
             labelStyle: TextStyle(color: Colors.grey.shade700),
-            errorStyle:
-                CustomText.textStyle(size: 10, color: ColorConstant.red),
+            errorStyle: CustomText.textStyle(
+              size: 10,
+              color: ColorConstant.red,
+            ),
             // isDense: true,
             contentPadding: contentPadding,
             focusedBorder: OutlineInputBorder(
@@ -83,12 +96,15 @@ class CommonWidget {
     );
   }
 
-  static Widget customTextField(String hint,
-      {TextInputType? keyboardType,
-      required TextEditingController controller,
-      Function(String, String)? validator,
-      String? initVal,
-      List<TextInputFormatter>? inputFormatters}) {
+  static Widget customTextField(
+    String hint, {
+    TextInputType? keyboardType,
+    required TextEditingController controller,
+    Function(String, String)? validator,
+    String? initVal,
+    Widget? prefixIcon,
+    List<TextInputFormatter>? inputFormatters,
+  }) {
     return TextFormField(
       controller: controller,
       initialValue: initVal,
@@ -104,74 +120,89 @@ class CommonWidget {
         return null;
       },
       decoration: InputDecoration(
-        labelText: hint,
+        // labelText: hint,
         hintText: hint,
-        labelStyle: TextStyle(color: Colors.grey.shade700),
+        filled: true,
+        fillColor: Color(0xffDEE2E6),
+        labelStyle: TextStyle(color: Colors.grey.shade700, fontSize: 14),
         errorStyle: CustomText.textStyle(size: 10, color: ColorConstant.red),
         isDense: true,
-        contentPadding:
-            const EdgeInsets.symmetric(vertical: 14, horizontal: 15),
+        contentPadding: const EdgeInsets.symmetric(
+          vertical: 14,
+          horizontal: 12,
+        ),
+        prefixIcon: prefixIcon,
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: ColorConstant.primaryColor),
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: ColorConstant.primaryColor),
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide.none,
         ),
         focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(color: ColorConstant.red),
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide.none,
         ),
         errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(color: ColorConstant.red),
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide.none,
         ),
       ),
     );
   }
 
-  static ElevatedButton roundedButton(
-      {required BuildContext context,
-      required String title,
-      EdgeInsets? padding,
-      double borderRadius = 20,
-      Color? bgColor = ColorConstant.primaryColor,
-      Color? titleColor = Colors.white,
-      double textsize = 16,
-      required VoidCallback onTap}) {
-    return ElevatedButton(
+  static Widget roundedButton({
+    required BuildContext context,
+    required String title,
+    EdgeInsets? padding,
+    double borderRadius = 20,
+    Color? bgColor = ColorConstant.primaryColor,
+    Color? titleColor = Colors.white,
+    double textsize = 16,
+    required VoidCallback onTap,
+  }) {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton(
         style: ElevatedButton.styleFrom(
-            backgroundColor: bgColor,
-            // minimumSize: Size(120.w, 40),
-            padding: padding ??
-                EdgeInsets.symmetric(vertical: 12, horizontal: 42),
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(borderRadius))),
+          backgroundColor: bgColor,
+          // minimumSize: Size(120.w, 40),
+          padding:
+              padding ?? EdgeInsets.symmetric(vertical: 12, horizontal: 42),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(borderRadius),
+          ),
+        ),
         onPressed: onTap,
-        child:
-            CustomText.title(text: title, color: titleColor, size: textsize));
+        child: CustomText.title(text: title, color: titleColor, size: textsize),
+      ),
+    );
   }
 
-  static Widget roundedBtnWithIcon(
-      {required String title,
-      required String icon,
-      required VoidCallback onTap}) {
+  static Widget roundedBtnWithIcon({
+    required String title,
+    required String icon,
+    required VoidCallback onTap,
+  }) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 5, vertical: 5),
         margin: EdgeInsets.symmetric(horizontal: 10, vertical: 20),
         decoration: BoxDecoration(
-            color: ColorConstant.primaryColor,
-            borderRadius: BorderRadius.circular(30)),
+          color: ColorConstant.primaryColor,
+          borderRadius: BorderRadius.circular(30),
+        ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
               padding: EdgeInsets.all(12),
               decoration: const BoxDecoration(
-                  color: Colors.white, shape: BoxShape.circle),
+                color: Colors.white,
+                shape: BoxShape.circle,
+              ),
               child: Image.asset(
                 icon,
                 height: 20,
@@ -179,29 +210,35 @@ class CommonWidget {
                 color: ColorConstant.primaryColor,
               ),
             ),
-            CustomText.title(text: title, color: Colors.white)
-                .padOnly(l: 10, r: 20)
+            CustomText.title(
+              text: title,
+              color: Colors.white,
+            ).padOnly(l: 10, r: 20),
           ],
         ),
       ),
     );
   }
 
-  static BoxDecoration containerDecoration(
-      {String? imgUrl, Color? color, double radius = 10}) {
+  static BoxDecoration containerDecoration({
+    String? imgUrl,
+    Color? color,
+    double radius = 10,
+  }) {
     return BoxDecoration(
-        color: color ?? Colors.white,
-        borderRadius: BorderRadius.circular(radius),
-        image: (imgUrl != null)
-            ? DecorationImage(fit: BoxFit.cover, image: NetworkImage(imgUrl))
-            : null,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            spreadRadius: 5,
-            blurRadius: 7,
-            offset: const Offset(0, 2),
-          ),
-        ]);
+      color: color ?? Colors.white,
+      borderRadius: BorderRadius.circular(radius),
+      image: (imgUrl != null)
+          ? DecorationImage(fit: BoxFit.cover, image: NetworkImage(imgUrl))
+          : null,
+      boxShadow: [
+        BoxShadow(
+          color: Colors.grey.withOpacity(0.1),
+          spreadRadius: 5,
+          blurRadius: 7,
+          offset: const Offset(0, 2),
+        ),
+      ],
+    );
   }
 }
