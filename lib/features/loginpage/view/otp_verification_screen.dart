@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:get/get.dart';
 import 'package:pinput/pinput.dart';
+import 'package:tracure/features/homepage/view/homepage.dart';
 import 'package:tracure/utils/extensions.dart';
 
 import '../../../utils/common_widget.dart';
@@ -95,7 +97,7 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
                   CommonWidget.roundedButton(
                     context: context,
                     title: "Generate OTP",
-                    onTap: () {},
+                    onTap: () => Get.offAll(Homepage()),
                   ),
                   SizedBox(height: 16),
                   CustomText.richText(

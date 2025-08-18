@@ -1,14 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:intl/intl.dart';
-import 'package:permission_handler/permission_handler.dart';
+
+import 'package:tracure/features/blood_pressure/view/blood_pressure_screen.dart';
+import 'package:tracure/features/blood_sugar/view/blood_sugar_screen.dart';
+import 'package:tracure/features/fasting_tracker/view/fasting_tracker__screen.dart';
 import 'package:tracure/features/homepage/controller/home_controller.dart';
 import 'package:tracure/features/homepage/view/CircularProgressWidget.dart'
     show CircularProgressWidget;
+import 'package:tracure/features/medicine_tracker/view/medicine_tracker_screen.dart';
+import 'package:tracure/features/sleep_tracker/view/sleep_tracker_screen.dart';
+import 'package:tracure/features/water_intake/view/water_intake_screen.dart';
 import 'package:tracure/servies/app_permission.dart';
 import 'package:tracure/servies/health_service.dart';
+import 'package:tracure/utils/common_widget.dart';
+import 'package:tracure/utils/extensions.dart';
 
 import '../../../servies/sleep_service.dart';
+import '../../../utils/custom_text.dart';
 
 class Homepage extends StatefulWidget {
   const Homepage({super.key});
@@ -73,12 +81,98 @@ class _HomepageState extends State<Homepage> with WidgetsBindingObserver {
               WelcomeHeader(),
               SleepStepCalories(),
               BookSpecialistCard(),
+              GymCheckinWidget(),
               HealthEcosystem(),
             ],
           ),
         ),
       ),
     );
+  }
+}
+
+class GymCheckinWidget extends StatelessWidget {
+  const GymCheckinWidget({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final weekList = ["M", "T", "W", "T", "F", "S", "S"];
+    final weekDates = getCurrentWeekDates();
+    final daysList = weekDates.map((d) => d.day).toList();
+    return Container(
+      padding: EdgeInsets.all(16),
+      decoration: CommonWidget.containerDecoration(),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          CustomText.title(
+            
+            text: "Gym Check-in",
+            size: 16,
+            isBold: true,
+          ).padOnly(b: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              ...weekList.map((day) {
+                return GestureDetector(
+                  onTap: () {
+                    // Handle day toggle
+                  },
+                  child: Container(
+                    width: 40,
+                    height: 40,
+                    alignment: Alignment.center,
+
+                    child: Text(day, style: TextStyle(fontSize: 16)),
+                  ),
+                );
+              }),
+            ],
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              ...daysList.map((day) {
+                return GestureDetector(
+                  onTap: () {
+                    // Handle day toggle
+                  },
+                  child: Container(
+                    width: 40,
+                    height: 40,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      "$day",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                );
+              }),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  List<DateTime> getCurrentWeekDates() {
+    final now = DateTime.now(); // Add 1 day to ensure today is included
+
+    // Start of this week (Monday)
+    final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
+
+    // Generate all 7 dates (Mon → Sun)
+    return List.generate(7, (index) {
+      return startOfWeek.add(Duration(days: index));
+    });
   }
 }
 
@@ -346,22 +440,25 @@ class TrackWellbeing extends StatelessWidget {
             children: [
               Expanded(
                 child: iconLabelCard(
-                  label: "BMI Calculator",
-                  img: "assets/images/fluent-emoji_man-standing.png",
+                  label: "Blood Sugar",
+                  img: "assets/images/fluent-emoji_drop-of-blood.png",
+                  onTap: () => Get.to(() => const BloodSugarScreen()),
                 ),
               ),
               SizedBox(width: 6),
               Expanded(
                 child: iconLabelCard(
                   label: "Fasting Blood Pressure Tracker",
-                  img: "assets/images/fluent-emoji_drop-of-blood.png",
+                  img: "assets/images/ic_heart-rate.png",
+                  onTap: () => Get.to(() => const BloodPressureScreen()),
                 ),
               ),
               SizedBox(width: 6),
               Expanded(
                 child: iconLabelCard(
-                  label: "Breathing Exercise",
+                  label: "Sleep Tracker",
                   img: "assets/images/fluent-emoji_sleeping-face.png",
+                  onTap: () => Get.to(() => const SleepTrackerScreen()),
                 ),
               ),
             ],
@@ -371,26 +468,33 @@ class TrackWellbeing extends StatelessWidget {
     );
   }
 
-  Container iconLabelCard({required String label, required String img}) {
-    return Container(
-      height: 80,
-      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Image.asset(img, height: 20, width: 20),
-          SizedBox(height: 4),
-          Text(
-            label,
-            maxLines: 2,
-            overflow: TextOverflow.visible,
-            style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-          ),
-        ],
+  Widget iconLabelCard({
+    required String label,
+    required String img,
+    VoidCallback? onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 80,
+        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Image.asset(img, height: 20, width: 20),
+            SizedBox(height: 4),
+            Text(
+              label,
+              maxLines: 2,
+              overflow: TextOverflow.visible,
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -424,6 +528,7 @@ class Ecosystem extends StatelessWidget {
                 child: iconLabelCard(
                   label: "Water Intake",
                   img: "assets/images/fluent-emoji_glass-of-milk.png",
+                  onTap: () => Get.to(() => const WaterIntakeScreen()),
                 ),
               ),
               SizedBox(width: 6),
@@ -431,13 +536,15 @@ class Ecosystem extends StatelessWidget {
                 child: iconLabelCard(
                   label: "Medicine Tracker",
                   img: "assets/images/fluent-emoji_pill.png",
+                  onTap: () => Get.to(() => const MedicineTrackerScreen()),
                 ),
               ),
               SizedBox(width: 6),
               Expanded(
                 child: iconLabelCard(
-                  label: "Menstrual Cycle",
-                  img: "assets/images/fluent-emoji_female-sign.png",
+                  label: "Fasting Tracker",
+                  img: "assets/images/ic_fasting.png",
+                  onTap: () => Get.to(() => const FastingTrackerScreen()),
                 ),
               ),
             ],
@@ -447,26 +554,33 @@ class Ecosystem extends StatelessWidget {
     );
   }
 
-  Container iconLabelCard({required String label, required String img}) {
-    return Container(
-      height: 80,
-      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Image.asset(img, height: 20, width: 20),
-          SizedBox(height: 4),
-          Text(
-            label,
-            maxLines: 2,
-            overflow: TextOverflow.visible,
-            style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-          ),
-        ],
+  Widget iconLabelCard({
+    required String label,
+    required String img,
+    VoidCallback? onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 80,
+        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Image.asset(img, height: 20, width: 20),
+            SizedBox(height: 4),
+            Text(
+              label,
+              maxLines: 2,
+              overflow: TextOverflow.visible,
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
       ),
     );
   }

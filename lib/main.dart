@@ -1,10 +1,12 @@
+import 'package:alice/alice.dart';
+import 'package:alice/model/alice_configuration.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:tracure/features/homepage/view/homepage.dart';
+import 'package:tracure/features/blood_pressure/view/blood_pressure_screen.dart';
+import 'package:tracure/features/blood_sugar/view/blood_sugar_screen.dart';
+import 'package:tracure/features/fasting_tracker/view/fasting_tracker__screen.dart';
 import 'package:tracure/features/loginpage/view/login_page.dart';
-import 'package:tracure/features/sleep_tracker/view/sleep_tracker_day.dart';
-import 'package:tracure/features/sleep_tracker/view/sleep_tracker_screen.dart';
-import 'package:tracure/features/step_tracker/view/step_tracker_screen.dart';
+import 'package:tracure/features/medicine_tracker/view/medicine_tracker_screen.dart';
 import 'package:tracure/utils/app_theme.dart';
 
 Future<void> main() async {
@@ -14,6 +16,13 @@ Future<void> main() async {
   runApp(const MyApp());
 }
 
+// Alice alice = Alice(
+//   configuration: AliceConfiguration(
+//     showNotification: true,
+//     showInspectorOnShake: true,
+//   ),
+// );
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -21,8 +30,9 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
+      navigatorKey: alice.getNavigatorKey(),
       theme: ThemeClass.lightTheme,
-      home: const SleepTrackerScreen(),
+      home: const LoginPage(),
     );
   }
 }

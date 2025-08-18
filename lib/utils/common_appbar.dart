@@ -15,28 +15,31 @@ class CustomAppbar extends StatelessWidget implements PreferredSize {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Container(
-        color: bgColor,
-        child: Row(
-          children: [
-            GestureDetector(
-              onTap: () => Navigator.pop(context),
-              child: Container(
+    return Container(
+      color: bgColor,
+      child: SafeArea(
+        child: Container(
+          color: bgColor,
+          child: Row(
+            children: [
+              GestureDetector(
+                onTap: () => Navigator.pop(context),
+                child: Container(
+                  height: 40,
+                  width: 40,
+                  padding: EdgeInsets.all(12),
+                  child: Image.asset("assets/images/arrow_back_black.png"),
+                ),
+              ).padSymm(horizontal: 10, vertical: 10),
+              Center(
+                child: CustomText.title(text: title, size: 16, isBold: true),
+              ),
+              const SizedBox(
                 height: 40,
                 width: 40,
-                padding: EdgeInsets.all(12),
-                child: Image.asset("assets/images/arrow_back_black.png"),
-              ),
-            ).padSymm(horizontal: 10, vertical: 10),
-            Center(
-              child: CustomText.title(text: title, size: 16, isBold: true),
-            ),
-            const SizedBox(
-              height: 40,
-              width: 40,
-            ).padSymm(horizontal: 10, vertical: 10),
-          ],
+              ).padSymm(horizontal: 10, vertical: 10),
+            ],
+          ),
         ),
       ),
     );

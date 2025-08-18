@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get.dart';
 import 'package:tracure/utils/constant/color_constants.dart';
 import 'package:tracure/utils/custom_text.dart';
 import 'package:tracure/utils/extensions.dart';
@@ -156,14 +157,16 @@ class CommonWidget {
     required BuildContext context,
     required String title,
     EdgeInsets? padding,
-    double borderRadius = 20,
+    double borderRadius = 10,
     Color? bgColor = ColorConstant.primaryColor,
     Color? titleColor = Colors.white,
     double textsize = 16,
+    double? width,
+
     required VoidCallback onTap,
   }) {
     return SizedBox(
-      width: double.infinity,
+      width: width ?? double.infinity,
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
           backgroundColor: bgColor,
@@ -224,6 +227,7 @@ class CommonWidget {
     String? imgUrl,
     Color? color,
     double radius = 10,
+    bool boolShadow = true,
   }) {
     return BoxDecoration(
       color: color ?? Colors.white,
@@ -231,14 +235,36 @@ class CommonWidget {
       image: (imgUrl != null)
           ? DecorationImage(fit: BoxFit.cover, image: NetworkImage(imgUrl))
           : null,
-      boxShadow: [
-        BoxShadow(
-          color: Colors.grey.withOpacity(0.1),
-          spreadRadius: 5,
-          blurRadius: 7,
-          offset: const Offset(0, 2),
-        ),
-      ],
+      boxShadow: (boolShadow)
+          ? [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.1),
+                spreadRadius: 5,
+                blurRadius: 7,
+                offset: const Offset(0, 2),
+              ),
+            ]
+          : [],
+    );
+  }
+
+  static showToast(String text, {int maxLine = 2, int seconds = 2}) {
+    // Get.closeCurrentSnackbar();
+
+    Get.snackbar(
+      "",
+      "",
+      titleText: CustomText.title(
+        text: text,
+        size: 15,
+        maxLine: maxLine,
+        isBold: true,
+        color: Colors.black87,
+      ),
+      messageText: const SizedBox(),
+      duration: Duration(seconds: seconds),
+      margin: EdgeInsets.symmetric(vertical: 20, horizontal: 20),
+      snackPosition: SnackPosition.BOTTOM,
     );
   }
 }

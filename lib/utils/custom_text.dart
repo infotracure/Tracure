@@ -5,42 +5,52 @@ import 'constant/color_constants.dart';
 class CustomText {
   CustomText._();
 
-  static Widget subTitle(
-      {required String text,
-      double size = 12,
-      Color? color,
-      bool? isBold,
-      int? maxLine,
-      TextAlign? textAlign,
-      EdgeInsetsGeometry? padding}) {
+  static Widget subTitle({
+    required String text,
+    double size = 12,
+    Color? color,
+    bool? isBold,
+    int? maxLine,
+    TextAlign? textAlign,
+    EdgeInsetsGeometry? padding,
+  }) {
     return Padding(
       padding: padding ?? const EdgeInsets.all(0),
-      child: Text(text,
-          overflow: TextOverflow.ellipsis,
-          textAlign: textAlign,
-          maxLines: maxLine,
-          style: textStyle(size: size, bold: isBold, color: color)),
+      child: Text(
+        text,
+        overflow: TextOverflow.ellipsis,
+        textAlign: textAlign,
+        maxLines: maxLine,
+        style: textStyle(size: size, bold: isBold, color: color),
+      ),
     );
   }
 
-  static Widget title(
-      {required String? text,
-      double size = 14,
-      Color? color,
-      bool? isBold,
-      int? maxLine,
-      TextOverflow? overflow,
-      TextAlign? textAlign,
-      TextDecoration? decoration,
-      EdgeInsetsGeometry? padding}) {
+  static Widget title({
+    required String? text,
+    double size = 14,
+    Color? color,
+    bool? isBold,
+    int? maxLine,
+    TextOverflow? overflow,
+    TextAlign? textAlign,
+    TextDecoration? decoration,
+    EdgeInsetsGeometry? padding,
+  }) {
     return Padding(
       padding: padding ?? const EdgeInsets.all(0),
-      child: Text(text ?? "",
-          overflow: overflow ?? TextOverflow.ellipsis,
-          textAlign: textAlign,
-          maxLines: maxLine,
-          style: textStyle(
-              size: size, bold: isBold, color: color, decoration: decoration)),
+      child: Text(
+        text ?? "",
+        overflow: overflow ?? TextOverflow.ellipsis,
+        textAlign: textAlign,
+        maxLines: maxLine,
+        style: textStyle(
+          size: size,
+          bold: isBold,
+          color: color,
+          decoration: decoration,
+        ),
+      ),
     );
   }
 
@@ -61,23 +71,25 @@ class CustomText {
       maxLines: maxLines,
       overflow: overflow,
       text: TextSpan(
-        style: defaultStyle ??
+        style:
+            defaultStyle ??
             (context != null ? DefaultTextStyle.of(context).style : null),
         children: textSpans,
       ),
     );
   }
 
-  static TextStyle textStyle(
-          {required double size,
-          bool? bold = false,
-          Color? color,
-          TextDecoration? decoration}) =>
-      TextStyle(
-          fontSize: size,
-          decoration: decoration,
-          height: 1.2,
-          decorationColor: color ?? ColorConstant.primaryTextColor,
-          fontWeight: (bold != null && bold) ? FontWeight.w500 : null,
-          color: color ?? ColorConstant.primaryTextColor);
+  static TextStyle textStyle({
+    required double size,
+    bool? bold = false,
+    Color? color,
+    TextDecoration? decoration,
+  }) => TextStyle(
+    fontSize: size,
+    decoration: decoration,
+    height: 1.2,
+    decorationColor: color ?? ColorConstant.primaryTextColor,
+    fontWeight: (bold != null && bold) ? FontWeight.w600 : null,
+    color: color ?? ColorConstant.primaryTextColor,
+  );
 }
