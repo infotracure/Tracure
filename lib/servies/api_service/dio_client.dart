@@ -1,5 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:talker_dio_logger/talker_dio_logger.dart';
+import 'package:tracure/servies/api_service/auth_interceptor.dart';
+import 'package:tracure/servies/api_service/curl_logger_interceptor.dart';
 
 import '../../main.dart';
 import 'end_points.dart';
@@ -13,8 +16,17 @@ class DioClient {
       ..options.baseUrl = baseUrl ?? EndPoints.baseUrl
       ..options.responseType = ResponseType.json
       ..options.connectTimeout = Duration(seconds: 60)
-      ..options.responseType = ResponseType.plain
-      // ..interceptors.add(alice.)
+      ..interceptors.add(AuthInterceptor())
+      // ..interceptors.add(CurlLoggerInterceptor())
+      ..interceptors.add(
+        TalkerDioLogger(
+          talker: talker,
+          settings: const TalkerDioLoggerSettings(
+            printRequestHeaders: true,
+            printResponseHeaders: true,
+          ),
+        ),
+      )
       ..options.receiveTimeout = Duration(seconds: 60);
   }
 
@@ -26,19 +38,17 @@ class DioClient {
     CancelToken? cancelToken,
   }) async {
     try {
-      debugPrint("url :${_dio.options.baseUrl}$url ");
-      debugPrint("Param: $queryParam");
       final response = await _dio.get(
         url,
         queryParameters: queryParam,
         options: options,
         cancelToken: cancelToken,
       );
-      debugPrint('res: ${response.data}');
+
       return DioResponse(response);
     } catch (e) {
       // debugPrint("$e");
-      var dioError = DioExceptions.fromDioError(e as DioError);
+      var dioError = DioExceptions.fromDioError(e as DioException);
       return dioError;
     }
   }
@@ -52,8 +62,7 @@ class DioClient {
     CancelToken? cancelToken,
   }) async {
     try {
-      debugPrint("url :${_dio.options.baseUrl}$url \n req: $data");
-      debugPrint("Param: $queryParam");
+
 
       final response = await _dio.post(
         url,
@@ -63,12 +72,11 @@ class DioClient {
         cancelToken: cancelToken,
       );
 
-      debugPrint('res: ${response.data}');
 
       return DioResponse(response);
     } catch (e) {
       // debugPrint(e.toString());
-      var dioError = DioExceptions.fromDioError(e as DioError);
+      var dioError = DioExceptions.fromDioError(e as DioException);
       return dioError;
     }
   }

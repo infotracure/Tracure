@@ -1,7 +1,9 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:health/health.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:tracure/features/step_tracker/view/step_tracker_day.dart';
+import 'package:tracure/servies/health_service.dart';
 import 'package:tracure/utils/common_widget.dart';
 import 'package:tracure/utils/constant/color_constants.dart';
 import 'package:tracure/utils/custom_text.dart';
@@ -54,7 +56,7 @@ class _StepTrackerMonthState extends State<StepTrackerMonth> {
               child: iconLabelCard(
                 label: "Steps",
                 img: "assets/images/emojione_running-shoe.png",
-                color: 0xFFFAB005,
+                color:  Color(0xFFFAB005),
                 value: "14566",
               ),
             ),
@@ -68,7 +70,7 @@ class _StepTrackerMonthState extends State<StepTrackerMonth> {
               child: iconLabelCard(
                 label: "Total Distance",
                 img: "assets/images/emojione_running-shoe.png",
-                color: 0xFF40B8B2,
+                color: ColorConstant.verdigris,
                 value: "2.4 km",
               ),
             ),
@@ -81,7 +83,7 @@ class _StepTrackerMonthState extends State<StepTrackerMonth> {
   Container iconLabelCard({
     required String label,
     required String img,
-    required int color,
+    required Color color,
     required String value,
   }) {
     return Container(
@@ -127,11 +129,23 @@ class CustomCalendar extends StatefulWidget {
 class _CustomCalendarState extends State<CustomCalendar> {
   late DateTime _focusedDay;
   DateTime? _selectedDay;
+  List<HealthDataPoint> _monthlySteps = [];
+  Map<String, List<HealthDataPoint>> _stepsCache = {};
 
   @override
   void initState() {
     super.initState();
     _focusedDay = widget.initialMonth;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final now = DateTime.now();
+      final steps = await HealthDataService().getMonthlySteps(now);
+
+      setState(() {
+        _monthlySteps = steps;
+        _focusedDay = now; // keep calendar focused on today
+      });
+    });
   }
 
   @override
@@ -164,8 +178,28 @@ class _CustomCalendarState extends State<CustomCalendar> {
           widget.onDaySelected!(selectedDay);
         }
       },
-      onPageChanged: (focusedDay) {
-        _focusedDay = focusedDay;
+      onPageChanged: (focusedDay) async {
+        setState(() {
+          _focusedDay = focusedDay;
+        });
+
+        final key =
+            "${focusedDay.year}-${focusedDay.month.toString().padLeft(2, '0')}";
+
+        if (_stepsCache.containsKey(key)) {
+          // ✅ Already cached, just use it
+          setState(() {
+            _monthlySteps = _stepsCache[key]!;
+          });
+        } else {
+          // 🔄 Not cached yet, fetch from Health
+          final steps = await HealthDataService().getMonthlySteps(focusedDay);
+
+          setState(() {
+            _monthlySteps = steps;
+            _stepsCache[key] = steps; // save to cache
+          });
+        }
       },
       calendarBuilders: CalendarBuilders(
         defaultBuilder: (context, day, focusedDay) {
@@ -196,7 +230,8 @@ class _CustomCalendarState extends State<CustomCalendar> {
     bool isToday = false,
   }) {
     final key = DateTime(day.year, day.month, day.day);
-    final value = widget.dayData[key] ?? 0;
+    final dailySteps = getDailySteps(_monthlySteps);
+    final steps = dailySteps[DateTime(day.year, day.month, day.day)] ?? 0;
 
     return Container(
       margin: const EdgeInsets.all(4.0),
@@ -213,11 +248,31 @@ class _CustomCalendarState extends State<CustomCalendar> {
           ),
           const SizedBox(height: 4),
           Text(
-            "$value",
+            "$steps",
             style: TextStyle(fontSize: 10, color: Colors.grey[700]),
           ),
         ],
       ),
     );
+  }
+
+  Map<DateTime, int> getDailySteps(List<HealthDataPoint> data) {
+    final Map<DateTime, int> stepsPerDay = {};
+
+    for (var point in data) {
+      if (point.value is NumericHealthValue) {
+        final stepsValue = (point.value as NumericHealthValue).numericValue
+            .toInt();
+
+        final date = DateTime(
+          point.dateFrom.year,
+          point.dateFrom.month,
+          point.dateFrom.day,
+        );
+        stepsPerDay[date] = (stepsPerDay[date] ?? 0) + stepsValue;
+      }
+    }
+
+    return stepsPerDay;
   }
 }

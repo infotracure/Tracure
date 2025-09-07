@@ -1,8 +1,19 @@
 import 'package:get/get.dart';
+import 'package:health/health.dart';
 import 'package:intl/intl.dart';
+import 'package:tracure/features/homepage/model/feature_mapper_model.dart';
+import 'package:tracure/features/loginpage/model/user_config_model.dart';
 import 'package:tracure/servies/app_permission.dart';
 import 'package:tracure/servies/health_service.dart';
 import 'package:tracure/servies/sleep_service.dart';
+
+import '../../../servies/api_service/dio_client.dart';
+import '../../../servies/api_service/end_points.dart';
+import '../../../servies/api_service/response_handler.dart';
+import '../../../utils/common_widget.dart';
+import '../../../utils/constant/string_constants.dart';
+import '../../../utils/loading_overlay.dart';
+import '../../loginpage/model/verify_otp_model.dart';
 
 var startTime = '22:00';
 var endTime = '07:00';
@@ -11,16 +22,18 @@ class HomeController extends GetxController {
   var todayStep = "".obs;
   var todayCalories = "".obs;
   var todaySleep = "".obs;
+  FeatureMapperModel? featureMapperModel;
 
   @override
   void onInit() async {
     super.onInit();
-    
+
     todayStep.value = (await printTodaySteps()).toString();
     todaySleep.value = await getTotalDuration();
-    await startSleepTracking();
+    // await startSleepTracking();
     scheduleSleep();
-    
+    await getUserConfiguration();
+    await getFeatureList();
   }
 
   void setStepValue() async {
@@ -28,7 +41,7 @@ class HomeController extends GetxController {
   }
 
   void setSleepValue() async {
-      todaySleep.value = await getTotalDuration();
+    todaySleep.value = await getTotalDuration();
   }
 
   Future<void> scheduleSleep() async {
@@ -97,4 +110,75 @@ class HomeController extends GetxController {
       return now; // return today
     }
   }
+
+  Future<void> getFeatureList() async {
+    try {
+      showGlobalLoader();
+      final url = EndPoints.featureListing;
+      final res = await DioClient().get(url);
+      hideGlobalLoader();
+      final featureMapper = jsonToObject(res, FeatureMapperModel.fromJson);
+      if (featureMapper?.code != 1) {
+        CommonWidget.showToast(
+          featureMapper?.message ??
+              StringConstant.internalErrorExceptionMessage,
+        );
+        return;
+      }
+    } catch (e) {
+      hideGlobalLoader();
+      CommonWidget.showToast(StringConstant.internalErrorExceptionMessage);
+    }
+  }
+
+  Future<void> getUserConfiguration() async {
+    try {
+      showGlobalLoader();
+      final url = EndPoints.userConfiguration;
+      final res = await DioClient().get(url);
+      hideGlobalLoader();
+      final userConfig = jsonToObject(res, UserConfigurationModel.fromJson);
+      if (userConfig?.code != 1) {
+        CommonWidget.showToast(
+          userConfig?.message ?? StringConstant.internalErrorExceptionMessage,
+        );
+        return;
+      }
+      checkForLastPushedData(userConfig);
+    } catch (e) {
+      hideGlobalLoader();
+      CommonWidget.showToast(StringConstant.internalErrorExceptionMessage);
+    }
+  }
+
+  Future<void> pushStepsData(List<HealthDataPoint> data) async {
+    try {
+      showGlobalLoader();
+      final url = EndPoints.pushSteps;
+      var jsonStepList = data.map((e) => e.toJson()).toList();
+      final param = {"steps": jsonStepList};
+
+      final res = await DioClient().post(url, param);
+      hideGlobalLoader();
+      final userConfig = jsonToObject(res, UserConfigurationModel.fromJson);
+      if (userConfig?.code != 1) {
+        CommonWidget.showToast(
+          userConfig?.message ?? StringConstant.internalErrorExceptionMessage,
+        );
+        return;
+      }
+    } catch (e) {
+      hideGlobalLoader();
+      CommonWidget.showToast(StringConstant.internalErrorExceptionMessage);
+    }
+  }
+
+  void checkForLastPushedData(UserConfigurationModel? userConfig) async {
+    if (userConfig?.data?.lastSyncTimeSteps?.isEmpty ?? true) return;
+
+    HealthDataService().getStepsDataFrom(
+      DateTime.now().subtract(Duration(days: 7)),
+    );
+  }
+  
 }

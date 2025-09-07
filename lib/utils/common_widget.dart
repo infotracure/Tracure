@@ -100,34 +100,38 @@ class CommonWidget {
   static Widget customTextField(
     String hint, {
     TextInputType? keyboardType,
-    required TextEditingController controller,
-    Function(String, String)? validator,
+    TextEditingController? controller,
+    FormFieldValidator<String>? validator,
     String? initVal,
+    int? maxLength,
+    bool readOnly = false,
+    Function()? onTap,
     Widget? prefixIcon,
+
     List<TextInputFormatter>? inputFormatters,
   }) {
     return TextFormField(
       controller: controller,
+      onTap: onTap,
       initialValue: initVal,
-      autovalidateMode: AutovalidateMode.onUserInteraction,
-      keyboardType: TextInputType.name,
+      readOnly: readOnly,
+      maxLength: maxLength,
+      keyboardType: keyboardType,
       inputFormatters: inputFormatters,
       textCapitalization: TextCapitalization.sentences,
-      validator: (value) {
-        if (validator != null) {
-          return validator(value ?? "", hint);
-        }
-        if (value!.trim().isEmpty) return "Please Enter $hint";
-        return null;
-      },
+      validator: validator,
       decoration: InputDecoration(
         // labelText: hint,
+        counter: SizedBox.shrink(),
         hintText: hint,
         filled: true,
-        fillColor: Color(0xffDEE2E6),
-        labelStyle: TextStyle(color: Colors.grey.shade700, fontSize: 14),
-        errorStyle: CustomText.textStyle(size: 10, color: ColorConstant.red),
+        fillColor: Color(0xffE9ECEF),
+        hintStyle: TextStyle(color: Colors.grey.shade700, fontSize: 14),
+        errorStyle: CustomText.textStyle(size: 14, color: ColorConstant.red),
         isDense: true,
+        prefixIconConstraints: const BoxConstraints(
+          minWidth: 40, // default ~48, reduce to make tighter
+        ),
         contentPadding: const EdgeInsets.symmetric(
           vertical: 14,
           horizontal: 12,
@@ -150,6 +154,60 @@ class CommonWidget {
           borderSide: BorderSide.none,
         ),
       ),
+    );
+  }
+
+  static Widget customDropdown<T>(
+    String hint, {
+    T? value,
+    required List<DropdownMenuItem<T>> items,
+    FormFieldValidator<T>? validator,
+    ValueChanged<T?>? onChanged,
+    Widget? prefixIcon,
+  }) {
+    return DropdownButtonFormField<T>(
+      value: value,
+      validator: validator,
+      decoration: InputDecoration(
+        counter: const SizedBox.shrink(),
+        hintText: hint,
+        filled: true,
+        fillColor: const Color(0xffE9ECEF),
+
+        labelStyle: TextStyle(color: Colors.grey.shade700, fontSize: 14),
+        errorStyle: CustomText.textStyle(size: 14, color: ColorConstant.red),
+        isDense: true,
+        prefixIconConstraints: const BoxConstraints(
+          minWidth: 40, // default ~48, reduce to make tighter
+        ),
+        contentPadding: const EdgeInsets.symmetric(
+          vertical: 14,
+          horizontal: 12,
+        ),
+        prefixIcon: prefixIcon,
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide.none,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide.none,
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide.none,
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide.none,
+        ),
+      ),
+      items: items,
+      onChanged: onChanged,
+      icon: const Icon(Icons.arrow_back_ios_new, size: 16).rotate(-90),
+      style: const TextStyle(fontSize: 14, color: Colors.black),
+      dropdownColor: const Color(0xffE9ECEF),
+      borderRadius: BorderRadius.circular(16),
     );
   }
 

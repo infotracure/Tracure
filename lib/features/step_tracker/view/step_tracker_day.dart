@@ -65,7 +65,7 @@ class _StepTrackerDayState extends State<StepTrackerDay> {
                 child: iconLabelCard(
                   label: "Steps",
                   img: "assets/images/emojione_running-shoe.png",
-                  color: 0xFFFAB005,
+                  color:  Color(0xFFFAB005),
                   value: "14566",
                 ),
               ),
@@ -79,7 +79,7 @@ class _StepTrackerDayState extends State<StepTrackerDay> {
                 child: iconLabelCard(
                   label: "Total Distance",
                   img: "assets/images/emojione_running-shoe.png",
-                  color: 0xFF40B8B2,
+                  color: ColorConstant.verdigris,
                   value: "2.4 km",
                 ),
               ),
@@ -93,7 +93,7 @@ class _StepTrackerDayState extends State<StepTrackerDay> {
   Container iconLabelCard({
     required String label,
     required String img,
-    required int color,
+    required Color color,
     required String value,
   }) {
     return Container(
@@ -161,21 +161,26 @@ List<double> generateRandomDoubleList(
 }
 
 class LeftRightIconButton extends StatelessWidget {
-  const LeftRightIconButton({super.key});
+  const LeftRightIconButton({super.key, this.onTap});
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 35,
-      width: 35,
-      padding: EdgeInsets.all(10),
-      decoration: CommonWidget.containerDecoration(
-        radius: 10,
-        color: ColorConstant.primaryColor,
-      ),
-      child: Image.asset(
-        "assets/images/arrow_back_black.png",
-        color: Colors.white,
+    return GestureDetector(
+      onTap: onTap,
+
+      child: Container(
+        height: 35,
+        width: 35,
+        padding: EdgeInsets.all(10),
+        decoration: CommonWidget.containerDecoration(
+          radius: 10,
+          color: ColorConstant.primaryColor,
+        ),
+        child: Image.asset(
+          "assets/images/arrow_back_black.png",
+          color: Colors.white,
+        ),
       ),
     );
   }

@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:permission_handler/permission_handler.dart';
 import 'package:health/health.dart';
+import 'package:tracure/utils/common_methods.dart';
 
 class PermissionManager {
   static Future<void> requestActivityPermission() async {
@@ -81,38 +82,51 @@ class HealthDataService {
     return await _fetchStepsForDay(DateTime.now());
   }
 
-  Future<List<Map<String, dynamic>>> getWeeklySteps() async {
+  Future<List<HealthDataPoint>> getWeeklySteps(DateTime week) async {
     if (!await _authorize()) return [];
 
-    final now = DateTime.now();
-    List<Map<String, dynamic>> stepsData = [];
+    final startOfWeek = week.subtract(
+      Duration(days: week.weekday - 1),
+    ); // Monday
+    final endOfWeek = startOfWeek.add(const Duration(days: 6)); // Sunday
 
-    for (int i = 6; i >= 0; i--) {
-      final date = now.subtract(Duration(days: i));
-      final steps = await _fetchStepsForDay(date);
-      stepsData.add({'date': date, 'steps': steps});
-    }
+    // Fetch all step data for the week in a single query
+    final data = await _health.getHealthDataFromTypes(
+      startTime: startOfWeek,
+      endTime: endOfWeek,
+      types: _dataTypes,
+    );
 
-    return stepsData;
+    final clean = _health.removeDuplicates(data);
+    return clean;
   }
 
-  Future<List<Map<String, dynamic>>> getMonthlySteps() async {
+  Future<List<HealthDataPoint>> getMonthlySteps(DateTime month) async {
     if (!await _authorize()) return [];
 
-    final now = DateTime.now();
-    final firstDay = DateTime(now.year, now.month, 1);
-    final today = DateTime(now.year, now.month, now.day);
-    final days = today.difference(firstDay).inDays + 1;
+    final start = DateTime(month.year, month.month, 1);
+    final end = getLastDayOfMonth(start);
 
-    List<Map<String, dynamic>> stepsData = [];
+    final data = await _health.getHealthDataFromTypes(
+      startTime: start,
+      endTime: end,
+      types: _dataTypes,
+    );
 
-    for (int i = 0; i < days; i++) {
-      final date = firstDay.add(Duration(days: i));
-      final steps = await _fetchStepsForDay(date);
-      stepsData.add({'date': date, 'steps': steps});
-    }
+    final clean = _health.removeDuplicates(data);
+    return clean;
+  }
 
-    return stepsData;
+  Future<List<HealthDataPoint>> getStepsDataFrom(DateTime from) async {
+    if (!await _authorize()) return [];
+    final data = await _health.getHealthDataFromTypes(
+      startTime: from,
+      endTime: DateTime.now(),
+      types: _dataTypes,
+    );
+
+    final clean = _health.removeDuplicates(data);
+    return clean;
   }
 
   Future<void> fetchSleepData() async {
@@ -146,16 +160,19 @@ Future<int> printTodaySteps() async {
 
 void printWeeklySteps() async {
   final service = HealthDataService();
-  final weekData = await service.getWeeklySteps();
-  for (var day in weekData) {
-    log("${day['date']}: ${day['steps']} steps");
-  }
+  final weekData = await service.getWeeklySteps(DateTime.now());
 }
 
 void printMonthlySteps() async {
   final service = HealthDataService();
-  final monthData = await service.getMonthlySteps();
-  for (var day in monthData) {
-    log("${day['date']}: ${day['steps']} steps");
-  }
+  final monthData = await service.getMonthlySteps(DateTime.now());
+}
+
+DateTime getLastDayOfMonth(DateTime date) {
+  // Move to the next month, then go back one day
+  DateTime firstDayNextMonth = (date.month == 12)
+      ? DateTime(date.year + 1, 1, 1)
+      : DateTime(date.year, date.month + 1, 1);
+
+  return firstDayNextMonth.subtract(const Duration(days: 1));
 }

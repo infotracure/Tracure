@@ -59,7 +59,7 @@ class _MedicineTrackerWeekState extends State<MedicineTrackerWeek> {
               child: iconLabelCard(
                 label: "Avg Sys",
                 img: "assets/images/emojione_running-shoe.png",
-                color: 0xFFFAB005,
+                color:  Color(0xFFFAB005),
                 value: "130",
               ),
             ),
@@ -73,7 +73,7 @@ class _MedicineTrackerWeekState extends State<MedicineTrackerWeek> {
               child: iconLabelCard(
                 label: "Avg Dia",
                 img: "assets/images/emojione_running-shoe.png",
-                color: 0xFF40B8B2,
+                color: ColorConstant.verdigris,
                 value: "60",
               ),
             ),
@@ -86,7 +86,7 @@ class _MedicineTrackerWeekState extends State<MedicineTrackerWeek> {
   Container iconLabelCard({
     required String label,
     required String img,
-    required int color,
+    required Color color,
     required String value,
   }) {
     return Container(

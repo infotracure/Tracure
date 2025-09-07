@@ -2,8 +2,7 @@ class StringConstant {
   static const String rupee = "\u{20B9}";
   static const String bullet = "\u2022";
 
-  static const internalErrorExceptionMessage =
-      "Something went wrong please try again after some time.";
+  static const internalErrorExceptionMessage = "Something went wrong.";
 
   static const timeOutExceptionMessage = "Server Connection Timeout.";
 
@@ -19,9 +18,10 @@ class StringConstant {
       "Not Found Exception: Nothing here. Please check back in sometime";
 
   static const formatException = "The received data was of incorrect format.";
-  static const serviceTemporarilyUnavailable = "Service Temporarily Unavailable.";
+  static const serviceTemporarilyUnavailable =
+      "Service Temporarily Unavailable.";
   static const futureDateException = "The received date is of future";
   static const appUpdateException = "The App could not be updated";
   static const loadingAssetsStr = 'Please Wait. Loading Assets:';
-
+  static const sessionExpired = 'Session Expired, please login again.';
 }

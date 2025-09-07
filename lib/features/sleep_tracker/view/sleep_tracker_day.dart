@@ -65,7 +65,7 @@ class _SleepTrackerDayState extends State<SleepTrackerDay> {
                 child: iconLabelCard(
                   label: "Goal",
                   img: "assets/images/emojione_running-shoe.png",
-                  color: 0xFFFAB005,
+                  color:  Color(0xFFFAB005),
                   value: "09h 30m",
                 ),
               ),
@@ -79,7 +79,7 @@ class _SleepTrackerDayState extends State<SleepTrackerDay> {
                 child: iconLabelCard(
                   label: "Sleep Time",
                   img: "assets/images/emojione_running-shoe.png",
-                  color: 0xFFFAB005,
+                  color:  Color(0xFFFAB005),
                   value: "09h 00m",
                 ),
               ),
@@ -93,7 +93,7 @@ class _SleepTrackerDayState extends State<SleepTrackerDay> {
                 child: iconLabelCard(
                   label: "Wake-up",
                   img: "assets/images/emojione_running-shoe.png",
-                  color: 0xFF40B8B2,
+                  color: ColorConstant.verdigris,
                   value: "08h 38m",
                 ),
               ),
@@ -107,7 +107,7 @@ class _SleepTrackerDayState extends State<SleepTrackerDay> {
   Container iconLabelCard({
     required String label,
     required String img,
-    required int color,
+    required Color color,
     required String value,
   }) {
     return Container(

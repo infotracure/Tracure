@@ -53,7 +53,7 @@ class TodaysMedsButtons extends StatelessWidget {
           child: dailyBtns(
             icon: Icons.add,
             text: "Add New Schedule",
-            onTap: () => Get.to(MedicineScheduleScreen()),
+            onTap: () => Get.to(() => MedicineScheduleScreen()),
           ),
         ),
       ],

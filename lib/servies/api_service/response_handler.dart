@@ -16,7 +16,7 @@ class DioResponse extends Response implements ApiResponse {
 
 T? jsonToObject<T>(
   ApiResponse res,
-  T Function(String) fromJson, {
+  T Function(Map<String, dynamic>) fromJson, {
   bool showToast = true,
 }) {
   try {

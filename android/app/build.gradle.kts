@@ -7,14 +7,18 @@ plugins {
     id("com.google.gms.google-services")
 }
 
+
+
 android {
     namespace = "com.tracure.main"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 35
     ndkVersion = "27.0.12077973"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
+        isCoreLibraryDesugaringEnabled = true
+        
     }
 
     kotlinOptions {
@@ -40,6 +44,11 @@ android {
         }
     }
 }
+kapt {
+    arguments {
+        arg("room.schemaLocation", "$projectDir/schemas")
+    }
+}
 
 flutter {
     source = "../.."
@@ -53,4 +62,7 @@ dependencies {
     implementation("androidx.room:room-runtime:2.7.2")
     kapt("androidx.room:room-compiler:2.7.2")
     implementation("androidx.room:room-ktx:2.7.2")
+
+    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.24")
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
 }

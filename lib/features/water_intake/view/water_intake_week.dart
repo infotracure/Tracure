@@ -59,7 +59,7 @@ class _WaterIntakeWeekState extends State<WaterIntakeWeek> {
               child: iconLabelCard(
                 label: "Avg Daily Intake",
                 img: "assets/images/emojione_running-shoe.png",
-                color: 0xFFFAB005,
+                color:  Color(0xFFFAB005),
                 value: "2300 ml",
               ),
             ),
@@ -73,7 +73,7 @@ class _WaterIntakeWeekState extends State<WaterIntakeWeek> {
               child: iconLabelCard(
                 label: "Gaol",
                 img: "assets/images/emojione_running-shoe.png",
-                color: 0xFF40B8B2,
+                color: ColorConstant.verdigris,
                 value: "2600 ml",
               ),
             ),
@@ -86,7 +86,7 @@ class _WaterIntakeWeekState extends State<WaterIntakeWeek> {
   Container iconLabelCard({
     required String label,
     required String img,
-    required int color,
+    required Color color,
     required String value,
   }) {
     return Container(

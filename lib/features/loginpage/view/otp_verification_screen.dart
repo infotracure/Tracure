@@ -3,7 +3,9 @@ import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:pinput/pinput.dart';
 import 'package:tracure/features/homepage/view/homepage.dart';
+import 'package:tracure/features/loginpage/controller/login_controller.dart';
 import 'package:tracure/utils/extensions.dart';
+import 'package:tracure/utils/text_field_validator.dart';
 
 import '../../../utils/common_widget.dart';
 import '../../../utils/constant/color_constants.dart';
@@ -17,8 +19,7 @@ class OTPVerificationScreen extends StatefulWidget {
 }
 
 class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
-  final otpTFC = TextEditingController();
-
+  final loginController = Get.find<LoginController>();
   final focusedBorderColor = ColorConstant.primaryColor;
   final fillColor = Color.fromRGBO(243, 246, 249, 0);
 
@@ -48,7 +49,7 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
               width: 200,
             ).padOnly(b: 20),
             Container(
-              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 20),
               decoration: CommonWidget.containerDecoration(),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -74,30 +75,39 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
                     ],
                   ),
                   SizedBox(height: 16),
-                  Pinput(
-                    controller: otpTFC,
-                    focusedPinTheme: defaultPinTheme.copyWith(
-                      decoration: defaultPinTheme.decoration!.copyWith(
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: focusedBorderColor),
+                  Form(
+                    key: loginController.formKeyOTP,
+                    child: Pinput(
+                      length: 6,
+                      controller: loginController.otpTFC,
+                      validator: TextfieldValidator.validateOTP,
+                      errorTextStyle: TextStyle(
+                        color: Colors.red,
+                        fontSize: 14,
                       ),
-                    ),
-                    submittedPinTheme: defaultPinTheme.copyWith(
-                      decoration: defaultPinTheme.decoration!.copyWith(
-                        color: fillColor,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: focusedBorderColor),
+                      focusedPinTheme: defaultPinTheme.copyWith(
+                        decoration: defaultPinTheme.decoration!.copyWith(
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: focusedBorderColor),
+                        ),
                       ),
-                    ),
-                    errorPinTheme: defaultPinTheme.copyBorderWith(
-                      border: Border.all(color: Colors.redAccent),
+                      submittedPinTheme: defaultPinTheme.copyWith(
+                        decoration: defaultPinTheme.decoration!.copyWith(
+                          color: fillColor,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: focusedBorderColor),
+                        ),
+                      ),
+                      errorPinTheme: defaultPinTheme.copyBorderWith(
+                        border: Border.all(color: Colors.redAccent),
+                      ),
                     ),
                   ),
-                  SizedBox(height: 16),
+                  SizedBox(height: 25),
                   CommonWidget.roundedButton(
                     context: context,
-                    title: "Generate OTP",
-                    onTap: () => Get.offAll(Homepage()),
+                    title: "Verify OTP",
+                    onTap: () => loginController.verifyOTPSubmit(),
                   ),
                   SizedBox(height: 16),
                   CustomText.richText(
@@ -120,7 +130,7 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
               ),
             ),
           ],
-        ).padSymm(horizontal: 40),
+        ).padSymm(horizontal: 20),
       ).padOnly(b: 38),
     );
   }

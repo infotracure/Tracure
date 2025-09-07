@@ -53,7 +53,7 @@ class _FastingTrackerMonthState extends State<FastingTrackerMonth> {
             Expanded(
               child: iconLabelCard(
                 label: "Highest this week",
-                color: 0xFFFAB005,
+                color:  Color(0xFFFAB005),
                 value: "18 hours",
               ),
             ),
@@ -66,7 +66,7 @@ class _FastingTrackerMonthState extends State<FastingTrackerMonth> {
             Expanded(
               child: iconLabelCard(
                 label: "Lowest this week",
-                color: 0xFF40B8B2,
+                color: ColorConstant.verdigris,
                 value: "2 hours",
               ),
             ),
@@ -78,7 +78,7 @@ class _FastingTrackerMonthState extends State<FastingTrackerMonth> {
 
   Container iconLabelCard({
     required String label,
-    required int color,
+    required Color color,
     required String value,
   }) {
     return Container(
@@ -102,7 +102,7 @@ class _FastingTrackerMonthState extends State<FastingTrackerMonth> {
         ],
       ),
     );
-  } 
+  }
 }
 
 class CustomCalendar extends StatefulWidget {

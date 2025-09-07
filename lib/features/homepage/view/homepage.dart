@@ -9,13 +9,16 @@ import 'package:tracure/features/homepage/view/CircularProgressWidget.dart'
     show CircularProgressWidget;
 import 'package:tracure/features/medicine_tracker/view/medicine_tracker_screen.dart';
 import 'package:tracure/features/sleep_tracker/view/sleep_tracker_screen.dart';
+import 'package:tracure/features/step_tracker/view/step_tracker_screen.dart';
 import 'package:tracure/features/water_intake/view/water_intake_screen.dart';
 import 'package:tracure/servies/app_permission.dart';
 import 'package:tracure/servies/health_service.dart';
 import 'package:tracure/utils/common_widget.dart';
 import 'package:tracure/utils/extensions.dart';
 
+import '../../../main.dart';
 import '../../../servies/sleep_service.dart';
+import '../../../utils/constant/color_constants.dart';
 import '../../../utils/custom_text.dart';
 
 class Homepage extends StatefulWidget {
@@ -62,7 +65,7 @@ class _HomepageState extends State<Homepage> with WidgetsBindingObserver {
         actions: [
           GestureDetector(
             onTap: () async {
-              await SleepService.stopTracking();
+              // await SleepService.stopTracking();
             },
             child: Icon(Icons.notifications),
           ),
@@ -81,10 +84,89 @@ class _HomepageState extends State<Homepage> with WidgetsBindingObserver {
               WelcomeHeader(),
               SleepStepCalories(),
               BookSpecialistCard(),
+              WaterFastinWidget(),
               GymCheckinWidget(),
               HealthEcosystem(),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class WaterFastinWidget extends StatelessWidget {
+  const WaterFastinWidget({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 90,
+      child: Row(
+        children: [
+          Expanded(
+            child: iconLabelCard(
+              label: "Water Intake",
+              img: "assets/images/fluent-emoji_glass-of-milk.png",
+              color: Color(0xFF5B84D0),
+              value: "600 ml",
+
+              onTap: () => Get.to(() => const WaterIntakeScreen()),
+            ),
+          ),
+          SizedBox(width: 16),
+          Expanded(
+            child: iconLabelCard(
+              label: "Fasting",
+              img: "assets/images/ic_fasting.png",
+              color: Color(0xFF40C057),
+              value: "01:02 hr",
+              onTap: () => Get.to(() => const FastingTrackerScreen()),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget iconLabelCard({
+    required String label,
+    required String img,
+    required Color color,
+    required String value,
+    VoidCallback? onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+        decoration: CommonWidget.containerDecoration(),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            CustomText.title(text: label, size: 14, isBold: true),
+            SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  value,
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                ),
+                Image.asset(img, height: 20, width: 20),
+              ],
+            ),
+            SizedBox(height: 6),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: LinearProgressIndicator(
+                value: 0.8,
+                minHeight: 6,
+                backgroundColor: Colors.grey.shade200,
+                valueColor: AlwaysStoppedAnimation<Color>(color),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -106,7 +188,6 @@ class GymCheckinWidget extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           CustomText.title(
-            
             text: "Gym Check-in",
             size: 16,
             isBold: true,
@@ -248,23 +329,26 @@ class SleepStepCalories extends StatelessWidget {
                     iconLabelCard(
                       label: "Steps",
                       img: "assets/images/emojione_running-shoe.png",
-                      color: 0xFFFAB005,
+                      color:  Color(0xFFFAB005),
                       value: homeController.todayStep.value,
+                      onTap: () => Get.to(() => const StepTrackerScreen()),
                     ),
+                    VerticalDivider(thickness: 1, color: Colors.grey.shade300),
                     iconLabelCard(
                       label: "Sleep",
                       img: "assets/images/fluent-emoji_sleeping-face.png",
-                      color: 0xFF228BE6,
+                      color:  Color(0xFF228BE6),
                       value: homeController.todaySleep.value,
+                      onTap: () => Get.to(() => const SleepTrackerScreen()),
                     ),
                     VerticalDivider(thickness: 1, color: Colors.grey.shade300),
                     iconLabelCard(
                       label: "Calories",
                       img: "assets/images/fluent-emoji_fire.png",
-                      color: 0xFF40B8B2,
+                      color: ColorConstant.verdigris,
                       value: homeController.todayCalories.value,
+                      onTap: () => Get.to(() => const StepTrackerScreen()),
                     ),
-                    VerticalDivider(thickness: 1, color: Colors.grey.shade300),
                   ],
                 ),
               ),
@@ -275,42 +359,46 @@ class SleepStepCalories extends StatelessWidget {
     );
   }
 
-  Container iconLabelCard({
+  Widget iconLabelCard({
     required String label,
     required String img,
-    required int color,
+    required Color color,
     required String value,
+    VoidCallback? onTap,
   }) {
-    return Container(
-      height: 80,
-      width: 100,
-      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-      decoration: BoxDecoration(color: Colors.white),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(label, style: TextStyle(fontSize: 12)),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                value,
-                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-              ),
-              Image.asset(img, height: 20, width: 20),
-            ],
-          ),
-          SizedBox(height: 6),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(10),
-            child: LinearProgressIndicator(
-              value: 0.8,
-              minHeight: 6,
-              backgroundColor: Colors.grey.shade200,
-              valueColor: AlwaysStoppedAnimation<Color>(Color(color)),
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 80,
+        width: 100,
+        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+        decoration: BoxDecoration(color: Colors.white),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(label, style: TextStyle(fontSize: 12)),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  value,
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                ),
+                Image.asset(img, height: 20, width: 20),
+              ],
             ),
-          ),
-        ],
+            SizedBox(height: 6),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: LinearProgressIndicator(
+                value: 0.8,
+                minHeight: 6,
+                backgroundColor: Colors.grey.shade200,
+                valueColor: AlwaysStoppedAnimation<Color>(color),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -363,7 +451,7 @@ class BookSpecialistCard extends StatelessWidget {
                       // getSleep();
                       SleepService.getSleepDataForDate('2025-06-30');
                       // printWeeklySteps();
-                      // printMonthlySteps();
+                      printMonthlySteps();
                     },
                     child: Row(
                       mainAxisSize: MainAxisSize.min, // Wraps content tightly
@@ -440,6 +528,14 @@ class TrackWellbeing extends StatelessWidget {
             children: [
               Expanded(
                 child: iconLabelCard(
+                  label: "BMI Calculator",
+                  img: "assets/images/ic_personStanding.png",
+                  onTap: () => Get.to(() => const BloodSugarScreen()),
+                ),
+              ),
+              SizedBox(width: 6),
+              Expanded(
+                child: iconLabelCard(
                   label: "Blood Sugar",
                   img: "assets/images/fluent-emoji_drop-of-blood.png",
                   onTap: () => Get.to(() => const BloodSugarScreen()),
@@ -447,19 +543,12 @@ class TrackWellbeing extends StatelessWidget {
               ),
               SizedBox(width: 6),
               Expanded(
-                child: iconLabelCard(
-                  label: "Fasting Blood Pressure Tracker",
-                  img: "assets/images/ic_heart-rate.png",
-                  onTap: () => Get.to(() => const BloodPressureScreen()),
-                ),
-              ),
-              SizedBox(width: 6),
-              Expanded(
-                child: iconLabelCard(
-                  label: "Sleep Tracker",
-                  img: "assets/images/fluent-emoji_sleeping-face.png",
-                  onTap: () => Get.to(() => const SleepTrackerScreen()),
-                ),
+                // child: iconLabelCard(
+                //   label: "Sleep Tracker",
+                //   img: "assets/images/fluent-emoji_sleeping-face.png",
+                //   onTap: () => Get.to(() => const SleepTrackerScreen()),
+                // ),
+                child: SizedBox.shrink(),
               ),
             ],
           ),
@@ -526,14 +615,6 @@ class Ecosystem extends StatelessWidget {
             children: [
               Expanded(
                 child: iconLabelCard(
-                  label: "Water Intake",
-                  img: "assets/images/fluent-emoji_glass-of-milk.png",
-                  onTap: () => Get.to(() => const WaterIntakeScreen()),
-                ),
-              ),
-              SizedBox(width: 6),
-              Expanded(
-                child: iconLabelCard(
                   label: "Medicine Tracker",
                   img: "assets/images/fluent-emoji_pill.png",
                   onTap: () => Get.to(() => const MedicineTrackerScreen()),
@@ -542,8 +623,16 @@ class Ecosystem extends StatelessWidget {
               SizedBox(width: 6),
               Expanded(
                 child: iconLabelCard(
-                  label: "Fasting Tracker",
-                  img: "assets/images/ic_fasting.png",
+                  label: "Menstrual Cycle",
+                  img: "assets/images/ic_female.png",
+                  onTap: () => Get.to(() => const MedicineTrackerScreen()),
+                ),
+              ),
+              SizedBox(width: 6),
+              Expanded(
+                child: iconLabelCard(
+                  label: "Breathing Exercise",
+                  img: "assets/images/ic_personStanding.png",
                   onTap: () => Get.to(() => const FastingTrackerScreen()),
                 ),
               ),

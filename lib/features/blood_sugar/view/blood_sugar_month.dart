@@ -54,7 +54,7 @@ class _BloodSugarMonthState extends State<BloodSugarMonth> {
               child: iconLabelCard(
                 label: "Highest this week",
                 img: "assets/images/emojione_running-shoe.png",
-                color: 0xFFFAB005,
+                color: Color(0xFFFAB005),
                 value: "138 mm/dl",
               ),
             ),
@@ -68,7 +68,7 @@ class _BloodSugarMonthState extends State<BloodSugarMonth> {
               child: iconLabelCard(
                 label: "Lowest this week",
                 img: "assets/images/emojione_running-shoe.png",
-                color: 0xFF40B8B2,
+                color: ColorConstant.verdigris,
                 value: "121 mm/dl",
               ),
             ),
@@ -81,7 +81,7 @@ class _BloodSugarMonthState extends State<BloodSugarMonth> {
   Container iconLabelCard({
     required String label,
     required String img,
-    required int color,
+    required Color color,
     required String value,
   }) {
     return Container(

@@ -1,27 +1,28 @@
-import 'package:alice/alice.dart';
-import 'package:alice/model/alice_configuration.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:tracure/features/blood_pressure/view/blood_pressure_screen.dart';
-import 'package:tracure/features/blood_sugar/view/blood_sugar_screen.dart';
-import 'package:tracure/features/fasting_tracker/view/fasting_tracker__screen.dart';
+import 'package:hive_flutter/adapters.dart';
+import 'package:talker_flutter/talker_flutter.dart';
 import 'package:tracure/features/loginpage/view/login_page.dart';
-import 'package:tracure/features/medicine_tracker/view/medicine_tracker_screen.dart';
+import 'package:tracure/features/loginpage/view/splash_screen.dart';
+import 'package:tracure/features/register_screen/controller/register_controller.dart';
+import 'package:tracure/features/register_screen/view/register_screen.dart';
+import 'package:tracure/servies/hive_service.dart';
 import 'package:tracure/utils/app_theme.dart';
+import 'features/homepage/view/homepage.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // await Firebase.initializeApp();
+  await Hive.initFlutter();
+  await Hive.openBox('appBox');
+
+  // Initialize singleton service
+  await HiveService.instance.init();
 
   runApp(const MyApp());
 }
 
-// Alice alice = Alice(
-//   configuration: AliceConfiguration(
-//     showNotification: true,
-//     showInspectorOnShake: true,
-//   ),
-// );
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+final talker = Talker();
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -29,10 +30,21 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return GetMaterialApp(
-      navigatorKey: alice.getNavigatorKey(),
-      theme: ThemeClass.lightTheme,
-      home: const LoginPage(),
+    return GestureDetector(
+      behavior: HitTestBehavior.translucent, // lets taps pass through
+      onTap: () {
+        FocusManager.instance.primaryFocus?.unfocus();
+      },
+      child: GetMaterialApp(
+        navigatorKey: navigatorKey,
+        theme: ThemeClass.lightTheme,
+        // home: navigateToSplash(),
+        home: TalkerWrapper(
+          talker: talker,
+          options: TalkerWrapperOptions(),
+          child: SplashScreen(),
+        ),
+      ),
     );
   }
 }
