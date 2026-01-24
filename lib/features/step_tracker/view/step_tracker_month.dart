@@ -36,7 +36,7 @@ class _StepTrackerMonthState extends State<StepTrackerMonth> {
           decoration: CommonWidget.containerDecoration(),
           child: Column(
             children: [
-              CustomCalendar(initialMonth: DateTime.now(), dayData: dayValues),
+              CustomCalendar(initialMonth: DateTime.now()),
             ],
           ),
         ),
@@ -112,13 +112,11 @@ class _StepTrackerMonthState extends State<StepTrackerMonth> {
 
 class CustomCalendar extends StatefulWidget {
   final DateTime initialMonth;
-  final Map<DateTime, int> dayData;
   final void Function(DateTime)? onDaySelected;
 
   const CustomCalendar({
     super.key,
     required this.initialMonth,
-    required this.dayData,
     this.onDaySelected,
   });
 

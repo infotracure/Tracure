@@ -1,10 +1,7 @@
 import 'package:dio/dio.dart';
-import 'package:flutter/material.dart';
-import 'package:talker_dio_logger/talker_dio_logger.dart';
 import 'package:tracure/servies/api_service/auth_interceptor.dart';
 import 'package:tracure/servies/api_service/curl_logger_interceptor.dart';
 
-import '../../main.dart';
 import 'end_points.dart';
 import 'response_handler.dart';
 
@@ -17,16 +14,7 @@ class DioClient {
       ..options.responseType = ResponseType.json
       ..options.connectTimeout = Duration(seconds: 60)
       ..interceptors.add(AuthInterceptor())
-      // ..interceptors.add(CurlLoggerInterceptor())
-      ..interceptors.add(
-        TalkerDioLogger(
-          talker: talker,
-          settings: const TalkerDioLoggerSettings(
-            printRequestHeaders: true,
-            printResponseHeaders: true,
-          ),
-        ),
-      )
+      ..interceptors.add(CurlLoggerInterceptor())
       ..options.receiveTimeout = Duration(seconds: 60);
   }
 

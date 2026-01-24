@@ -8,6 +8,8 @@ import 'package:tracure/utils/constant/color_constants.dart';
 import 'package:tracure/utils/custom_text.dart';
 import 'package:tracure/utils/extensions.dart';
 
+import 'sleep_progress_widget.dart';
+
 class SleepTrackerDay extends StatefulWidget {
   const SleepTrackerDay({super.key});
 
@@ -22,34 +24,148 @@ class _SleepTrackerDayState extends State<SleepTrackerDay> {
     return Column(
       spacing: 16,
       children: [
-        Container(
-          decoration: CommonWidget.containerDecoration(),
-          child: Column(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  LeftRightIconButton().padSymm(horizontal: 10, vertical: 10),
-                  CustomText.title(
-                    text: "Tuesday, 10 June 2025",
-                    isBold: true,
-                    size: 14,
-                  ),
-                  LeftRightIconButton()
-                      .rotate(180)
-                      .padSymm(horizontal: 10, vertical: 10),
-                ],
-              ),
-              SizedBox(
-                height: 200,
-                child: DayBarChart(data: sleepData).padOnly(l: 8),
-              ),
-            ],
-          ),
-        ),
-        sleepTimeWidget().padSymm(horizontal: 8),
+        SleepProgressWidget(currentMin: 441, goal: 10 * 60),
+        activitesCardGrid(),
+        // Container(
+        //   decoration: CommonWidget.containerDecoration(),
+        //   child: Column(children: []),
+        // ),
+        keyHealthBenefits(),
       ],
     ).padSymm(horizontal: 16, vertical: 16);
+  }
+
+  Column activitesCardGrid() {
+    final todayStep = int.tryParse("2000") ?? 0;
+    final stepRemain = (todayStep > 10000) ? 0 : (10000 - todayStep);
+    return Column(
+      children: [
+        Row(
+          children: [
+            tileCard("Quality", "85 %", "assets/images/ic_percentage.png"),
+            SizedBox(width: 10),
+            tileCard("Awakenings", "3", "assets/images/ic_sleep_awake.png"),
+            SizedBox(width: 10),
+            tileCard(
+              "Time to fall asleep",
+              "12 min",
+              "assets/images/mingcute_time-line.png",
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget tileCard(String title, String value, String img) {
+    return Expanded(
+      child: Container(
+        height: 80,
+        decoration: CommonWidget.containerDecoration(),
+        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: CustomText.title(
+                    text: title,
+                    size: 10,
+                    overflow: TextOverflow.visible,
+                  ),
+                ),
+                SizedBox(width: 4),
+                Image.asset(img, height: 25),
+              ],
+            ),
+            Spacer(),
+            CustomText.title(text: value, size: 14, isBold: true),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget keyHealthBenefits() {
+    var benefitList = [
+      {
+        "icon": "assets/images/ic_heart.png",
+        "title": "Cardiovascular Health",
+        "subTitle": "Reduces Heart Disease risk by 30-50%",
+      },
+      {
+        "icon": "assets/images/ic_mental_clarity.png",
+        "title": "Mental Clarity",
+        "subTitle": "Improves Cognitive function by 25%",
+      },
+      {
+        "icon": "assets/images/ic_energy_boost.png",
+        "title": "Energy Boost",
+        "subTitle": "Increases daily energy by 40%",
+      },
+      {
+        "icon": "assets/images/ic_immune_system.png",
+        "title": "Immune System",
+        "subTitle": "Reduces illness risk by 35%",
+      },
+    ];
+    return Container(
+      decoration: CommonWidget.containerDecoration(),
+
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(height: 16),
+          CustomText.title(
+            text: "Key Health Benefits",
+            isBold: true,
+          ).padSymm(horizontal: 16),
+          GridView.builder(
+            shrinkWrap: true,
+            physics: NeverScrollableScrollPhysics(),
+            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            itemCount: benefitList.length,
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: 8,
+              mainAxisSpacing: 8,
+              childAspectRatio: 1.3,
+            ),
+            itemBuilder: (BuildContext context, int i) {
+              return Container(
+                padding: EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Color(0xffF9F9FA),
+                  border: Border.all(color: Colors.grey.shade300),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Image.asset(benefitList[i]["icon"]!, height: 24),
+                    SizedBox(height: 4),
+                    CustomText.title(
+                      text: benefitList[i]["title"],
+                      isBold: true,
+                      size: 12,
+                      overflow: TextOverflow.visible,
+                    ),
+                    SizedBox(height: 4),
+                    CustomText.title(
+                      text: benefitList[i]["subTitle"],
+                      size: 10,
+                      overflow: TextOverflow.visible,
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+    );
   }
 
   Widget sleepTimeWidget() {
@@ -65,7 +181,7 @@ class _SleepTrackerDayState extends State<SleepTrackerDay> {
                 child: iconLabelCard(
                   label: "Goal",
                   img: "assets/images/emojione_running-shoe.png",
-                  color:  Color(0xFFFAB005),
+                  color: Color(0xFFFAB005),
                   value: "09h 30m",
                 ),
               ),
@@ -79,7 +195,7 @@ class _SleepTrackerDayState extends State<SleepTrackerDay> {
                 child: iconLabelCard(
                   label: "Sleep Time",
                   img: "assets/images/emojione_running-shoe.png",
-                  color:  Color(0xFFFAB005),
+                  color: Color(0xFFFAB005),
                   value: "09h 00m",
                 ),
               ),

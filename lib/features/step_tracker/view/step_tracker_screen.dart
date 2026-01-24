@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:tracure/features/step_tracker/controller/step_tracker_controller.dart';
 import 'package:tracure/features/step_tracker/view/step_tracker_day.dart';
 import 'package:tracure/features/step_tracker/view/step_tracker_month.dart';
+import 'package:tracure/features/step_tracker/view/step_tracker_setting.dart';
 import 'package:tracure/features/step_tracker/view/step_tracker_week.dart';
 import 'package:tracure/utils/common_appbar.dart';
 import 'package:tracure/utils/constant/color_constants.dart';
@@ -22,12 +25,14 @@ class _StepTrackerScreenState extends State<StepTrackerScreen>
     {"title": "Challenges", "icon": "assets/images/ic_trophy.png"},
     {"title": "Settings", "icon": "assets/images/ic_settings.png"},
   ];
-
+  final StepTrackerController stepTrackerController = Get.put(
+    StepTrackerController(),
+  );
   @override
   void initState() {
     super.initState();
-    tabController = TabController(length: 4, vsync: this);
-    tabController?.addListener(() {
+    tabController = TabController(length: tabData.length, vsync: this);
+    tabController?.animation?.addListener(() {
       setState(() {});
     });
   }
@@ -60,10 +65,10 @@ class _StepTrackerScreenState extends State<StepTrackerScreen>
         tabViews: const [
           StepTrackerDay(),
           StepTrackerWeek(),
-          StepTrackerMonth(),
           SizedBox(),
+          StepTrackerSetting(),
         ],
-      ).padOnly(t: 16),
+      ),
     );
   }
 
@@ -72,12 +77,14 @@ class _StepTrackerScreenState extends State<StepTrackerScreen>
     required String icon,
     required int index,
   }) {
+    final selected = isSelected(index);
+
     return Tab(
       child: Row(
         children: [
           Image.asset(
             icon,
-            color: tabController?.index == index ? Colors.white : Colors.grey,
+            color: selected ? Colors.white : Colors.grey,
             height: 20,
             width: 20,
           ),
@@ -86,12 +93,18 @@ class _StepTrackerScreenState extends State<StepTrackerScreen>
             title,
             style: TextStyle(
               fontSize: 14,
-              color: tabController?.index == index ? Colors.white : Colors.grey,
+              color: selected ? Colors.white : Colors.grey,
             ),
           ),
         ],
       ),
     );
+  }
+
+  bool isSelected(int tabIndex) {
+    final currentPage =
+        tabController?.animation?.value.round() ?? tabController?.index;
+    return currentPage == tabIndex;
   }
 }
 
@@ -114,6 +127,7 @@ class RoundedTabBarExample extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isThree = tabs.length <= 3;
     return DefaultTabController(
       length: tabs.length,
       child: Column(
@@ -128,8 +142,8 @@ class RoundedTabBarExample extends StatelessWidget {
               ),
               child: TabBar(
                 controller: controller,
-                tabAlignment: TabAlignment.start,
-                isScrollable: true,
+                tabAlignment: isThree ? null : TabAlignment.start,
+                isScrollable: !isThree,
                 padding: EdgeInsets.zero,
                 indicatorPadding: EdgeInsetsGeometry.all(3),
                 indicator: BoxDecoration(

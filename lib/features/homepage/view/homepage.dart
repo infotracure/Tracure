@@ -7,16 +7,17 @@ import 'package:tracure/features/fasting_tracker/view/fasting_tracker__screen.da
 import 'package:tracure/features/homepage/controller/home_controller.dart';
 import 'package:tracure/features/homepage/view/CircularProgressWidget.dart'
     show CircularProgressWidget;
+import 'package:tracure/features/loginpage/view/login_page.dart';
 import 'package:tracure/features/medicine_tracker/view/medicine_tracker_screen.dart';
 import 'package:tracure/features/sleep_tracker/view/sleep_tracker_screen.dart';
 import 'package:tracure/features/step_tracker/view/step_tracker_screen.dart';
 import 'package:tracure/features/water_intake/view/water_intake_screen.dart';
 import 'package:tracure/servies/app_permission.dart';
 import 'package:tracure/servies/health_service.dart';
+import 'package:tracure/servies/hive_service.dart';
 import 'package:tracure/utils/common_widget.dart';
 import 'package:tracure/utils/extensions.dart';
 
-import '../../../main.dart';
 import '../../../servies/sleep_service.dart';
 import '../../../utils/constant/color_constants.dart';
 import '../../../utils/custom_text.dart';
@@ -41,13 +42,18 @@ class _HomepageState extends State<Homepage> with WidgetsBindingObserver {
     if (state == AppLifecycleState.resumed) {
       homeController.setStepValue();
       homeController.setSleepValue();
-      SleepService.requestAlarmPermission().then((isGranted) async {
-        if (isGranted) {
-          await homeController.scheduleSleep();
-        }
-        await PermissionManager.requestActivityPermission();
-        await AppPermission.requestNotificationPermission();
-      });
+      SleepService.requestAlarmPermission()
+          .then((isGranted) async {
+            if (isGranted) {
+              await homeController.scheduleSleep();
+            }
+          })
+          .then((_) async {
+            await PermissionManager.requestActivityPermission();
+          })
+          .then((_) async {
+            await AppPermission.requestNotificationPermission();
+          });
     }
   }
 
@@ -73,7 +79,26 @@ class _HomepageState extends State<Homepage> with WidgetsBindingObserver {
         ],
         backgroundColor: Color(0xFFF2F3F7),
       ),
-      drawer: Drawer(child: ListView()),
+      drawer: Drawer(
+        child: SafeArea(
+          child: Column(
+            children: [
+              Expanded(child: ListView()),
+              Divider(),
+              ListTile(
+                leading: Icon(Icons.logout, color: Colors.red),
+                title: Text('Logout', style: TextStyle(color: Colors.red)),
+                onTap: () async {
+                  Navigator.pop(context);
+                  await HiveService.instance.clear();
+                  Get.offAll(() => const LoginPage());
+                },
+              ),
+              SizedBox(height: 16),
+            ],
+          ),
+        ),
+      ),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
@@ -324,30 +349,35 @@ class SleepStepCalories extends StatelessWidget {
               child: SizedBox(
                 height: 80,
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    iconLabelCard(
-                      label: "Steps",
-                      img: "assets/images/emojione_running-shoe.png",
-                      color:  Color(0xFFFAB005),
-                      value: homeController.todayStep.value,
-                      onTap: () => Get.to(() => const StepTrackerScreen()),
+                    Expanded(
+                      child: iconLabelCard(
+                        label: "Steps",
+                        img: "assets/images/emojione_running-shoe.png",
+                        color: Color(0xFFFAB005),
+                        value: homeController.todayStep.value,
+                        onTap: () => Get.to(() => const StepTrackerScreen()),
+                      ),
                     ),
                     VerticalDivider(thickness: 1, color: Colors.grey.shade300),
-                    iconLabelCard(
-                      label: "Sleep",
-                      img: "assets/images/fluent-emoji_sleeping-face.png",
-                      color:  Color(0xFF228BE6),
-                      value: homeController.todaySleep.value,
-                      onTap: () => Get.to(() => const SleepTrackerScreen()),
+                    Expanded(
+                      child: iconLabelCard(
+                        label: "Sleep",
+                        img: "assets/images/fluent-emoji_sleeping-face.png",
+                        color: Color(0xFF228BE6),
+                        value: homeController.todaySleep.value,
+                        onTap: () => Get.to(() => const SleepTrackerScreen()),
+                      ),
                     ),
                     VerticalDivider(thickness: 1, color: Colors.grey.shade300),
-                    iconLabelCard(
-                      label: "Calories",
-                      img: "assets/images/fluent-emoji_fire.png",
-                      color: ColorConstant.verdigris,
-                      value: homeController.todayCalories.value,
-                      onTap: () => Get.to(() => const StepTrackerScreen()),
+                    Expanded(
+                      child: iconLabelCard(
+                        label: "Calories",
+                        img: "assets/images/fluent-emoji_fire.png",
+                        color: ColorConstant.verdigris,
+                        value: homeController.todayCalories.value,
+                        onTap: () => Get.to(() => const StepTrackerScreen()),
+                      ),
                     ),
                   ],
                 ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hive_flutter/adapters.dart';
+import 'package:shake_gesture/shake_gesture.dart';
 import 'package:talker_flutter/talker_flutter.dart';
 import 'package:tracure/features/loginpage/view/login_page.dart';
 import 'package:tracure/features/loginpage/view/splash_screen.dart';
@@ -30,19 +31,27 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      behavior: HitTestBehavior.translucent, // lets taps pass through
-      onTap: () {
-        FocusManager.instance.primaryFocus?.unfocus();
-      },
-      child: GetMaterialApp(
-        navigatorKey: navigatorKey,
-        theme: ThemeClass.lightTheme,
-        // home: navigateToSplash(),
-        home: TalkerWrapper(
-          talker: talker,
-          options: TalkerWrapperOptions(),
-          child: SplashScreen(),
+    return TalkerWrapper(
+      talker: talker,
+      options: TalkerWrapperOptions(),
+      child: ShakeGesture(
+        onShake: () {
+          if (navigatorKey.currentContext != null) {
+            Navigator.of(navigatorKey.currentContext!).push(
+              MaterialPageRoute(builder: (_) => TalkerScreen(talker: talker)),
+            );
+          }
+        },
+        child: GestureDetector(
+          behavior: HitTestBehavior.translucent, // lets taps pass through
+          onTap: () {
+            FocusManager.instance.primaryFocus?.unfocus();
+          },
+          child: GetMaterialApp(
+            navigatorKey: navigatorKey,
+            theme: ThemeClass.lightTheme,
+            home: SplashScreen(),
+          ),
         ),
       ),
     );

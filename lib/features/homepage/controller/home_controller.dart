@@ -31,7 +31,7 @@ class HomeController extends GetxController {
     todayStep.value = (await printTodaySteps()).toString();
     todaySleep.value = await getTotalDuration();
     // await startSleepTracking();
-    scheduleSleep();
+    await scheduleSleep();
     await getUserConfiguration();
     await getFeatureList();
   }
@@ -180,5 +180,4 @@ class HomeController extends GetxController {
       DateTime.now().subtract(Duration(days: 7)),
     );
   }
-  
 }

@@ -1,8 +1,6 @@
 //base url
 class EndPoints {
- 
-  static const String baseUrl =
-      "https://api.tracure.in";
+  static const String baseUrl = "https://api.tracure.in";
 
   // receiveTimeout
   static const int receiveTimeout = 15000;
@@ -17,4 +15,8 @@ class EndPoints {
   static const String featureListing = "$baseUrl/feature/featurelisting";
   static const String userConfiguration = "$baseUrl/user/configuration";
   static const String pushSteps = "$baseUrl/steps";
+  static const String stepsbydate = "$baseUrl/stepsbydate";
+  static const String stepssummarybydate = "$baseUrl/steps/stepssummarybydate";
+  static const String stepsaverage = "$baseUrl/stepsaverage";
+  static const String stepsetting = "$baseUrl/stepsetting";
 }

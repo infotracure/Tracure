@@ -2,7 +2,6 @@ import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
 
-class CommonMethods {}
 
 void devLog(
   String message, {

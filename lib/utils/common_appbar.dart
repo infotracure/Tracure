@@ -23,14 +23,15 @@ class CustomAppbar extends StatelessWidget implements PreferredSize {
           child: Row(
             children: [
               GestureDetector(
+                behavior: HitTestBehavior.opaque,
                 onTap: () => Navigator.pop(context),
                 child: Container(
-                  height: 40,
-                  width: 40,
-                  padding: EdgeInsets.all(12),
+                  height: double.infinity,
+                  width: 60,
+                  padding: EdgeInsets.all(22),
                   child: Image.asset("assets/images/arrow_back_black.png"),
                 ),
-              ).padSymm(horizontal: 10, vertical: 10),
+              ),
               Center(
                 child: CustomText.title(text: title, size: 16, isBold: true),
               ),

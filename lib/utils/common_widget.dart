@@ -220,6 +220,8 @@ class CommonWidget {
     Color? titleColor = Colors.white,
     double textsize = 16,
     double? width,
+    double? elevation,
+    Widget? prefixIcon,
 
     required VoidCallback onTap,
   }) {
@@ -227,6 +229,7 @@ class CommonWidget {
       width: width ?? double.infinity,
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
+          elevation: elevation,
           backgroundColor: bgColor,
           // minimumSize: Size(120.w, 40),
           padding:
@@ -236,7 +239,14 @@ class CommonWidget {
           ),
         ),
         onPressed: onTap,
-        child: CustomText.title(text: title, color: titleColor, size: textsize),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ?prefixIcon,
+            SizedBox(width: 8).visible(isVisible: prefixIcon != null),
+            CustomText.title(text: title, color: titleColor, size: textsize),
+          ],
+        ),
       ),
     );
   }

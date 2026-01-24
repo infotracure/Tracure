@@ -5,7 +5,7 @@ import 'package:tracure/features/water_intake/view/water_intake_week.dart';
 import 'package:tracure/utils/extensions.dart';
 
 import '../../../utils/common_appbar.dart';
-import '../../sleep_tracker/view/sleep_tracker_screen.dart';
+import '../../step_tracker/view/step_tracker_screen.dart';
 
 class WaterIntakeScreen extends StatelessWidget {
   const WaterIntakeScreen({super.key});

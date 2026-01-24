@@ -179,15 +179,17 @@ class TitledDropdown extends StatelessWidget {
   final List<String> items;
   final String? value;
   final ValueChanged<String?>? onChanged;
+  final double fontSize;
 
   const TitledDropdown({
-    Key? key,
+    super.key,
     required this.title,
     this.hint,
     required this.items,
     this.value,
     this.onChanged,
-  }) : super(key: key);
+    this.fontSize = 16,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -196,28 +198,32 @@ class TitledDropdown extends StatelessWidget {
       children: [
         CustomText.title(
           text: title,
-          size: 16,
+          size: fontSize,
         ).visible(isVisible: title.isNotEmpty),
         const SizedBox(height: 6),
-        DropdownButtonFormField<String>(
-          value: value,
-          decoration: InputDecoration(
-            isDense: true,
-            hintText: hint,
-            hintStyle: TextStyle(color: Colors.grey.shade600, fontSize: 14),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: Colors.grey.shade400),
+        SizedBox(
+          height: 40,
+          child: DropdownButtonFormField<String>(
+            value: value,
+            decoration: InputDecoration(
+              isDense: true,
+              hintText: hint,
+              contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              hintStyle: TextStyle(color: Colors.grey.shade600, fontSize: 14),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: Colors.grey.shade400),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: Colors.grey.shade400),
+              ),
             ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: Colors.grey.shade400),
-            ),
+            items: items
+                .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                .toList(),
+            onChanged: onChanged,
           ),
-          items: items
-              .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-              .toList(),
-          onChanged: onChanged,
         ),
       ],
     );

@@ -1,5 +1,7 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
-import 'package:tracure/utils/common_methods.dart';
+import 'package:tracure/main.dart';
 
 class CurlLoggerInterceptor extends Interceptor {
   @override
@@ -11,41 +13,52 @@ class CurlLoggerInterceptor extends Interceptor {
 
     // Headers
     options.headers.forEach((k, v) {
-      buffer.write(' -H "$k: $v"');
+      buffer.write(' \\\n  -H "$k: $v"');
     });
 
     // Body
     if (options.data != null) {
       if (options.data is FormData) {
-        buffer.write(" --data '<form-data>'");
+        buffer.write(" \\\n  --data '<form-data>'");
       } else {
-        buffer.write(" --data '${options.data.toString()}'");
+        buffer.write(" \\\n  --data '${options.data.toString()}'");
       }
     }
 
-    devLog('===== CURL REQUEST =====');
-    devLog(buffer.toString());
-    devLog('========================');
+    talker.info('📤 CURL REQUEST\n${buffer.toString()}');
 
-    handler.next(options); // ✅ safe
+    handler.next(options);
   }
 
   @override
   void onResponse(Response response, ResponseInterceptorHandler handler) {
-    devLog('===== RESPONSE (${response.statusCode}) =====');
-    devLog(response.data);
-    devLog('================================');
+    String responseBody;
+    try {
+      responseBody = const JsonEncoder.withIndent('  ').convert(response.data);
+    } catch (_) {
+      responseBody = response.data.toString();
+    }
+
+    talker.info(
+      '📥 RESPONSE [${response.statusCode}] ${response.requestOptions.uri}\n$responseBody',
+    );
     handler.next(response);
   }
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
-    devLog('===== ERROR (${err.response?.statusCode}) =====');
-    devLog(err.message ?? 'Unknown error');
-    if (err.response != null) {
-      devLog(err.response?.data);
+    String errorBody = '';
+    if (err.response?.data != null) {
+      try {
+        errorBody = const JsonEncoder.withIndent('  ').convert(err.response?.data);
+      } catch (_) {
+        errorBody = err.response?.data.toString() ?? '';
+      }
     }
-    devLog('================================');
+
+    talker.error(
+      '❌ ERROR [${err.response?.statusCode}] ${err.requestOptions.uri}\n${err.message ?? 'Unknown error'}\n$errorBody',
+    );
     handler.next(err);
   }
 }

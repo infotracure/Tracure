@@ -1,9 +1,7 @@
 // lib/api/interceptors/auth_interceptor.dart
 import 'package:dio/dio.dart';
 import 'package:tracure/features/loginpage/model/verify_otp_model.dart';
-import 'package:tracure/servies/api_service/dio_client.dart';
 import 'package:tracure/servies/api_service/end_points.dart';
-import 'package:tracure/servies/api_service/response_handler.dart';
 import 'package:tracure/servies/hive_service.dart';
 
 import '../../utils/common_widget.dart';
@@ -76,24 +74,37 @@ class AuthInterceptor extends Interceptor {
   Future<String?> _refreshToken(String refreshToken) async {
     try {
       showGlobalLoader();
-      final url = EndPoints.refreshToken;
-      final res = await DioClient().post(url, {"refreshToken": refreshToken});
+      // Use plain Dio without interceptors to avoid infinite loop
+      final dio = Dio(BaseOptions(
+        baseUrl: EndPoints.baseUrl,
+        connectTimeout: Duration(seconds: 60),
+        receiveTimeout: Duration(seconds: 60),
+      ));
+      final response = await dio.post(
+        EndPoints.refreshToken,
+        data: {"refreshToken": refreshToken},
+      );
       hideGlobalLoader();
-      final verifyOTP = jsonToObject(res, VerifyOtpModel.fromJson);
-      if (verifyOTP?.code == 1 && verifyOTP?.data?.accessToken != "") {
-        HiveService.instance.save(
-          verifyOTP?.data?.accessToken ?? '',
-          HiveService.loginKey,
-        );
-        HiveService.instance.save(
-          verifyOTP?.data?.refreshToken ?? '',
-          HiveService.refreshToken,
-        );
-        return verifyOTP?.data?.accessToken ?? '';
+
+      if (response.statusCode == 200 && response.data != null) {
+        final verifyOTP = VerifyOtpModel.fromJson(response.data);
+        if (verifyOTP.code == 1 && verifyOTP.data?.accessToken != null) {
+          HiveService.instance.save(
+            verifyOTP.data?.accessToken ?? '',
+            HiveService.loginToken,
+          );
+          HiveService.instance.save(
+            verifyOTP.data?.refreshToken ?? '',
+            HiveService.refreshToken,
+          );
+          return verifyOTP.data?.accessToken ?? '';
+        }
       }
+      return null;
     } catch (e) {
       hideGlobalLoader();
       CommonWidget.showToast(StringConstant.internalErrorExceptionMessage);
+      return null;
     }
   }
 }

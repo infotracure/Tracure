@@ -9,6 +9,7 @@ import 'package:tracure/utils/extensions.dart';
 
 import '../../../utils/common_appbar.dart';
 import '../../sleep_tracker/view/sleep_tracker_screen.dart';
+import '../../step_tracker/view/step_tracker_screen.dart';
 
 class BloodSugarScreen extends StatelessWidget {
   const BloodSugarScreen({super.key});

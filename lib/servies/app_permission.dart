@@ -1,24 +1,37 @@
 import 'package:permission_handler/permission_handler.dart';
 
 class AppPermission {
- static Future<bool> requestNotificationPermission() async {
-    // Check current status
-    final status = await Permission.notification.status;
+  static bool _isRequestingNotificationPermission = false;
 
-    if (status.isGranted) {
-      return true;
+  static Future<bool> requestNotificationPermission() async {
+    // Prevent concurrent permission requests
+    if (_isRequestingNotificationPermission) {
+      return false;
     }
 
-    // Request permission
-    final result = await Permission.notification.request();
+    _isRequestingNotificationPermission = true;
 
-    if (result.isGranted) {
-      return true;
-    } else if (result.isPermanentlyDenied) {
-      // Optional: Prompt user to open settings
-      await openAppSettings();
+    try {
+      // Check current status
+      final status = await Permission.notification.status;
+
+      if (status.isGranted) {
+        return true;
+      }
+
+      // Request permission
+      final result = await Permission.notification.request();
+
+      if (result.isGranted) {
+        return true;
+      } else if (result.isPermanentlyDenied) {
+        // Optional: Prompt user to open settings
+        await openAppSettings();
+      }
+
+      return false;
+    } finally {
+      _isRequestingNotificationPermission = false;
     }
-
-    return false;
   }
 }

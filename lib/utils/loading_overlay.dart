@@ -1,24 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:tracure/main.dart';
 
-//TODO: Concurrent api calls loader hides
-//TODO: When loader is in progess and view is poped, loader is not removed
 OverlayEntry? _loaderOverlayEntry;
-bool isLoadingShown = false;
+int _loaderCount = 0;
 
 void showGlobalLoader({bool coverAppBar = false}) {
-  if (isLoadingShown) return;
-  isLoadingShown = true;
+  _loaderCount++;
+
+  // Only show overlay if this is the first request
+  if (_loaderCount > 1) return;
 
   WidgetsBinding.instance.addPostFrameCallback((_) {
-    if (!isLoadingShown)
-      return; // 🔑 skip if hideGlobalLoader was already called
+    // Skip if all requests completed before callback ran
+    if (_loaderCount <= 0) return;
+
+    // Skip if overlay already exists
+    if (_loaderOverlayEntry != null) return;
 
     final overlay = navigatorKey.currentState?.overlay;
-    if (overlay == null) {
-      isLoadingShown = false;
-      return;
-    }
+    if (overlay == null) return;
 
     final topOffset = coverAppBar
         ? 0.0
@@ -40,8 +40,13 @@ void showGlobalLoader({bool coverAppBar = false}) {
 }
 
 void hideGlobalLoader() {
-  if (!isLoadingShown) return;
+  if (_loaderCount <= 0) return;
+
+  _loaderCount--;
+
+  // Only hide overlay when all requests are done
+  if (_loaderCount > 0) return;
+
   _loaderOverlayEntry?.remove();
   _loaderOverlayEntry = null;
-  isLoadingShown = false;
 }

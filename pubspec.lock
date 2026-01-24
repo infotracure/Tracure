@@ -496,6 +496,38 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.8"
+  shake_gesture:
+    dependency: "direct main"
+    description:
+      name: shake_gesture
+      sha256: "356bf6c6d10dd467b2a8059e500d54b500c4ff10311d74382119a490146d5de2"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.0"
+  shake_gesture_android:
+    dependency: transitive
+    description:
+      name: shake_gesture_android
+      sha256: "7f8feed03c7aa7836cc18b7ac86e14a55b1b03c09bbf39dd199ff5444555bad8"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.0"
+  shake_gesture_ios:
+    dependency: transitive
+    description:
+      name: shake_gesture_ios
+      sha256: dd7d5a89587f3696d2abe45d35c350e9986ebaa723538892e6da91d4c7e092d5
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.2"
+  shake_gesture_platform_interface:
+    dependency: transitive
+    description:
+      name: shake_gesture_platform_interface
+      sha256: c5e9adef94892c16e030aabd2c480620cac4dfc002f397309e796248a2a397cc
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.1"
   share_plus:
     dependency: transitive
     description:
