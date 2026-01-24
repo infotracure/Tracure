@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:tracure/features/step_tracker/controller/step_tracker_controller.dart';
-import 'package:tracure/features/step_tracker/view/step_tracker_day.dart';
+import 'package:tracure/features/step_tracker/view/step_tracker_overview.dart';
 import 'package:tracure/features/step_tracker/view/step_tracker_month.dart';
 import 'package:tracure/features/step_tracker/view/step_tracker_setting.dart';
-import 'package:tracure/features/step_tracker/view/step_tracker_week.dart';
+import 'package:tracure/features/step_tracker/view/step_tracker_activity.dart';
 import 'package:tracure/utils/common_appbar.dart';
 import 'package:tracure/utils/constant/color_constants.dart';
 import 'package:tracure/utils/extensions.dart';
@@ -22,7 +22,7 @@ class _StepTrackerScreenState extends State<StepTrackerScreen>
   final List<Map<String, String>> tabData = [
     {"title": "Overview", "icon": "assets/images/ic_overview_chart.png"},
     {"title": "Activity", "icon": "assets/images/ic_person_running.png"},
-    {"title": "Challenges", "icon": "assets/images/ic_trophy.png"},
+    // {"title": "Challenges", "icon": "assets/images/ic_trophy.png"},
     {"title": "Settings", "icon": "assets/images/ic_settings.png"},
   ];
   final StepTrackerController stepTrackerController = Get.put(
@@ -63,9 +63,9 @@ class _StepTrackerScreenState extends State<StepTrackerScreen>
         }).toList(),
 
         tabViews: const [
-          StepTrackerDay(),
-          StepTrackerWeek(),
-          SizedBox(),
+          StepTrackerOverview(),
+          StepTrackerActivity(),
+          // SizedBox(),
           StepTrackerSetting(),
         ],
       ),
@@ -80,23 +80,25 @@ class _StepTrackerScreenState extends State<StepTrackerScreen>
     final selected = isSelected(index);
 
     return Tab(
-      child: Row(
-        children: [
-          Image.asset(
-            icon,
-            color: selected ? Colors.white : Colors.grey,
-            height: 20,
-            width: 20,
-          ),
-          SizedBox(width: 8),
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 14,
+      child: FittedBox(
+        child: Row(
+          children: [
+            Image.asset(
+              icon,
               color: selected ? Colors.white : Colors.grey,
+              height: 18,
+              width: 18,
             ),
-          ),
-        ],
+            SizedBox(width: 6),
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 12,
+                color: selected ? Colors.white : Colors.grey,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -1,30 +1,29 @@
-import 'dart:math';
-
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:health/health.dart';
+import 'package:intl/intl.dart';
 import 'package:tracure/features/homepage/controller/home_controller.dart';
 import 'package:tracure/features/step_tracker/controller/step_tracker_controller.dart';
+import 'package:tracure/features/step_tracker/model/step_by_date_model.dart';
 import 'package:tracure/features/step_tracker/view/step_progress_widget.dart';
 
 import 'package:tracure/utils/common_widget.dart';
 import 'package:tracure/utils/constant/color_constants.dart';
 import 'package:tracure/utils/custom_text.dart';
 import 'package:tracure/utils/extensions.dart';
-import 'package:tracure/utils/string_extension.dart';
 
-class StepTrackerDay extends StatefulWidget {
-  const StepTrackerDay({super.key});
+class StepTrackerOverview extends StatefulWidget {
+  const StepTrackerOverview({super.key});
 
   @override
-  State<StepTrackerDay> createState() => _StepTrackerDayState();
+  State<StepTrackerOverview> createState() => _StepTrackerOverviewState();
 }
 
-class _StepTrackerDayState extends State<StepTrackerDay> {
-  final stepData = generateRandomDoubleList(48);
+class _StepTrackerOverviewState extends State<StepTrackerOverview> {
   final homeController = Get.find<HomeController>();
   final stepController = Get.find<StepTrackerController>();
+  DateTime _selectedDate = DateTime.now();
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -35,8 +34,15 @@ class _StepTrackerDayState extends State<StepTrackerDay> {
             Column(
               children: [
                 StepProgressWidget(
-                  current: int.tryParse(homeController.todayStep.value) ?? 0,
-                  goal: 10000,
+                  current:
+                      stepController.stepsSummaryByDate.value?.data?.steps ?? 0,
+                  goal:
+                      stepController
+                          .stepsSummaryByDate
+                          .value
+                          ?.data
+                          ?.stepGoals ??
+                      0,
                 ),
                 SizedBox(height: 16),
                 activitesCardGrid(stepController),
@@ -52,8 +58,6 @@ class _StepTrackerDayState extends State<StepTrackerDay> {
   }
 
   Column activitesCardGrid(StepTrackerController stepController) {
-    final todayStep = int.tryParse(homeController.todayStep.value) ?? 0;
-    final stepRemain = (todayStep > 10000) ? 0 : (10000 - todayStep);
     return Column(
       children: [
         Row(
@@ -123,6 +127,10 @@ class _StepTrackerDayState extends State<StepTrackerDay> {
   }
 
   Container dayBarChartWidget() {
+    final todayData = stepController.todayAllSteps.value?.data ?? [];
+    final stepData = _bucketStepsToHourlyIntervals(todayData);
+    final dateFormat = DateFormat('EEEE, dd MMMM yyyy');
+
     return Container(
       decoration: CommonWidget.containerDecoration(),
       child: Column(
@@ -130,15 +138,29 @@ class _StepTrackerDayState extends State<StepTrackerDay> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              LeftRightIconButton().padSymm(horizontal: 10, vertical: 10),
+              LeftRightIconButton(
+                onTap: () async {
+                  _selectedDate = _selectedDate.subtract(Duration(days: 1));
+                  await stepController.getStepsbydate(
+                    DateFormat('yyyy-MM-dd').format(_selectedDate),
+                  );
+                },
+              ).padSymm(horizontal: 10, vertical: 10),
               CustomText.title(
-                text: "Tuesday, 10 June 2025",
+                text: dateFormat.format(_selectedDate),
                 isBold: true,
                 size: 14,
               ),
-              LeftRightIconButton()
-                  .rotate(180)
-                  .padSymm(horizontal: 10, vertical: 10),
+              _isToday()
+                  ? const SizedBox(width: 55)
+                  : LeftRightIconButton(
+                      onTap: () async {
+                        _selectedDate = _selectedDate.add(Duration(days: 1));
+                        await stepController.getStepsbydate(
+                          DateFormat('yyyy-MM-dd').format(_selectedDate),
+                        );
+                      },
+                    ).rotate(180).padSymm(horizontal: 10, vertical: 10),
             ],
           ),
           SizedBox(
@@ -148,6 +170,62 @@ class _StepTrackerDayState extends State<StepTrackerDay> {
         ],
       ),
     );
+  }
+
+  bool _isToday() {
+    final now = DateTime.now();
+    return _selectedDate.year == now.year &&
+        _selectedDate.month == now.month &&
+        _selectedDate.day == now.day;
+  }
+
+  List<double> _bucketStepsToHourlyIntervals(List<Datum> data) {
+    // 24 intervals of 1 hour each (00:00-01:00, 01:00-02:00, ...)
+    final List<double> buckets = List.filled(24, 0.0);
+
+    for (final datum in data) {
+      if (datum.startTime == null ||
+          datum.endTime == null ||
+          datum.steps == null) {
+        continue;
+      }
+
+      final start = datum.startTime!;
+      final end = datum.endTime!;
+      final steps = datum.steps!;
+      final totalDuration = end.difference(start).inSeconds;
+
+      if (totalDuration <= 0 || steps == 0) continue;
+
+      DateTime cursor = start;
+
+      while (cursor.isBefore(end)) {
+        // Calculate current hour bucket index
+        final bucketIndex = cursor.hour;
+
+        // Calculate end of current hour bucket
+        final bucketEnd = DateTime(
+          cursor.year,
+          cursor.month,
+          cursor.day,
+          cursor.hour + 1,
+        );
+
+        final effectiveEnd = end.isBefore(bucketEnd) ? end : bucketEnd;
+        final duration = effectiveEnd.difference(cursor).inSeconds;
+
+        final fraction = duration / totalDuration;
+        final stepsForBucket = steps * fraction;
+
+        if (bucketIndex >= 0 && bucketIndex < 24) {
+          buckets[bucketIndex] += stepsForBucket;
+        }
+
+        cursor = effectiveEnd;
+      }
+    }
+
+    return buckets;
   }
 
   Widget keyHealthBenefits() {
@@ -260,44 +338,21 @@ class _StepTrackerDayState extends State<StepTrackerDay> {
   }
 }
 
-List<String> generateTimeListWith4HourLabels({
-  Duration gap = const Duration(minutes: 30),
-}) {
+List<String> generateHourlyLabels() {
   List<String> timeList = [];
-  DateTime time = DateTime(0, 1, 1, 0, 0); // Start at 12:00 AM
 
-  int step = 0;
-  do {
-    if (step % 8 == 0) {
-      String period = time.hour < 12 ? "\nam" : "\npm";
-      int hour = time.hour % 12 == 0 ? 12 : time.hour % 12;
-      String minute = time.minute.toString().padLeft(2, '0');
-
-      String formattedTime = minute == "00"
-          ? "$hour$period"
-          : "$hour:$minute$period";
-      timeList.add(formattedTime);
+  for (int hour = 0; hour < 24; hour++) {
+    // Show label every 4 hours (12am, 4am, 8am, 12pm, 4pm, 8pm)
+    if (hour % 4 == 0) {
+      String period = hour < 12 ? "\nam" : "\npm";
+      int displayHour = hour % 12 == 0 ? 12 : hour % 12;
+      timeList.add("$displayHour$period");
     } else {
       timeList.add("");
     }
+  }
 
-    time = time.add(gap);
-    step++;
-  } while (time.day == 1);
-  // timeList.last = "12\nam";
   return timeList;
-}
-
-List<double> generateRandomDoubleList(
-  int length, {
-  double min = 0,
-  double max = 10000,
-}) {
-  Random random = Random();
-  return List.generate(length, (_) {
-    double range = max - min;
-    return min + random.nextDouble() * range;
-  });
 }
 
 class LeftRightIconButton extends StatelessWidget {
@@ -331,20 +386,64 @@ class DayBarChart extends StatelessWidget {
 
   const DayBarChart({super.key, required this.data});
 
+  double _calculateMaxY() {
+    if (data.isEmpty) return 1000.0;
+
+    final maxVal = data.reduce((a, b) => a > b ? a : b);
+    if (maxVal <= 0) return 1000.0;
+
+    // Round up to nearest 500 or 1000 for cleaner intervals
+    if (maxVal <= 1000) return ((maxVal / 100).ceil() * 100).toDouble();
+    return ((maxVal / 500).ceil() * 500).toDouble();
+  }
+
+  String _formatHour(int hour) {
+    final period = hour < 12 ? 'AM' : 'PM';
+    final displayHour = hour % 12 == 0 ? 12 : hour % 12;
+    return '$displayHour$period';
+  }
+
   @override
   Widget build(BuildContext context) {
-    final hourLabels = generateTimeListWith4HourLabels();
-    const maxY = 10000.0;
+    final hourLabels = generateHourlyLabels();
+    final maxY = _calculateMaxY();
     return BarChart(
       BarChartData(
         maxY: maxY,
-        // minY: 0,
         groupsSpace: 1,
         alignment: BarChartAlignment.spaceEvenly,
-        barTouchData: BarTouchData(enabled: true),
+        barTouchData: BarTouchData(
+          enabled: true,
+          touchTooltipData: BarTouchTooltipData(
+            tooltipPadding: const EdgeInsets.symmetric(
+              horizontal: 8,
+              vertical: 4,
+            ),
+            getTooltipItem: (group, groupIndex, rod, rodIndex) {
+              final hour = group.x;
+              final nextHour = (hour + 1) % 24;
+              final hourStr = _formatHour(hour);
+              final nextHourStr = _formatHour(nextHour);
+              return BarTooltipItem(
+                '${rod.toY.toInt()}\n',
+                const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+                children: [
+                  TextSpan(
+                    text: '$hourStr-$nextHourStr',
+                    style: const TextStyle(color: Colors.white70, fontSize: 12),
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
         gridData: FlGridData(
           show: true,
-          horizontalInterval: 5000.0,
+          horizontalInterval: maxY / 2,
           drawVerticalLine: false,
         ),
         borderData: FlBorderData(show: false),
@@ -392,8 +491,8 @@ class DayBarChart extends StatelessWidget {
               BarChartRodData(
                 toY: data[i].isFinite ? data[i] : 0,
                 color: Colors.teal,
-                width: 2,
-                borderRadius: BorderRadius.circular(4),
+                width: 6,
+                borderRadius: BorderRadius.circular(2),
               ),
             ],
           ),
@@ -401,45 +500,4 @@ class DayBarChart extends StatelessWidget {
       ),
     );
   }
-}
-
-Map<int, int> bucketStepsByHour(List<HealthDataPoint> dataPoints) {
-  final Map<int, double> hourlyBuckets = {for (var i = 0; i < 24; i++) i: 0.0};
-
-  for (final point in dataPoints) {
-    if (point.type != HealthDataType.STEPS) continue;
-
-    final int steps = (point.value as num).toInt();
-    final DateTime start = point.dateFrom;
-    final DateTime end = point.dateTo;
-
-    final totalDuration = end.difference(start).inSeconds;
-    if (totalDuration <= 0 || steps == 0) continue;
-
-    DateTime cursor = start;
-
-    while (cursor.isBefore(end)) {
-      // End of current hour (e.g. 1:00 → 2:00)
-      final DateTime hourEnd = DateTime(
-        cursor.year,
-        cursor.month,
-        cursor.day,
-        cursor.hour + 1,
-      );
-
-      final DateTime bucketEnd = end.isBefore(hourEnd) ? end : hourEnd;
-      final int duration = bucketEnd.difference(cursor).inSeconds;
-
-      final double fraction = duration / totalDuration;
-      final double stepsForBucket = steps * fraction;
-
-      hourlyBuckets[cursor.hour] =
-          (hourlyBuckets[cursor.hour] ?? 0) + stepsForBucket;
-
-      cursor = bucketEnd;
-    }
-  }
-
-  // Convert to int for charting
-  return hourlyBuckets.map((key, value) => MapEntry(key, value.round()));
 }

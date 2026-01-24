@@ -21,18 +21,20 @@ class _SleepTrackerDayState extends State<SleepTrackerDay> {
   final sleepData = generateRandomDoubleList(48);
   @override
   Widget build(BuildContext context) {
-    return Column(
-      spacing: 16,
-      children: [
-        SleepProgressWidget(currentMin: 441, goal: 10 * 60),
-        activitesCardGrid(),
-        // Container(
-        //   decoration: CommonWidget.containerDecoration(),
-        //   child: Column(children: []),
-        // ),
-        keyHealthBenefits(),
-      ],
-    ).padSymm(horizontal: 16, vertical: 16);
+    return SingleChildScrollView(
+      child: Column(
+        spacing: 16,
+        children: [
+          SleepProgressWidget(currentMin: 441, goal: 10 * 60),
+          activitesCardGrid(),
+          // Container(
+          //   decoration: CommonWidget.containerDecoration(),
+          //   child: Column(children: []),
+          // ),
+          keyHealthBenefits(),
+        ],
+      ).padSymm(horizontal: 16, vertical: 16),
+    );
   }
 
   Column activitesCardGrid() {

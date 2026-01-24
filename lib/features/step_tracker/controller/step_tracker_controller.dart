@@ -20,25 +20,51 @@ class StepTrackerController extends GetxController {
   Rx<StepSummaryByDateModel?> stepsSummaryByDate = Rx<StepSummaryByDateModel?>(
     null,
   );
-  StepAverageModel? stepAverageModel;
+  Rx<StepAvgModel?> stepAverageModel = Rx<StepAvgModel?>(null);
+  Rx<StepSummaryByRangeModel?> stepWeeklyModel = Rx<StepSummaryByRangeModel?>(
+    null,
+  );
+  Rx<StepSummaryByRangeModel?> stepMonthModel = Rx<StepSummaryByRangeModel?>(
+    null,
+  );
+  Rx<StepByDateModel?> todayAllSteps = Rx<StepByDateModel?>(null);
   StepSettingModel? stepSettingModel;
   @override
   void onInit() async {
     super.onInit();
-    await getStepSummaryByDate();
+    var todayFormatted = DateFormat('yyyy-MM-dd').format(DateTime.now());
+    await getStepSummaryByDate(todayFormatted);
+
+    // Calculate current week's start (Monday) and end (Sunday)
+    final now = DateTime.now();
+    final weekStart = now.subtract(Duration(days: now.weekday - 1));
+    final weekEnd = weekStart.add(const Duration(days: 6));
+    final dateFormat = DateFormat('yyyy-MM-dd');
+
+    await getStepAverageData(
+      startDate: dateFormat.format(weekStart),
+      endDate: dateFormat.format(weekEnd),
+    );
+
+    await getStepsbydate(todayFormatted);
+
+    // await getStepSummaryByRange(
+    //   dateFormat.format(weekStart),
+    //   dateFormat.format(weekEnd),
+    // );
   }
 
-  Future<void> getStepsbydate() async {
+  Future<void> getStepsbydate(String date) async {
     try {
       showGlobalLoader();
-      final param = {"stepDate": "2025-06-22"};
+      final param = {"stepDate": date};
       final url = EndPoints.stepsbydate;
       final res = await DioClient().get(url, queryParam: param);
       hideGlobalLoader();
-      final stepByDateModel = jsonToObject(res, StepByDateModel.fromJson);
-      if (stepByDateModel?.code != 1) {
+      todayAllSteps.value = jsonToObject(res, StepByDateModel.fromJson);
+      if (todayAllSteps.value?.code != 1) {
         CommonWidget.showToast(
-          stepByDateModel?.message ??
+          todayAllSteps.value?.message ??
               StringConstant.internalErrorExceptionMessage,
         );
         return;
@@ -49,12 +75,12 @@ class StepTrackerController extends GetxController {
     }
   }
 
-  Future<void> getStepSummaryByDate() async {
+  Future<void> getStepSummaryByDate(String date) async {
     try {
       showGlobalLoader();
-      
-      final param = {"stepDate":  DateFormat('yyyy-MM-dd').format(DateTime.now())};
-      final url = EndPoints.stepssummarybydate;
+
+      final param = {"stepDate": date};
+      final url = EndPoints.stepsSummarybydate;
       final res = await DioClient().get(url, queryParam: param);
       hideGlobalLoader();
       stepsSummaryByDate.value = jsonToObject(
@@ -74,17 +100,75 @@ class StepTrackerController extends GetxController {
     }
   }
 
-  Future<void> getStepAverageData() async {
+  Future<void> getStepSummaryByRange(String startDate, String endDate) async {
     try {
       showGlobalLoader();
-      final param = {"startDate": "2025-06-22", "endDate": "2025-06-22"};
+
+      final param = {"startDate": startDate, "endDate": endDate};
+      final url = EndPoints.stepsSummarybyRange;
+      final res = await DioClient().get(url, queryParam: param);
+      hideGlobalLoader();
+      stepWeeklyModel.value = jsonToObject(
+        res,
+        StepSummaryByRangeModel.fromJson,
+      );
+      if (stepWeeklyModel.value?.code != 1) {
+        CommonWidget.showToast(
+          stepWeeklyModel.value?.message ??
+              StringConstant.internalErrorExceptionMessage,
+        );
+        return;
+      }
+    } catch (e) {
+      hideGlobalLoader();
+      CommonWidget.showToast(StringConstant.internalErrorExceptionMessage);
+    }
+  }
+
+  Future<void> getStepSummaryByMonth(DateTime month) async {
+    try {
+      showGlobalLoader();
+
+      // Calculate first and last day of the month
+      final firstDay = DateTime(month.year, month.month, 1);
+      final lastDay = DateTime(month.year, month.month + 1, 0);
+      final dateFormat = DateFormat('yyyy-MM-dd');
+
+      final param = {
+        "startDate": dateFormat.format(firstDay),
+        "endDate": dateFormat.format(lastDay),
+      };
+      final url = EndPoints.stepsSummarybyRange;
+      final res = await DioClient().get(url, queryParam: param);
+      hideGlobalLoader();
+      stepMonthModel.value = jsonToObject(
+        res,
+        StepSummaryByRangeModel.fromJson,
+      );
+      if (stepMonthModel.value?.code != 1) {
+        CommonWidget.showToast(
+          stepMonthModel.value?.message ??
+              StringConstant.internalErrorExceptionMessage,
+        );
+        return;
+      }
+    } catch (e) {
+      hideGlobalLoader();
+      CommonWidget.showToast(StringConstant.internalErrorExceptionMessage);
+    }
+  }
+
+  Future<void> getStepAverageData({String? startDate, String? endDate}) async {
+    try {
+      showGlobalLoader();
+      final param = {"startDate": startDate, "endDate": endDate};
       final url = EndPoints.stepsaverage;
       final res = await DioClient().get(url, queryParam: param);
       hideGlobalLoader();
-      final stepAverageModel = jsonToObject(res, StepAverageModel.fromJson);
-      if (stepAverageModel?.code != 1) {
+      stepAverageModel.value = jsonToObject(res, StepAvgModel.fromJson);
+      if (stepAverageModel.value?.code != 1) {
         CommonWidget.showToast(
-          stepAverageModel?.message ??
+          stepAverageModel.value?.message ??
               StringConstant.internalErrorExceptionMessage,
         );
         return;

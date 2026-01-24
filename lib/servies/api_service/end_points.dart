@@ -15,8 +15,10 @@ class EndPoints {
   static const String featureListing = "$baseUrl/feature/featurelisting";
   static const String userConfiguration = "$baseUrl/user/configuration";
   static const String pushSteps = "$baseUrl/steps";
-  static const String stepsbydate = "$baseUrl/stepsbydate";
-  static const String stepssummarybydate = "$baseUrl/steps/stepssummarybydate";
-  static const String stepsaverage = "$baseUrl/stepsaverage";
+  static const String stepsbydate = "$baseUrl/steps/stepsbydate";
+  static const String stepsSummarybydate = "$baseUrl/steps/stepssummarybydate";
+  static const String stepsSummarybyRange =
+      "$baseUrl/steps/stepssummarybyrange";
+  static const String stepsaverage = "$baseUrl/steps/stepsaverage";
   static const String stepsetting = "$baseUrl/stepsetting";
 }

@@ -1,6 +1,6 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import 'package:tracure/features/step_tracker/view/step_tracker_day.dart';
+import 'package:tracure/features/step_tracker/view/step_tracker_overview.dart';
 import 'package:tracure/utils/common_widget.dart';
 import 'package:tracure/utils/constant/color_constants.dart';
 import 'package:tracure/utils/custom_text.dart';

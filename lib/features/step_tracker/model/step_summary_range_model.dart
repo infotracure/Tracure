@@ -1,57 +1,55 @@
+// To parse this JSON data, do
+//
+//     final stepSummaryByRangeModel = stepSummaryByRangeModelFromJson(jsonString);
+
 import 'dart:convert';
 
-StepSummaryRangeModel stepSummaryRangeModelFromJson(String str) =>
-    StepSummaryRangeModel.fromJson(json.decode(str));
+StepSummaryByRangeModel stepSummaryByRangeModelFromJson(String str) =>
+    StepSummaryByRangeModel.fromJson(json.decode(str));
 
-String stepSummaryRangeModelToJson(StepSummaryRangeModel data) =>
+String stepSummaryByRangeModelToJson(StepSummaryByRangeModel data) =>
     json.encode(data.toJson());
 
-class StepSummaryRangeModel {
-  int? code;
-  List<StepData>? data;
-  String? message;
+class StepSummaryByRangeModel {
+  final int? code;
+  final List<Datum>? data;
+  final String? message;
 
-  StepSummaryRangeModel({
-    this.code,
-    this.data,
-    this.message,
-  });
+  StepSummaryByRangeModel({this.code, this.data, this.message});
 
-  factory StepSummaryRangeModel.fromJson(Map<String, dynamic> json) =>
-      StepSummaryRangeModel(
+  factory StepSummaryByRangeModel.fromJson(Map<String, dynamic> json) =>
+      StepSummaryByRangeModel(
         code: json["code"],
         data: json["data"] == null
             ? []
-            : List<StepData>.from(
-                json["data"].map((x) => StepData.fromJson(x))),
+            : List<Datum>.from(json["data"]!.map((x) => Datum.fromJson(x))),
         message: json["message"],
       );
 
   Map<String, dynamic> toJson() => {
-        "code": code,
-        "data": data == null
-            ? []
-            : List<dynamic>.from(data!.map((x) => x.toJson())),
-        "message": message,
-      };
+    "code": code,
+    "data": data == null
+        ? []
+        : List<dynamic>.from(data!.map((x) => x.toJson())),
+    "message": message,
+  };
 }
 
-class StepData {
-  String? stepDate;
-  int? steps;
+class Datum {
+  final DateTime? stepDate;
+  final int? steps;
 
-  StepData({
-    this.stepDate,
-    this.steps,
-  });
+  Datum({this.stepDate, this.steps});
 
-  factory StepData.fromJson(Map<String, dynamic> json) => StepData(
-        stepDate: json["stepDate"],
-        steps: json["steps"],
-      );
+  factory Datum.fromJson(Map<String, dynamic> json) => Datum(
+    stepDate: json["stepDate"] == null
+        ? null
+        : DateTime.parse(json["stepDate"]),
+    steps: json["steps"],
+  );
 
   Map<String, dynamic> toJson() => {
-        "stepDate": stepDate,
-        "steps": steps,
-      };
+    "stepDate": stepDate?.toIso8601String(),
+    "steps": steps,
+  };
 }

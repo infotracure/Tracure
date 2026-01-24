@@ -62,7 +62,7 @@ class Data {
     distance: json["distance"],
     activeTime: json["activeTime"],
     caloriesBurned: json["caloriesBurned"],
-    stepsPercentage: json["stepsPercentage"],
+    stepsPercentage: (json["stepsPercentage"] as num?)?.toDouble(),
   );
 
   Map<String, dynamic> toJson() => {

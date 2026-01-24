@@ -1,10 +1,9 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
-import 'package:health/health.dart';
+import 'package:intl/intl.dart';
 import 'package:tracure/features/step_tracker/controller/step_tracker_controller.dart';
-import 'package:tracure/features/step_tracker/view/step_tracker_day.dart';
+import 'package:tracure/features/step_tracker/view/step_tracker_overview.dart';
 import 'package:tracure/features/step_tracker/view/view_monthly_bottom_sheet.dart';
 import 'package:tracure/utils/common_widget.dart';
 import 'package:tracure/utils/constant/color_constants.dart';
@@ -13,17 +12,16 @@ import 'package:tracure/utils/extensions.dart';
 import 'package:tracure/utils/int_extension.dart';
 import 'package:tracure/utils/string_extension.dart';
 
-import '../../../servies/health_service.dart';
 import 'step_tracker_month.dart';
 
-class StepTrackerWeek extends StatefulWidget {
-  const StepTrackerWeek({super.key});
+class StepTrackerActivity extends StatefulWidget {
+  const StepTrackerActivity({super.key});
 
   @override
-  State<StepTrackerWeek> createState() => _StepTrackerWeekState();
+  State<StepTrackerActivity> createState() => _StepTrackerActivityState();
 }
 
-class _StepTrackerWeekState extends State<StepTrackerWeek> {
+class _StepTrackerActivityState extends State<StepTrackerActivity> {
   DateTime _selectedWeek = DateTime.now();
   List<double> _weeklySteps = List.filled(7, 0.0);
   final stepTrackerController = Get.find<StepTrackerController>();
@@ -63,15 +61,18 @@ class _StepTrackerWeekState extends State<StepTrackerWeek> {
                       isBold: true,
                       size: 14,
                     ),
-                    LeftRightIconButton(
-                      onTap: () {
-                        if (_selectedWeek.isAfter(DateTime.now())) return;
-                        setState(() {
-                          _selectedWeek = _selectedWeek.add(Duration(days: 7));
-                          _loadWeeklySteps(_selectedWeek);
-                        });
-                      },
-                    ).rotate(180).padSymm(horizontal: 10, vertical: 10),
+                    _isCurrentWeek()
+                        ? const SizedBox(width: 55)
+                        : LeftRightIconButton(
+                            onTap: () {
+                              setState(() {
+                                _selectedWeek = _selectedWeek.add(
+                                  Duration(days: 7),
+                                );
+                                _loadWeeklySteps(_selectedWeek);
+                              });
+                            },
+                          ).rotate(180).padSymm(horizontal: 10, vertical: 10),
                   ],
                 ),
                 SizedBox(height: 8),
@@ -95,12 +96,18 @@ class _StepTrackerWeekState extends State<StepTrackerWeek> {
                               color: ColorConstant.verdigris,
                               size: 20,
                             ),
-                            onTap: () => showRoundedBottomSheet(
-                              context: context,
-                              child: CustomCalendar(
-                                initialMonth: DateTime.now(),
-                              ),
-                            ),
+                            onTap: () async {
+                              await stepTrackerController.getStepSummaryByMonth(
+                                DateTime.now(),
+                              );
+                              if (!context.mounted) return;
+                              showRoundedBottomSheet(
+                                context: context,
+                                child: CustomCalendar(
+                                  initialMonth: DateTime.now(),
+                                ),
+                              );
+                            },
                           )
                           .padSymm(horizontal: 16, vertical: 8)
                           .align(Alignment.bottomCenter),
@@ -119,7 +126,7 @@ class _StepTrackerWeekState extends State<StepTrackerWeek> {
   }
 
   Column activitesCardGrid() {
-    final avgDataModel = stepTrackerController.stepAverageModel?.data;
+    final avgDataModel = stepTrackerController.stepAverageModel.value?.data;
     return Column(
       children: [
         Row(
@@ -160,19 +167,23 @@ class _StepTrackerWeekState extends State<StepTrackerWeek> {
   Widget tileCard(String title, String value, String img) {
     return Expanded(
       child: Container(
+        height: 74,
         decoration: CommonWidget.containerDecoration(),
-        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                CustomText.title(text: title, size: 10),
-                SizedBox(height: 8),
-                CustomText.title(text: value, size: 14, isBold: true),
-              ],
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  CustomText.title(text: title, size: 10, maxLine: 2),
+                  Spacer(),
+                  CustomText.title(text: value, size: 14, isBold: true),
+                ],
+              ),
             ),
+            SizedBox(width: 7),
             Image.asset(img, height: 35),
           ],
         ),
@@ -257,43 +268,50 @@ class _StepTrackerWeekState extends State<StepTrackerWeek> {
   }
 
   Future<void> _loadWeeklySteps(DateTime weekDate) async {
-    final steps = await getDailyStepsForWeek(weekDate);
+    final start = startOfWeek(weekDate);
+    final end = endOfWeek(weekDate);
+    final dateFormat = DateFormat('yyyy-MM-dd');
+
+    // Call API to fetch weekly data
+    await stepTrackerController.getStepSummaryByRange(
+      dateFormat.format(start),
+      dateFormat.format(end),
+    );
+
+    // Map API data to _weeklySteps list
+    final apiData = stepTrackerController.stepWeeklyModel.value?.data ?? [];
+
+    // Create a map of date -> steps for quick lookup
+    final Map<DateTime, int> stepsPerDay = {};
+    for (var datum in apiData) {
+      if (datum.stepDate != null) {
+        final date = normalizeDate(datum.stepDate!);
+        stepsPerDay[date] = datum.steps ?? 0;
+      }
+    }
+
+    // Build the 7-day list (Monday to Sunday)
+    List<double> result = [];
+    for (int i = 0; i < 7; i++) {
+      final date = normalizeDate(start.add(Duration(days: i)));
+      result.add((stepsPerDay[date] ?? 0).toDouble());
+    }
+
     if (mounted) {
       setState(() {
-        _weeklySteps = steps;
+        _weeklySteps = result;
       });
     }
   }
 
-  Future<List<double>> getDailyStepsForWeek(DateTime week) async {
-    final Map<DateTime, int> stepsPerDay = {};
-    final startOfWeek = week.subtract(
-      Duration(days: week.weekday - 1),
-    ); // Monday
-    final data = await HealthDataService().getWeeklySteps(week);
-    for (var point in data) {
-      if (point.value is NumericHealthValue) {
-        final stepsValue = (point.value as NumericHealthValue).numericValue
-            .toInt();
-        final date = DateTime(
-          point.dateFrom.year,
-          point.dateFrom.month,
-          point.dateFrom.day,
-        );
-        stepsPerDay[date] = (stepsPerDay[date] ?? 0) + stepsValue;
-      }
-    }
-
-    // Ensure exactly 7 days (Sun → Sat for your chart)
-    List<double> result = [];
-    for (int i = 0; i < 7; i++) {
-      final date = normalizeDate(startOfWeek.add(Duration(days: i)));
-      result.add((stepsPerDay[date] ?? 0).toDouble());
-    }
-    return result;
-  }
-
   DateTime normalizeDate(DateTime d) => DateTime(d.year, d.month, d.day);
+
+  bool _isCurrentWeek() {
+    final now = DateTime.now();
+    final currentWeekStart = startOfWeek(now);
+    final selectedWeekStart = startOfWeek(_selectedWeek);
+    return normalizeDate(currentWeekStart) == normalizeDate(selectedWeekStart);
+  }
 
   DateTime startOfWeek(DateTime date) {
     return DateTime(
@@ -367,7 +385,26 @@ class _WeekBarChartState extends State<WeekBarChart> {
     return BarChart(
       BarChartData(
         maxY: maxY,
-        barTouchData: BarTouchData(enabled: true),
+        barTouchData: BarTouchData(
+          enabled: true,
+          touchTooltipData: BarTouchTooltipData(
+            tooltipPadding: const EdgeInsets.symmetric(
+              horizontal: 8,
+              vertical: 4,
+            ),
+
+            getTooltipItem: (group, groupIndex, rod, rodIndex) {
+              return BarTooltipItem(
+                rod.toY.toInt().toString(),
+                const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+              );
+            },
+          ),
+        ),
         gridData: FlGridData(
           show: true,
           horizontalInterval: maxY / 2,
