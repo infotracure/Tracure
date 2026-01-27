@@ -20,6 +20,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import kotlin.math.abs
 import kotlin.math.sqrt
@@ -161,13 +162,32 @@ class SleepTrackingService : Service(), SensorEventListener {
 
     private fun sendSleepData(start: String, end: String) {
         Log.d("SleepTracking", "Sleep on $todayDate from $start to $end")
-        val session = SleepSession(date = todayDate, startTime = start, endTime = end)
+        val startDateTime = LocalDateTime.parse(start)
+        val sleepDate = calculateSleepDate(startDateTime)
+
+        val session = SleepSession(
+            date = sleepDate,
+            startTime = start,
+            endTime = end
+        )
 
         CoroutineScope(Dispatchers.IO).launch {
             val db = AppDatabase.getDatabase(applicationContext)
             db.sleepSessionDao().insert(session)
             deletePast7daysEntries()
         }
+    }
+
+    private fun calculateSleepDate(startDateTime: LocalDateTime): String {
+        val cutoffHour = 4
+
+        val sleepDate = if (startDateTime.hour < cutoffHour) {
+            startDateTime.toLocalDate().minusDays(1)
+        } else {
+            startDateTime.toLocalDate()
+        }
+
+        return sleepDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
     }
 
     private fun deletePast7daysEntries(){

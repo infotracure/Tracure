@@ -328,7 +328,7 @@ class SleepTrendWidget extends StatefulWidget {
 
 class _SleepTrendWidgetState extends State<SleepTrendWidget> {
   final sleepTrackerController = Get.find<SleepTrackerController>();
-  DateTime _selectedDate = DateTime.now();
+  DateTime _selectedDate = DateTime.now().subtract(Duration(days: 1));
 
   // Sleep time constants (10 PM to 7 AM)
   final TimeOfDay _sleepStartTime = const TimeOfDay(
@@ -338,16 +338,16 @@ class _SleepTrendWidgetState extends State<SleepTrendWidget> {
   final TimeOfDay _sleepEndTime = const TimeOfDay(hour: 8, minute: 0); // 7 AM
 
   bool _isToday() {
-    final now = DateTime.now();
+    final now = DateTime.now().subtract(Duration(days: 1));
     return _selectedDate.year == now.year &&
         _selectedDate.month == now.month &&
         _selectedDate.day == now.day;
   }
 
   String _formatDate() {
-    if (_isToday()) {
-      return 'Today, ${DateFormat('d MMMM yyyy').format(_selectedDate)}';
-    }
+    // if (_isToday()) {
+    //   return 'Today, ${DateFormat('d MMMM yyyy').format(_selectedDate)}';
+    // }
     return DateFormat('EEEE, d MMMM yyyy').format(_selectedDate);
   }
 
@@ -600,8 +600,6 @@ class _SleepTrendWidgetState extends State<SleepTrendWidget> {
     );
   }
 }
-
-
 
 class DayBarChart extends StatelessWidget {
   final List<double> data;

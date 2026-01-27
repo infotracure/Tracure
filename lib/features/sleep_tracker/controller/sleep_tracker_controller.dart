@@ -26,12 +26,13 @@ class SleepTrackerController extends GetxController {
   @override
   void onInit() async {
     super.onInit();
-    var todayFormatted = DateFormat('yyyy-MM-dd').format(DateTime.now());
+    final now = DateTime.now().subtract(Duration(days: 1));
+    var todayFormatted = DateFormat('yyyy-MM-dd').format(now);
     await getSleepSummaryByDate(todayFormatted);
     await getSleepTrend(todayFormatted);
 
     // Calculate current week's start (Monday) and end (Sunday)
-    final now = DateTime.now();
+
     final weekStart = now.subtract(Duration(days: now.weekday - 1));
     final weekEnd = weekStart.add(const Duration(days: 6));
     final dateFormat = DateFormat('yyyy-MM-dd');
