@@ -357,13 +357,14 @@ class HomeController extends GetxController {
 
   Future<void> checkForLastSleepPushedData({bool silent = false}) async {
     final lastSyncTime = syncStatusModel?.value?.data?.sleep?.lastSyncTime;
-    if (lastSyncTime == null || isToday(lastSyncTime)) return;
+    if (lastSyncTime == null /*|| isToday(lastSyncTime)*/ ) return;
 
     final fetchDate = getDateToFetchSleep();
     final date = DateFormat('yyyy-MM-dd').format(fetchDate);
     var sessions = await SleepService.getSleepDataForDate(date);
+    print("SleepService.getSleepDataForDate");
     var convertedSessions = await convertSleepRawToObject(sessions);
-
+    print("SleepService.getSleepDataForDate : $convertedSessions");
     if (convertedSessions.isNotEmpty) {
       await pushSleepData(convertedSessions, silent: silent);
     }

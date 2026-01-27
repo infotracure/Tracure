@@ -22,6 +22,7 @@ import 'package:tracure/utils/extensions.dart';
 import '../../../servies/sleep_service.dart';
 import '../../../utils/constant/color_constants.dart';
 import '../../../utils/custom_text.dart';
+import 'gym_checkin_dialog.dart';
 
 class Homepage extends StatefulWidget {
   const Homepage({super.key});
@@ -88,16 +89,17 @@ class _HomepageState extends State<Homepage> with WidgetsBindingObserver {
           child: Column(
             children: [
               Expanded(child: ListView()),
-              Divider(),
-              ListTile(
-                leading: Icon(Icons.logout, color: Colors.red),
-                title: Text('Logout', style: TextStyle(color: Colors.red)),
-                onTap: () async {
-                  Navigator.pop(context);
-                  await HiveService.instance.clear();
-                  Get.offAll(() => const LoginPage());
-                },
-              ),
+              CommonWidget.roundedButton(
+                context: context,
+                titleColor: ColorConstant.bgWhite,
+                bgColor: ColorConstant.red,
+                title: "Logout",
+                padding: EdgeInsets.symmetric(vertical: 10),
+                elevation: 0,
+
+                onTap: () async {},
+              ).paddingSymmetric(horizontal: 16),
+
               SizedBox(height: 16),
             ],
           ),
@@ -294,9 +296,7 @@ class _GymCheckinWidgetState extends State<GymCheckinWidget> {
                   return GestureDetector(
                     onTap: () {
                       if (isToday && !isCheckedIn) {
-                        homeController.setGymCheckIn(
-                          date: DateFormat('yyyy-MM-dd').format(date),
-                        );
+                        showCheckInDialog(context, date);
                       }
                     },
                     child: Container(

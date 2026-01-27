@@ -15,13 +15,13 @@ import UIKit
   }
     private func configureMethodChannels(controller: FlutterViewController) {
         let sleepChannel = FlutterMethodChannel(
-             name: "com.tracure.main",
+             name: "sleep_service",
              binaryMessenger: controller.binaryMessenger
            )
 
            sleepChannel.setMethodCallHandler { call, result in
              switch call.method {
-             case "fetchSleepData":
+             case "getSleepDataForDate":
                  guard let args = call.arguments as? [String: Any],
                        let dateString = args["date"] as? String,
                        let givenDate = DateUtils.parseISO8601DateTrimmingMicroseconds(from: dateString) else {

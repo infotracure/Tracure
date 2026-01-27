@@ -10,16 +10,16 @@ import CoreMotion
 
 class SleepAnalyzer {
     static let motionManager = CMMotionActivityManager()
-    static var LSSleepStart = ""
-    static var LSSleepStop = ""
-    static var LSSleepCheck = ""
-    static var LSSleepInterval = 3600
+    static var LSSleepStart = "22:00"
+    static var LSSleepStop = "10:00"
+    static var LSSleepCheck = "07:00"
+    static var LSSleepInterval = 1800
     
     static func setDataFromSettings(settingsData: [String: Any]) {
-        LSSleepStart = settingsData["lSStartTime"] as? String ?? ""
-        LSSleepStop = settingsData["lSHardStopTime"] as? String ?? ""
-        LSSleepCheck = settingsData["lSEndTime"] as? String ?? ""
-        LSSleepInterval = settingsData["sleepInterval"] as? Int ?? 3600
+        LSSleepStart = settingsData["lSStartTime"] as? String ?? "22:00"
+        LSSleepStop = settingsData["lSHardStopTime"] as? String ?? "10:00"
+        LSSleepCheck = settingsData["lSEndTime"] as? String ?? "07:00"
+        LSSleepInterval = settingsData["sleepInterval"] as? Int ?? 1800
     }
     static func fetchSleepData(for givenDate: Date, completion: @escaping ([[String: Any]]) -> ()) {
         var sleepData: [(date: Date, startTime: String, endTime: String, duration: TimeInterval)] = []
@@ -104,6 +104,7 @@ class SleepAnalyzer {
                     
                     sleepArray.append([
                         "field": "sleepCount",
+                        "date": dateFormatter.string(from: range.end),
                         "value": String(format: "%.0f", sleepValue),
                         "startTime": sleepData.first?.startTime ?? "",
                         "endTime": sleepData.last?.endTime ?? "",
@@ -117,6 +118,7 @@ class SleepAnalyzer {
                     
                     sleepArray.append([
                         "field": "sleepCount",
+                        "date": dateFormatter.string(from: range.end),
                         "value": range.end.timeIntervalSince(range.start),
                         "startTime": dateFormatter.string(from: range.start),
                         "endTime": dateFormatter.string(from: range.end),
@@ -128,6 +130,7 @@ class SleepAnalyzer {
         }
         
         dispatchGroup.notify(queue: .main) {
+            print(sleepArray)
             completion(sleepArray)
         }
     }
