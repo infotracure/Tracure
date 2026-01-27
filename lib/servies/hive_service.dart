@@ -8,6 +8,7 @@ class HiveService {
   static const isUserLoggedIn = 'isUserLoggedIn';
   static const loginToken = 'token';
   static const refreshToken = 'refresh_token';
+  static const deviceId = 'device_id';
 
   late Box _box;
 

@@ -3,7 +3,6 @@ import 'package:intl/intl.dart';
 import 'package:tracure/features/homepage/model/feature_mapper_model.dart';
 import 'package:tracure/features/step_tracker/model/step_average_model.dart';
 import 'package:tracure/features/step_tracker/model/step_by_date_model.dart';
-import 'package:tracure/features/step_tracker/model/step_setting_model.dart';
 import 'package:tracure/features/step_tracker/model/step_summary_by_date.dart';
 import 'package:tracure/features/step_tracker/model/step_summary_range_model.dart';
 import 'package:tracure/utils/common_widget.dart';
@@ -28,7 +27,6 @@ class StepTrackerController extends GetxController {
     null,
   );
   Rx<StepByDateModel?> todayAllSteps = Rx<StepByDateModel?>(null);
-  StepSettingModel? stepSettingModel;
   @override
   void onInit() async {
     super.onInit();
@@ -179,20 +177,25 @@ class StepTrackerController extends GetxController {
     }
   }
 
-  Future<void> getStepSettingData() async {
+  Future<void> pushStepSettingData(int stepGoal) async {
     try {
       showGlobalLoader();
 
       final url = EndPoints.stepsetting;
-      final res = await DioClient().get(url);
+      final param = {"stepGoal": stepGoal};
+      final res = await DioClient().post(url, param);
       hideGlobalLoader();
-      final stepSettingModel = jsonToObject(res, StepSettingModel.fromJson);
-      if (stepSettingModel?.code != 1) {
+      if (res is DioResponse) {
+        final responseData = res.data as Map<String, dynamic>;
+        final code = responseData['code'];
+        final message = responseData['message'];
+
         CommonWidget.showToast(
-          stepSettingModel?.message ??
-              StringConstant.internalErrorExceptionMessage,
+          message ?? StringConstant.internalErrorExceptionMessage,
         );
-        return;
+        var todayFormatted = DateFormat('yyyy-MM-dd').format(DateTime.now());
+
+        getStepSummaryByDate(todayFormatted);
       }
     } catch (e) {
       hideGlobalLoader();

@@ -1,11 +1,15 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'package:tracure/features/sleep_tracker/view/sleep_tracker_day.dart';
+import 'package:tracure/features/sleep_tracker/controller/sleep_tracker_controller.dart';
+import 'package:tracure/features/sleep_tracker/view/sleep_tracker_overview.dart';
 import 'package:tracure/utils/common_widget.dart';
 import 'package:tracure/utils/constant/color_constants.dart';
 import 'package:tracure/utils/custom_text.dart';
 import 'package:tracure/utils/extensions.dart';
+
+import '../../step_tracker/view/step_tracker_overview.dart';
 
 class SleepTrackerMonth extends StatefulWidget {
   const SleepTrackerMonth({super.key});
@@ -15,16 +19,6 @@ class SleepTrackerMonth extends StatefulWidget {
 }
 
 class _SleepTrackerMonthState extends State<SleepTrackerMonth> {
-  final Map<DateTime, String> dayValues = {
-    DateTime(2025, 7, 1): "8h 30m",
-    DateTime(2025, 7, 2): "8h 30m",
-    DateTime(2025, 7, 3): "8h 30m",
-    DateTime(2025, 7, 4): "0h 30m",
-    DateTime(2025, 7, 5): "8h 30m",
-    DateTime(2025, 7, 6): "8h 30m",
-    DateTime(2025, 7, 13): "8h 30m",
-    // Add more if needed
-  };
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -33,9 +27,7 @@ class _SleepTrackerMonthState extends State<SleepTrackerMonth> {
         Container(
           decoration: CommonWidget.containerDecoration(),
           child: Column(
-            children: [
-              CustomCalendar(initialMonth: DateTime.now(), dayData: dayValues),
-            ],
+            children: [CustomCalendar(initialMonth: DateTime.now())],
           ),
         ),
         sleepTimeWidget().padSymm(horizontal: 8),
@@ -56,7 +48,7 @@ class _SleepTrackerMonthState extends State<SleepTrackerMonth> {
                 child: iconLabelCard(
                   label: "Goal",
                   img: "assets/images/emojione_running-shoe.png",
-                  color:  Color(0xFFFAB005),
+                  color: Color(0xFFFAB005),
                   value: "09h 30m",
                 ),
               ),
@@ -70,7 +62,7 @@ class _SleepTrackerMonthState extends State<SleepTrackerMonth> {
                 child: iconLabelCard(
                   label: "Sleep Time",
                   img: "assets/images/emojione_running-shoe.png",
-                  color:  Color(0xFFFAB005),
+                  color: Color(0xFFFAB005),
                   value: "09h 00m",
                 ),
               ),
@@ -127,13 +119,11 @@ class _SleepTrackerMonthState extends State<SleepTrackerMonth> {
 
 class CustomCalendar extends StatefulWidget {
   final DateTime initialMonth;
-  final Map<DateTime, String> dayData;
   final void Function(DateTime)? onDaySelected;
 
   const CustomCalendar({
     super.key,
     required this.initialMonth,
-    required this.dayData,
     this.onDaySelected,
   });
 
@@ -144,11 +134,41 @@ class CustomCalendar extends StatefulWidget {
 class _CustomCalendarState extends State<CustomCalendar> {
   late DateTime _focusedDay;
   DateTime? _selectedDay;
+  Map<DateTime, String> _monthlySleep = {};
+  final _sleepController = Get.find<SleepTrackerController>();
 
   @override
   void initState() {
     super.initState();
     _focusedDay = widget.initialMonth;
+    _loadMonthData(_focusedDay);
+  }
+
+  Future<void> _loadMonthData(DateTime month) async {
+    await _sleepController.getMonthlySleepSummary(month);
+    _updateSleepFromController();
+  }
+
+  void _updateSleepFromController() {
+    final apiData = _sleepController.monthlySleepSummary.value?.data ?? [];
+    final Map<DateTime, String> sleepPerDay = {};
+
+    for (var datum in apiData) {
+      if (datum.totalSleepHours != null) {
+        final date = DateTime(
+          datum.summaryDate!.year,
+          datum.summaryDate!.month,
+          datum.summaryDate!.day,
+        );
+        sleepPerDay[date] = datum.totalSleepHours ?? "0";
+      }
+    }
+
+    if (mounted) {
+      setState(() {
+        _monthlySleep = sleepPerDay;
+      });
+    }
   }
 
   @override
@@ -162,15 +182,8 @@ class _CustomCalendarState extends State<CustomCalendar> {
       selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
       calendarStyle: const CalendarStyle(outsideDaysVisible: false),
       daysOfWeekStyle: const DaysOfWeekStyle(
-        weekendStyle: TextStyle(
-          fontSize: 14,
-          height: 1, // Fixes clipping
-        ),
-        weekdayStyle: TextStyle(
-          fontSize: 14,
-
-          height: 1, // Fixes clipping
-        ),
+        weekendStyle: TextStyle(fontSize: 14, height: 1),
+        weekdayStyle: TextStyle(fontSize: 14, height: 1),
       ),
       onDaySelected: (selectedDay, focusedDay) {
         setState(() {
@@ -181,8 +194,11 @@ class _CustomCalendarState extends State<CustomCalendar> {
           widget.onDaySelected!(selectedDay);
         }
       },
-      onPageChanged: (focusedDay) {
-        _focusedDay = focusedDay;
+      onPageChanged: (focusedDay) async {
+        setState(() {
+          _focusedDay = focusedDay;
+        });
+        await _loadMonthData(focusedDay);
       },
       calendarBuilders: CalendarBuilders(
         defaultBuilder: (context, day, focusedDay) {
@@ -201,8 +217,12 @@ class _CustomCalendarState extends State<CustomCalendar> {
         headerPadding: EdgeInsets.zero,
         titleCentered: true,
         leftChevronPadding: EdgeInsets.zero,
-        leftChevronIcon: LeftRightIconButton().padSymm(),
-        rightChevronIcon: LeftRightIconButton().rotate(180).padSymm(),
+        leftChevronIcon: LeftRightIconButton(
+          iconColor: ColorConstant.primaryColor,
+        ).padSymm(),
+        rightChevronIcon: LeftRightIconButton(
+          iconColor: ColorConstant.primaryColor,
+        ).rotate(180).padSymm(),
       ),
     );
   }
@@ -213,7 +233,7 @@ class _CustomCalendarState extends State<CustomCalendar> {
     bool isToday = false,
   }) {
     final key = DateTime(day.year, day.month, day.day);
-    final value = widget.dayData[key] ?? 0;
+    final value = _monthlySleep[key] ?? "0";
 
     return Container(
       margin: const EdgeInsets.all(4.0),
@@ -230,7 +250,7 @@ class _CustomCalendarState extends State<CustomCalendar> {
           ),
           const SizedBox(height: 4),
           Text(
-            "$value",
+            value == "0" ? "" : value,
             style: TextStyle(fontSize: 10, color: Colors.grey[700]),
           ),
         ],

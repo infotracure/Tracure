@@ -15,68 +15,74 @@ class StepTrackerSetting extends StatefulWidget {
 }
 
 class _StepTrackerSettingState extends State<StepTrackerSetting> {
-  var _currentValue = 10000.0;
+  var _currentValue = 10000;
   final stepTrackerController = Get.find<StepTrackerController>();
   @override
   void initState() {
     super.initState();
     _currentValue =
-        stepTrackerController.stepSettingModel?.data?.goals?.toDouble() ??
-        10000.0;
+        stepTrackerController.stepsSummaryByDate.value?.data?.stepGoals ?? 0;
   }
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(
-        spacing: 16,
-        children: [
-          Container(
-            padding: EdgeInsets.all(16),
-            decoration: CommonWidget.containerDecoration(),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              spacing: 16,
-              children: [
-                CustomText.title(text: "Goal Settings", isBold: true),
+    return Column(
+      spacing: 16,
+      children: [
+        Container(
+          padding: EdgeInsets.all(16),
+          decoration: CommonWidget.containerDecoration(),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            spacing: 16,
+            children: [
+              CustomText.title(text: "Goal Settings", isBold: true),
 
-                dailyStepsGoalWidget(),
-                toggleCard(
-                  "Auto-adjust Goals",
-                  "Adjust goals based on your daily average",
-                  (val) {},
-                  true,
-                ),
-              ],
-            ),
+              dailyStepsGoalWidget(),
+              toggleCard(
+                "Auto-adjust Goals",
+                "Adjust goals based on your daily average",
+                (val) {},
+                true,
+              ),
+            ],
           ),
-          Container(
-            padding: EdgeInsets.all(16),
-            decoration: CommonWidget.containerDecoration(),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              spacing: 16,
-              children: [
-                CustomText.title(text: "Notification", isBold: true),
+        ),
+        Container(
+          padding: EdgeInsets.all(16),
+          decoration: CommonWidget.containerDecoration(),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            spacing: 16,
+            children: [
+              CustomText.title(text: "Notification", isBold: true),
 
-                toggleCard(
-                  "Steps Reminder",
-                  "Reminders user to walk if inactive for long duration",
-                  (val) {},
-                  true,
-                ),
-                toggleCard(
-                  "Goal Achievements",
-                  "Celebrate when user reaches the goal",
-                  (val) {},
-                  true,
-                ),
-              ],
-            ),
+              toggleCard(
+                "Steps Reminder",
+                "Reminders user to walk if inactive for long duration",
+                (val) {},
+                true,
+              ),
+              toggleCard(
+                "Goal Achievements",
+                "Celebrate when user reaches the goal",
+                (val) {},
+                true,
+              ),
+            ],
           ),
-        ],
-      ).padSymm(horizontal: 16, vertical: 16),
-    );
+        ),
+        Spacer(),
+        CommonWidget.roundedButton(
+          bgColor: ColorConstant.verdigris,
+          title: "Save Changes",
+          onTap: () async {
+            await stepTrackerController.pushStepSettingData(_currentValue);
+          },
+          context: context,
+        ),
+      ],
+    ).padSymm(horizontal: 16, vertical: 16);
   }
 
   Widget toggleCard(
@@ -128,14 +134,14 @@ class _StepTrackerSettingState extends State<StepTrackerSetting> {
             padding: EdgeInsets.zero,
             activeColor: ColorConstant.verdigris,
             inactiveColor: Colors.grey.shade200,
-            value: _currentValue,
+            value: _currentValue.toDouble(),
             min: 1000,
             max: 15000,
             divisions: (15000 - 1000) ~/ 500,
             label: _currentValue.round().toString(),
             onChanged: (value) {
               setState(() {
-                _currentValue = value;
+                _currentValue = value.round();
               });
             },
           ),

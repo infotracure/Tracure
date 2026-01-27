@@ -1,7 +1,9 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:tracure/features/step_tracker/view/step_tracker_overview.dart';
+import 'package:tracure/features/water_intake/controller/water_intake_controller.dart';
 import 'package:tracure/utils/common_widget.dart';
 import 'package:tracure/utils/constant/color_constants.dart';
 import 'package:tracure/utils/custom_text.dart';
@@ -33,9 +35,7 @@ class _WaterIntakeMonthState extends State<WaterIntakeMonth> {
         Container(
           decoration: CommonWidget.containerDecoration(),
           child: Column(
-            children: [
-              CustomCalendar(initialMonth: DateTime.now(), dayData: dayValues),
-            ],
+            children: [CustomCalendar(initialMonth: DateTime.now())],
           ),
         ),
         stepDistanceWidget().padSymm(horizontal: 8),
@@ -54,7 +54,7 @@ class _WaterIntakeMonthState extends State<WaterIntakeMonth> {
               child: iconLabelCard(
                 label: "Avg Daily Intake",
                 img: "assets/images/emojione_running-shoe.png",
-                color:  Color(0xFFFAB005),
+                color: Color(0xFFFAB005),
                 value: "2300 ml",
               ),
             ),
@@ -110,13 +110,11 @@ class _WaterIntakeMonthState extends State<WaterIntakeMonth> {
 
 class CustomCalendar extends StatefulWidget {
   final DateTime initialMonth;
-  final Map<DateTime, int> dayData;
   final void Function(DateTime)? onDaySelected;
-
+  final Color headerColor = ColorConstant.primaryColor;
   const CustomCalendar({
     super.key,
     required this.initialMonth,
-    required this.dayData,
     this.onDaySelected,
   });
 
@@ -127,11 +125,48 @@ class CustomCalendar extends StatefulWidget {
 class _CustomCalendarState extends State<CustomCalendar> {
   late DateTime _focusedDay;
   DateTime? _selectedDay;
+  Map<DateTime, int> _monthlyWater = {};
+  final _waterController = Get.find<WaterIntakeController>();
 
   @override
   void initState() {
     super.initState();
     _focusedDay = widget.initialMonth;
+    _loadMonthData(_focusedDay);
+  }
+
+  Future<void> _loadMonthData(DateTime month) async {
+    await _waterController.getMonthlyWaterSummary(month);
+    _updateWaterFromController();
+  }
+
+  void _updateWaterFromController() {
+    final apiData = _waterController.monthlyWaterSummary.value?.data ?? [];
+    final Map<DateTime, int> waterPerDay = {};
+
+    for (var datum in apiData) {
+      if (datum.totalMl != null && datum.summaryDate != null) {
+        final date = DateTime(
+          datum.summaryDate!.year,
+          datum.summaryDate!.month,
+          datum.summaryDate!.day,
+        );
+        waterPerDay[date] = datum.totalMl!;
+      }
+    }
+
+    if (mounted) {
+      setState(() {
+        _monthlyWater = waterPerDay;
+      });
+    }
+  }
+
+  String _formatWaterValue(int ml) {
+    if (ml >= 1000) {
+      return '${(ml / 1000).toStringAsFixed(1)}L';
+    }
+    return '${ml}ml';
   }
 
   @override
@@ -145,15 +180,8 @@ class _CustomCalendarState extends State<CustomCalendar> {
       selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
       calendarStyle: const CalendarStyle(outsideDaysVisible: false),
       daysOfWeekStyle: const DaysOfWeekStyle(
-        weekendStyle: TextStyle(
-          fontSize: 14,
-          height: 1, // Fixes clipping
-        ),
-        weekdayStyle: TextStyle(
-          fontSize: 14,
-
-          height: 1, // Fixes clipping
-        ),
+        weekendStyle: TextStyle(fontSize: 14, height: 1),
+        weekdayStyle: TextStyle(fontSize: 14, height: 1),
       ),
       onDaySelected: (selectedDay, focusedDay) {
         setState(() {
@@ -164,8 +192,11 @@ class _CustomCalendarState extends State<CustomCalendar> {
           widget.onDaySelected!(selectedDay);
         }
       },
-      onPageChanged: (focusedDay) {
-        _focusedDay = focusedDay;
+      onPageChanged: (focusedDay) async {
+        setState(() {
+          _focusedDay = focusedDay;
+        });
+        await _loadMonthData(focusedDay);
       },
       calendarBuilders: CalendarBuilders(
         defaultBuilder: (context, day, focusedDay) {
@@ -184,8 +215,12 @@ class _CustomCalendarState extends State<CustomCalendar> {
         headerPadding: EdgeInsets.zero,
         titleCentered: true,
         leftChevronPadding: EdgeInsets.zero,
-        leftChevronIcon: LeftRightIconButton().padSymm(),
-        rightChevronIcon: LeftRightIconButton().rotate(180).padSymm(),
+        leftChevronIcon: LeftRightIconButton(
+          iconColor: widget.headerColor,
+        ).padSymm(),
+        rightChevronIcon: LeftRightIconButton(
+          iconColor: widget.headerColor,
+        ).rotate(180).padSymm(),
       ),
     );
   }
@@ -196,7 +231,7 @@ class _CustomCalendarState extends State<CustomCalendar> {
     bool isToday = false,
   }) {
     final key = DateTime(day.year, day.month, day.day);
-    final value = widget.dayData[key] ?? 0;
+    final value = _monthlyWater[key];
 
     return Container(
       margin: const EdgeInsets.all(4.0),
@@ -213,7 +248,7 @@ class _CustomCalendarState extends State<CustomCalendar> {
           ),
           const SizedBox(height: 4),
           Text(
-            "$value",
+            value != null && value > 0 ? _formatWaterValue(value) : "",
             style: TextStyle(fontSize: 10, color: Colors.grey[700]),
           ),
         ],

@@ -69,7 +69,7 @@ class _SleepProgressWidgetState extends State<SleepProgressWidget> {
               CustomText.title(text: goalHours, isBold: true, size: 12),
               const SizedBox(height: 10),
               CustomText.title(
-                text: "22:20 - 5:50",
+                text: "22:20 - 7:00",
                 color: ColorConstant.primaryColor,
                 isBold: true,
                 size: 14,

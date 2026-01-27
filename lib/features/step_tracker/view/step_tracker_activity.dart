@@ -12,6 +12,7 @@ import 'package:tracure/utils/extensions.dart';
 import 'package:tracure/utils/int_extension.dart';
 import 'package:tracure/utils/string_extension.dart';
 
+import '../../../utils/common_methods.dart';
 import 'step_tracker_month.dart';
 
 class StepTrackerActivity extends StatefulWidget {
@@ -313,48 +314,9 @@ class _StepTrackerActivityState extends State<StepTrackerActivity> {
     return normalizeDate(currentWeekStart) == normalizeDate(selectedWeekStart);
   }
 
-  DateTime startOfWeek(DateTime date) {
-    return DateTime(
-      date.year,
-      date.month,
-      date.day,
-    ).subtract(Duration(days: date.weekday - 1)); // Monday
-  }
 
-  DateTime endOfWeek(DateTime date) {
-    return startOfWeek(date).add(const Duration(days: 6));
-  }
 
-  String formatWeekRange(DateTime selected) {
-    final start = startOfWeek(selected);
-    final end = endOfWeek(selected);
 
-    final monthName = _monthName(start.month);
-    // if week spans two months, show both
-    if (start.month != end.month) {
-      return "${start.day} ${_monthName(start.month)} - ${end.day} ${_monthName(end.month)} ${end.year}";
-    } else {
-      return "${start.day}-${end.day} $monthName ${end.year}";
-    }
-  }
-
-  String _monthName(int month) {
-    const months = [
-      "January",
-      "February",
-      "March",
-      "April",
-      "May",
-      "June",
-      "July",
-      "August",
-      "September",
-      "October",
-      "November",
-      "December",
-    ];
-    return months[month - 1];
-  }
 }
 
 class WeekBarChart extends StatefulWidget {

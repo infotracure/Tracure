@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:tracure/features/fasting_tracker/view/fasting_tracker__month.dart';
 import 'package:tracure/features/fasting_tracker/view/fasting_tracker__week.dart';
 import 'package:tracure/features/fasting_tracker/view/fasting_tracker_day.dart';
-import 'package:tracure/features/water_intake/view/water_intake_day.dart';
+import 'package:tracure/features/water_intake/view/water_intake_overview.dart';
 import 'package:tracure/features/water_intake/view/water_intake_month.dart';
-import 'package:tracure/features/water_intake/view/water_intake_week.dart';
+import 'package:tracure/features/water_intake/view/water_intake_acitvity.dart';
 import 'package:tracure/utils/extensions.dart';
 
 import '../../../utils/common_appbar.dart';

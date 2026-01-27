@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:tracure/features/sleep_tracker/view/sleep_tracker_day.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/get_core.dart';
+import 'package:tracure/features/sleep_tracker/view/sleep_tracker_overview.dart';
 import 'package:tracure/features/sleep_tracker/view/sleep_tracker_month.dart';
 import 'package:tracure/features/sleep_tracker/view/sleep_tracker_setting.dart';
-import 'package:tracure/features/sleep_tracker/view/sleep_tracker_week.dart';
+import 'package:tracure/features/sleep_tracker/view/sleep_tracker_insight.dart';
 import 'package:tracure/utils/common_appbar.dart';
 import 'package:tracure/utils/constant/color_constants.dart';
 import 'package:tracure/utils/extensions.dart';
 
 import '../../step_tracker/view/step_tracker_screen.dart';
+import '../controller/sleep_tracker_controller.dart';
 
 class SleepTrackerScreen extends StatefulWidget {
   const SleepTrackerScreen({super.key});
@@ -24,7 +27,7 @@ class _SleepTrackerScreenState extends State<SleepTrackerScreen>
     {"title": "Insights", "icon": "assets/images/ic_person_running.png"},
     {"title": "Settings", "icon": "assets/images/ic_settings.png"},
   ];
-
+  final sleepTrackerController = Get.put(SleepTrackerController());
   @override
   void initState() {
     super.initState();
@@ -43,7 +46,7 @@ class _SleepTrackerScreenState extends State<SleepTrackerScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppbar(title: "Step Tracking"),
+      appBar: CustomAppbar(title: "Sleep Tracking"),
       body: RoundedTabBarExample(
         controller: tabController,
         color: ColorConstant.primaryColor,
@@ -60,8 +63,8 @@ class _SleepTrackerScreenState extends State<SleepTrackerScreen>
         }).toList(),
 
         tabViews: const [
-          SleepTrackerDay(),
-          SleepTrackerWeek(),
+          SleepTrackerOverview(),
+          SleepTrackerInsights(),
           SleepTrackerSetting(),
         ],
       ),

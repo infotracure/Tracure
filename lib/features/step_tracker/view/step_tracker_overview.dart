@@ -356,8 +356,13 @@ List<String> generateHourlyLabels() {
 }
 
 class LeftRightIconButton extends StatelessWidget {
-  const LeftRightIconButton({super.key, this.onTap});
+  const LeftRightIconButton({
+    super.key,
+    this.onTap,
+    this.iconColor = ColorConstant.verdigris,
+  });
   final VoidCallback? onTap;
+  final Color iconColor;
 
   @override
   Widget build(BuildContext context) {
@@ -370,7 +375,7 @@ class LeftRightIconButton extends StatelessWidget {
         padding: EdgeInsets.all(10),
         decoration: CommonWidget.containerDecoration(
           radius: 10,
-          color: ColorConstant.verdigris,
+          color: iconColor,
         ),
         child: Image.asset(
           "assets/images/arrow_back_black.png",

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 
 import 'package:tracure/features/blood_pressure/view/blood_pressure_screen.dart';
 import 'package:tracure/features/blood_sugar/view/blood_sugar_screen.dart';
@@ -42,6 +43,9 @@ class _HomepageState extends State<Homepage> with WidgetsBindingObserver {
     if (state == AppLifecycleState.resumed) {
       homeController.setStepValue();
       homeController.setSleepValue();
+      // Sync steps silently in background
+      homeController.checkForLastStepPushedData(silent: true);
+      homeController.checkForLastSleepPushedData(silent: true);
       SleepService.requestAlarmPermission()
           .then((isGranted) async {
             if (isGranted) {
@@ -198,82 +202,179 @@ class WaterFastinWidget extends StatelessWidget {
   }
 }
 
-class GymCheckinWidget extends StatelessWidget {
+class GymCheckinWidget extends StatefulWidget {
   const GymCheckinWidget({super.key});
+
+  @override
+  State<GymCheckinWidget> createState() => _GymCheckinWidgetState();
+}
+
+class _GymCheckinWidgetState extends State<GymCheckinWidget> {
+  final homeController = Get.find<HomeController>();
+  int _weekOffset = 0; // 0 = current week, -1 = previous week, etc.
+
+  void _onWeekChanged(int newOffset) {
+    setState(() => _weekOffset = newOffset);
+    _fetchGymCheckIn();
+  }
+
+  void _fetchGymCheckIn() {
+    final weekDates = getWeekDates(_weekOffset);
+    final dateFormat = DateFormat('yyyy-MM-dd');
+    homeController.getGymCheckIn(
+      startDate: dateFormat.format(weekDates.first),
+      endDate: dateFormat.format(weekDates.last),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     final weekList = ["M", "T", "W", "T", "F", "S", "S"];
-    final weekDates = getCurrentWeekDates();
-    final daysList = weekDates.map((d) => d.day).toList();
-    return Container(
-      padding: EdgeInsets.all(16),
-      decoration: CommonWidget.containerDecoration(),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          CustomText.title(
-            text: "Gym Check-in",
-            size: 16,
-            isBold: true,
-          ).padOnly(b: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              ...weekList.map((day) {
-                return GestureDetector(
-                  onTap: () {
-                    // Handle day toggle
-                  },
-                  child: Container(
-                    width: 40,
-                    height: 40,
-                    alignment: Alignment.center,
+    final weekDates = getWeekDates(_weekOffset);
+    final isCurrentWeek = _weekOffset == 0;
 
-                    child: Text(day, style: TextStyle(fontSize: 16)),
-                  ),
-                );
-              }),
-            ],
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              ...daysList.map((day) {
-                return GestureDetector(
-                  onTap: () {
-                    // Handle day toggle
-                  },
-                  child: Container(
+    return Obx(() {
+      final checkInData = homeController.gymCheckInModel?.value?.data ?? [];
+
+      return Container(
+        padding: EdgeInsets.all(16),
+        decoration: CommonWidget.containerDecoration(),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                CustomText.title(
+                  text: "Gym Check-in",
+                  size: 16,
+                  isBold: true,
+                ).padOnly(b: 8),
+                Spacer(),
+                GestureDetector(
+                  onTap: () => _onWeekChanged(_weekOffset - 1),
+                  child: Icon(
+                    Icons.arrow_back_ios_new,
+                    size: 16,
+                  ).padAll(all: 6),
+                ),
+                SizedBox(width: 8),
+                GestureDetector(
+                  onTap: isCurrentWeek
+                      ? null
+                      : () => _onWeekChanged(_weekOffset + 1),
+                  child: Icon(
+                    Icons.arrow_forward_ios,
+                    size: 16,
+                    color: isCurrentWeek ? Colors.grey.shade300 : null,
+                  ).padAll(all: 6),
+                ),
+              ],
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                ...weekList.map((day) {
+                  return Container(
                     width: 40,
                     height: 40,
                     alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      "$day",
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
+                    child: Text(day, style: TextStyle(fontSize: 16)),
+                  );
+                }),
+              ],
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                ...weekDates.map((date) {
+                  final isCheckedIn = _isCheckedIn(date, checkInData);
+                  final isToday = _isSameDay(date, DateTime.now());
+                  final isFuture = _isFutureDate(date);
+
+                  return GestureDetector(
+                    onTap: () {
+                      if (isToday && !isCheckedIn) {
+                        homeController.setGymCheckIn(
+                          date: DateFormat('yyyy-MM-dd').format(date),
+                        );
+                      }
+                    },
+                    child: Container(
+                      width: 40,
+                      height: 40,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: _getDayColor(isCheckedIn, isToday, isFuture),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        "${date.day}",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: _getTextColor(isCheckedIn, isToday, isFuture),
+                        ),
                       ),
                     ),
-                  ),
-                );
-              }),
-            ],
-          ),
-        ],
-      ),
+                  );
+                }),
+              ],
+            ),
+          ],
+        ),
+      );
+    });
+  }
+
+  bool _isCheckedIn(DateTime date, List checkInData) {
+    return checkInData.any(
+      (item) =>
+          item.checkinDate != null &&
+          _isSameDay(item.checkinDate!, date) &&
+          item.checkedIn == true,
     );
   }
 
-  List<DateTime> getCurrentWeekDates() {
-    final now = DateTime.now(); // Add 1 day to ensure today is included
+  bool _isSameDay(DateTime a, DateTime b) {
+    return a.year == b.year && a.month == b.month && a.day == b.day;
+  }
 
-    // Start of this week (Monday)
-    final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
+  Color _getDayColor(bool isCheckedIn, bool isToday, bool isFuture) {
+    if (isFuture) {
+      return Colors.white;
+    } else if (isCheckedIn) {
+      return Colors.green.withAlpha(50);
+    } else if (isToday) {
+      return ColorConstant.backgroundColor;
+    }
+    return Colors.redAccent.withAlpha(50);
+  }
+
+  Color _getTextColor(bool isCheckedIn, bool isToday, bool isFuture) {
+    if (isFuture) {
+      return Colors.grey.shade400;
+    } else if (isCheckedIn) {
+      return Colors.green;
+    } else if (isToday) {
+      return ColorConstant.primaryColor;
+    }
+    return Colors.redAccent;
+  }
+
+  bool _isFutureDate(DateTime date) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final checkDate = DateTime(date.year, date.month, date.day);
+    return checkDate.isAfter(today);
+  }
+
+  List<DateTime> getWeekDates(int weekOffset) {
+    final now = DateTime.now();
+
+    // Start of this week (Monday), then apply offset
+    final startOfWeek = now
+        .subtract(Duration(days: now.weekday - 1))
+        .add(Duration(days: weekOffset * 7));
 
     // Generate all 7 dates (Mon → Sun)
     return List.generate(7, (index) {
