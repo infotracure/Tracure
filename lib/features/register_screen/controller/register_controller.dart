@@ -1,6 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
-import 'package:tracure/features/homepage/view/homepage.dart';
+import 'package:tracure/features/homepage/view/main_navigation.dart';
 
 import '../../../servies/api_service/dio_client.dart';
 import '../../../servies/api_service/end_points.dart';
@@ -35,7 +35,7 @@ class RegisterController extends GetxController {
       if (res is DioResponse) {
         if (res.data["code"] == 1) {
           HiveService.instance.save(true, HiveService.isUserLoggedIn);
-          Get.to(() => Homepage());
+          Get.offAll(() => MainNavigation());
           return;
         }
       } else if (res is DioResponse) {

@@ -8,14 +8,12 @@ import 'package:tracure/features/fasting_tracker/view/fasting_tracker__screen.da
 import 'package:tracure/features/homepage/controller/home_controller.dart';
 import 'package:tracure/features/homepage/view/CircularProgressWidget.dart'
     show CircularProgressWidget;
-import 'package:tracure/features/loginpage/view/login_page.dart';
 import 'package:tracure/features/medicine_tracker/view/medicine_tracker_screen.dart';
 import 'package:tracure/features/sleep_tracker/view/sleep_tracker_screen.dart';
 import 'package:tracure/features/step_tracker/view/step_tracker_screen.dart';
 import 'package:tracure/features/water_intake/view/water_intake_screen.dart';
 import 'package:tracure/servies/app_permission.dart';
 import 'package:tracure/servies/health_service.dart';
-import 'package:tracure/servies/hive_service.dart';
 import 'package:tracure/utils/common_widget.dart';
 import 'package:tracure/utils/extensions.dart';
 
@@ -32,7 +30,7 @@ class Homepage extends StatefulWidget {
 }
 
 class _HomepageState extends State<Homepage> with WidgetsBindingObserver {
-  final homeController = Get.put(HomeController());
+  final homeController = Get.find<HomeController>();
   @override
   void initState() {
     super.initState();
@@ -73,6 +71,12 @@ class _HomepageState extends State<Homepage> with WidgetsBindingObserver {
     return Scaffold(
       backgroundColor: Color(0xFFF2F3F7),
       appBar: AppBar(
+        leading: IconButton(
+          icon: Icon(Icons.menu),
+          onPressed: () {
+            homeController.mainScaffoldKey.currentState?.openDrawer();
+          },
+        ),
         actions: [
           GestureDetector(
             onTap: () async {
@@ -83,27 +87,6 @@ class _HomepageState extends State<Homepage> with WidgetsBindingObserver {
           SizedBox(width: 10),
         ],
         backgroundColor: Color(0xFFF2F3F7),
-      ),
-      drawer: Drawer(
-        child: SafeArea(
-          child: Column(
-            children: [
-              Expanded(child: ListView()),
-              CommonWidget.roundedButton(
-                context: context,
-                titleColor: ColorConstant.bgWhite,
-                bgColor: ColorConstant.red,
-                title: "Logout",
-                padding: EdgeInsets.symmetric(vertical: 10),
-                elevation: 0,
-
-                onTap: () async {},
-              ).paddingSymmetric(horizontal: 16),
-
-              SizedBox(height: 16),
-            ],
-          ),
-        ),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -118,6 +101,7 @@ class _HomepageState extends State<Homepage> with WidgetsBindingObserver {
               WaterFastinWidget(),
               GymCheckinWidget(),
               HealthEcosystem(),
+              WeeklyHealthInsight(),
             ],
           ),
         ),
@@ -127,37 +111,53 @@ class _HomepageState extends State<Homepage> with WidgetsBindingObserver {
 }
 
 class WaterFastinWidget extends StatelessWidget {
-  const WaterFastinWidget({super.key});
+  WaterFastinWidget({super.key});
+  final homeController = Get.find<HomeController>();
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 90,
-      child: Row(
-        children: [
-          Expanded(
-            child: iconLabelCard(
-              label: "Water Intake",
-              img: "assets/images/fluent-emoji_glass-of-milk.png",
-              color: Color(0xFF5B84D0),
-              value: "600 ml",
+    return Obx(() {
+      final waterData =
+          homeController.dashboardActivityModel?.value?.data?.water;
+      final totalMl = waterData?.totalMl ?? 0;
+      final waterProgress = (waterData?.percentageAchieved ?? 0) / 100;
 
-              onTap: () => Get.to(() => const WaterIntakeScreen()),
+      return SizedBox(
+        height: 90,
+        child: Row(
+          children: [
+            Expanded(
+              child: iconLabelCard(
+                label: "Water Intake",
+                img: "assets/images/fluent-emoji_glass-of-milk.png",
+                color: Color(0xFF5B84D0),
+                value: _formatWaterValue(totalMl),
+                progress: waterProgress.clamp(0.0, 1.0),
+                onTap: () => Get.to(() => const WaterIntakeScreen()),
+              ),
             ),
-          ),
-          SizedBox(width: 16),
-          Expanded(
-            child: iconLabelCard(
-              label: "Fasting",
-              img: "assets/images/ic_fasting.png",
-              color: Color(0xFF40C057),
-              value: "01:02 hr",
-              onTap: () => Get.to(() => const FastingTrackerScreen()),
+            SizedBox(width: 16),
+            Expanded(
+              child: iconLabelCard(
+                label: "Fasting",
+                img: "assets/images/ic_fasting.png",
+                color: Color(0xFF40C057),
+                value: "01:02 hr",
+                progress: 0.0,
+                onTap: () => Get.to(() => const FastingTrackerScreen()),
+              ),
             ),
-          ),
-        ],
-      ),
-    );
+          ],
+        ),
+      );
+    });
+  }
+
+  String _formatWaterValue(int ml) {
+    if (ml >= 1000) {
+      return '${(ml / 1000).toStringAsFixed(1)} L';
+    }
+    return '$ml ml';
   }
 
   Widget iconLabelCard({
@@ -165,6 +165,7 @@ class WaterFastinWidget extends StatelessWidget {
     required String img,
     required Color color,
     required String value,
+    required double progress,
     VoidCallback? onTap,
   }) {
     return GestureDetector(
@@ -191,7 +192,7 @@ class WaterFastinWidget extends StatelessWidget {
             ClipRRect(
               borderRadius: BorderRadius.circular(10),
               child: LinearProgressIndicator(
-                value: 0.8,
+                value: progress,
                 minHeight: 6,
                 backgroundColor: Colors.grey.shade200,
                 valueColor: AlwaysStoppedAnimation<Color>(color),
@@ -401,51 +402,67 @@ class SleepStepCalories extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.shade300,
-            spreadRadius: 0,
-            blurRadius: 3,
-            offset: Offset(0, 1),
-          ),
-        ],
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        children: [
-          Padding(
-            padding: EdgeInsets.symmetric(vertical: 12, horizontal: 12),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "You're Doing Great!",
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Text(
-                        "Keep up the momentum by finishing your daily goals.",
-                        style: TextStyle(fontSize: 14),
-                      ),
-                    ],
-                  ),
-                ),
-                CircularProgressWidget(percent: 0.8),
-              ],
+    return Obx(() {
+      final dashboard = homeController.dashboardActivityModel?.value?.data;
+      final overallScore = (dashboard?.overallScore ?? 0) / 100;
+
+      // Steps data
+      final stepsData = dashboard?.steps;
+      final totalSteps = stepsData?.totalSteps ?? 0;
+      final stepsProgress = (stepsData?.stepsPercentage ?? 0) / 100;
+
+      // Sleep data
+      final sleepData = dashboard?.sleep;
+      final sleepHours = sleepData?.totalSleepHours ?? '0h 0m';
+      final sleepProgress = (sleepData?.qualityScore ?? 0) / 100;
+
+      // Calories (using steps data for now as API doesn't have calories)
+      final caloriesValue = homeController.todayCalories.value;
+
+      return Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.shade300,
+              spreadRadius: 0,
+              blurRadius: 3,
+              offset: Offset(0, 1),
             ),
-          ),
-          SizedBox(height: 10),
-          Divider(height: 8, thickness: 1, color: Colors.grey.shade300),
-          Obx(
-            () => Padding(
+          ],
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          children: [
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          _getMotivationalMessage(overallScore),
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          "Keep up the momentum by finishing your daily goals.",
+                          style: TextStyle(fontSize: 14),
+                        ),
+                      ],
+                    ),
+                  ),
+                  CircularProgressWidget(percent: overallScore.clamp(0.0, 1.0)),
+                ],
+              ),
+            ),
+            SizedBox(height: 10),
+            Divider(height: 8, thickness: 1, color: Colors.grey.shade300),
+            Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8),
               child: SizedBox(
                 height: 80,
@@ -456,7 +473,8 @@ class SleepStepCalories extends StatelessWidget {
                         label: "Steps",
                         img: "assets/images/emojione_running-shoe.png",
                         color: Color(0xFFFAB005),
-                        value: homeController.todayStep.value,
+                        value: totalSteps.toString(),
+                        progress: stepsProgress.clamp(0.0, 1.0),
                         onTap: () => Get.to(() => const StepTrackerScreen()),
                       ),
                     ),
@@ -466,7 +484,8 @@ class SleepStepCalories extends StatelessWidget {
                         label: "Sleep",
                         img: "assets/images/fluent-emoji_sleeping-face.png",
                         color: Color(0xFF228BE6),
-                        value: homeController.todaySleep.value,
+                        value: sleepHours,
+                        progress: sleepProgress.clamp(0.0, 1.0),
                         onTap: () => Get.to(() => const SleepTrackerScreen()),
                       ),
                     ),
@@ -476,7 +495,8 @@ class SleepStepCalories extends StatelessWidget {
                         label: "Calories",
                         img: "assets/images/fluent-emoji_fire.png",
                         color: ColorConstant.verdigris,
-                        value: homeController.todayCalories.value,
+                        value: caloriesValue.isEmpty ? '0' : caloriesValue,
+                        progress: 0.0,
                         onTap: () => Get.to(() => const StepTrackerScreen()),
                       ),
                     ),
@@ -484,10 +504,17 @@ class SleepStepCalories extends StatelessWidget {
                 ),
               ),
             ),
-          ),
-        ],
-      ),
-    );
+          ],
+        ),
+      );
+    });
+  }
+
+  String _getMotivationalMessage(double progress) {
+    if (progress >= 0.8) return "You're Doing Great!";
+    if (progress >= 0.5) return "Keep Going!";
+    if (progress >= 0.25) return "Good Start!";
+    return "Let's Get Moving!";
   }
 
   Widget iconLabelCard({
@@ -495,6 +522,7 @@ class SleepStepCalories extends StatelessWidget {
     required String img,
     required Color color,
     required String value,
+    required double progress,
     VoidCallback? onTap,
   }) {
     return GestureDetector(
@@ -511,9 +539,12 @@ class SleepStepCalories extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  value,
-                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                Flexible(
+                  child: Text(
+                    value,
+                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
                 Image.asset(img, height: 20, width: 20),
               ],
@@ -522,7 +553,7 @@ class SleepStepCalories extends StatelessWidget {
             ClipRRect(
               borderRadius: BorderRadius.circular(10),
               child: LinearProgressIndicator(
-                value: 0.8,
+                value: progress,
                 minHeight: 6,
                 backgroundColor: Colors.grey.shade200,
                 valueColor: AlwaysStoppedAnimation<Color>(color),
@@ -801,6 +832,127 @@ class Ecosystem extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class WeeklyHealthInsight extends StatelessWidget {
+  const WeeklyHealthInsight({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(children: [keyHealthBenefits()]);
+  }
+
+  Widget keyHealthBenefits() {
+    var benefitList = [
+      {
+        "icon": "assets/images/ion_water-outline.png",
+        "title": "Hydration",
+        "subTitle": "Daily water intake increased by 20%",
+      },
+      {
+        "icon": "assets/images/ic_heart.png",
+        "title": "Heart Health",
+        "subTitle": "Improved resting heart rate by 12%",
+      },
+      {
+        "icon": "assets/images/hugeicons_energy.png",
+        "title": "Daily Activity",
+        "subTitle": "Increased step count by 35%",
+      },
+      {
+        "icon": "assets/images/solar_moon-sleep-linear.png",
+        "title": "Sleep Quality",
+        "subTitle": "Deep sleep extended by 13%",
+      },
+    ];
+    return Container(
+      decoration: CommonWidget.containerDecoration(),
+
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(height: 16),
+          CustomText.title(
+            text: "Weekly Health Highlights",
+            isBold: true,
+          ).padSymm(horizontal: 16),
+          GridView.builder(
+            shrinkWrap: true,
+            physics: NeverScrollableScrollPhysics(),
+            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            itemCount: benefitList.length,
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: 8,
+              mainAxisSpacing: 8,
+              childAspectRatio: 1.3,
+            ),
+            itemBuilder: (BuildContext context, int i) {
+              return Container(
+                padding: EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Color(0xffF9F9FA),
+                  border: Border.all(color: Colors.grey.shade300),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Image.asset(benefitList[i]["icon"]!, height: 24),
+                    SizedBox(height: 4),
+                    CustomText.title(
+                      text: benefitList[i]["title"],
+                      isBold: true,
+                      size: 12,
+                      overflow: TextOverflow.visible,
+                    ),
+                    SizedBox(height: 4),
+                    CustomText.title(
+                      text: benefitList[i]["subTitle"],
+                      size: 10,
+                      overflow: TextOverflow.visible,
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+          Container(
+            margin: EdgeInsets.fromLTRB(16, 0, 16, 16),
+            padding: EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Color(0xffF9F9FA),
+              border: Border.all(color: Colors.grey.shade300),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              children: [
+                Image.asset("assets/images/ic_target_goal.png", height: 24),
+                SizedBox(width: 10),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    CustomText.title(
+                      text: "Goal Achievement",
+                      isBold: true,
+                      size: 12,
+                      overflow: TextOverflow.visible,
+                    ),
+                    SizedBox(height: 4),
+                    CustomText.title(
+                      text: "You've achieved 85% of your weekly goals",
+                      size: 10,
+                      overflow: TextOverflow.visible,
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

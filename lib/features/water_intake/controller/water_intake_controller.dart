@@ -1,11 +1,17 @@
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:crypto/crypto.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:tracure/features/homepage/controller/home_controller.dart';
 import 'package:tracure/features/water_intake/model/water_stats_model.dart';
 import 'package:tracure/features/water_intake/model/water_summary_by_range.dart';
 
 import '../../../servies/api_service/dio_client.dart';
 import '../../../servies/api_service/end_points.dart';
 import '../../../servies/api_service/response_handler.dart';
+import '../../../utils/common_methods.dart';
 import '../../../utils/common_widget.dart';
 import '../../../utils/constant/string_constants.dart';
 import '../../../utils/loading_overlay.dart';
@@ -28,6 +34,30 @@ class WaterIntakeController extends GetxController {
     super.onInit();
     await callWaterApis();
     // await getWaterGoal();
+  }
+
+  Future<Map<String, Object>> covertToWaterJson({
+    required double value,
+    String? beverageType,
+  }) async {
+    return {
+      "uuid": generateWaterRecordId(DateTime.now().toIso8601String()),
+      "intakeTime": DateTime.now().toIso8601String(),
+      "amountMl": value.round(),
+      "beverageType": (beverageType?.isNotEmpty ?? false)
+          ? beverageType!
+          : "WATER",
+      "platform": Platform.isIOS ? "ios" : "android",
+      "deviceId": await getOrCreateDeviceId(),
+      "sourceId": "app",
+      "sourceName": "Tracure",
+    };
+  }
+
+  String generateWaterRecordId(String startTime) {
+    final bytes = utf8.encode(startTime);
+    final hash = sha1.convert(bytes).toString().substring(0, 8);
+    return 'water-$hash';
   }
 
   Future<void> callWaterApis() async {
@@ -231,6 +261,9 @@ class WaterIntakeController extends GetxController {
         );
         return;
       }
+      CommonWidget.showToast("Goal updated successfully");
+      var todayFormatted = DateFormat('yyyy-MM-dd').format(DateTime.now());
+      getWaterSummaryByDate(todayFormatted);
     } catch (e) {
       hideGlobalLoader();
       CommonWidget.showToast(StringConstant.internalErrorExceptionMessage);
@@ -252,6 +285,7 @@ class WaterIntakeController extends GetxController {
         return;
       }
       await callWaterApis();
+      Get.find<HomeController>().getDashboardData(silent: true);
     } catch (e) {
       hideGlobalLoader();
       CommonWidget.showToast(StringConstant.internalErrorExceptionMessage);

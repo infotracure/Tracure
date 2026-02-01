@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:health/health.dart';
 import 'package:hive_flutter/adapters.dart';
@@ -26,17 +27,22 @@ import '../../../utils/common_widget.dart';
 import '../../../utils/constant/string_constants.dart';
 import '../../../utils/loading_overlay.dart';
 import '../../loginpage/model/verify_otp_model.dart';
+import '../model/dashboard_activity_model.dart';
 
 var startTime = '22:00';
 var endTime = '07:00';
 
 class HomeController extends GetxController {
+  final GlobalKey<ScaffoldState> mainScaffoldKey = GlobalKey<ScaffoldState>();
+
   var todayStep = "".obs;
   var todayCalories = "".obs;
   var todaySleep = "".obs;
   FeatureMapperModel? featureMapperModel;
   Rx<SyncStatusModel?>? syncStatusModel = Rx<SyncStatusModel?>(null);
   Rx<GymCheckInModel?>? gymCheckInModel = Rx<GymCheckInModel?>(null);
+  Rx<DashboardActivityModel?>? dashboardActivityModel =
+      Rx<DashboardActivityModel?>(null);
 
   @override
   void onInit() async {
@@ -46,6 +52,9 @@ class HomeController extends GetxController {
     todaySleep.value = await getTotalDuration();
     // await startSleepTracking();
     await scheduleSleep();
+    await getDashboardData();
+    checkForLastStepPushedData(silent: true);
+    checkForLastSleepPushedData(silent: true);
     // await getUserConfiguration();
     await getFeatureList();
     final now = DateTime.now();
@@ -64,6 +73,13 @@ class HomeController extends GetxController {
 
   void setSleepValue() async {
     todaySleep.value = await getTotalDuration();
+  }
+
+  /// Called when returning to Homepage from another page
+  Future<void> refreshOnReturn() async {
+    setStepValue();
+    setSleepValue();
+    await getDashboardData(silent: true);
   }
 
   Future<void> scheduleSleep() async {
@@ -195,6 +211,34 @@ class HomeController extends GetxController {
     }
   }
 
+  Future<void> getDashboardData({bool silent = false}) async {
+    try {
+      if (!silent) showGlobalLoader();
+      final url = EndPoints.dashboard;
+      final arg = {"date": DateFormat('yyyy-MM-dd').format(DateTime.now())};
+      final res = await DioClient().get(url, queryParam: arg);
+      if (!silent) hideGlobalLoader();
+      dashboardActivityModel?.value = jsonToObject(
+        res,
+        DashboardActivityModel.fromJson,
+      );
+      if (dashboardActivityModel?.value?.code != 1) {
+        CommonWidget.showToast(
+          dashboardActivityModel?.value?.message ??
+              StringConstant.internalErrorExceptionMessage,
+        );
+        return;
+      }
+      // checkForLastStepPushedData(silent: silent);
+      // checkForLastSleepPushedData(silent: silent);
+    } catch (e) {
+      if (!silent) {
+        hideGlobalLoader();
+        CommonWidget.showToast(StringConstant.internalErrorExceptionMessage);
+      }
+    }
+  }
+
   Future<void> getGymCheckIn({String? startDate, String? endDate}) async {
     try {
       showGlobalLoader();
@@ -280,6 +324,7 @@ class HomeController extends GetxController {
           }
           return;
         }
+        getDashboardData(silent: true);
       }
     } catch (e) {
       if (!silent) {
@@ -318,6 +363,7 @@ class HomeController extends GetxController {
           }
           return;
         }
+        getDashboardData(silent: true);
       }
     } catch (e) {
       if (!silent) {

@@ -36,7 +36,7 @@ class _FastingTrackerDayState extends State<FastingTrackerDay> {
           width: 160,
           decoration: CommonWidget.containerDecoration(
             color: ColorConstant.backgroundColor,
-            boolShadow: false,
+            isShadow: false,
           ),
           child: CustomText.title(
             text: "Stop",
@@ -67,7 +67,7 @@ class _FastingTrackerDayState extends State<FastingTrackerDay> {
           height: 45,
           decoration: CommonWidget.containerDecoration(
             color: ColorConstant.backgroundColor,
-            boolShadow: false,
+            isShadow: false,
           ),
           child: Row(
             children: [
@@ -146,7 +146,7 @@ class _FastingTrackerDayState extends State<FastingTrackerDay> {
         height: 45,
         decoration: CommonWidget.containerDecoration(
           color: ColorConstant.backgroundColor,
-          boolShadow: false,
+          isShadow: false,
         ),
         child: Row(
           children: [

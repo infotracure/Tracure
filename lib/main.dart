@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:shake_gesture/shake_gesture.dart';
@@ -15,7 +16,6 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Hive.initFlutter();
   await Hive.openBox('appBox');
-
   // Initialize singleton service
   await HiveService.instance.init();
 
@@ -51,6 +51,12 @@ class MyApp extends StatelessWidget {
             navigatorKey: navigatorKey,
             theme: ThemeClass.lightTheme,
             home: SplashScreen(),
+            builder: (context, child) {
+              return Container(
+                color: Colors.white,
+                child: SafeArea(child: child!),
+              );
+            },
           ),
         ),
       ),

@@ -14,6 +14,7 @@ class EndPoints {
   static const String featureListing = "$baseUrl/feature/featurelisting";
   static const String userConfiguration = "$baseUrl/user/configuration";
   static const String syncStatus = "$baseUrl/configuration/sync-status";
+  static const String dashboard = "$baseUrl/dashboard";
   //* Step Tracker Endpoints */
   static const String pushSteps = "$baseUrl/steps";
   static const String stepsbydate = "$baseUrl/steps/stepsbydate";

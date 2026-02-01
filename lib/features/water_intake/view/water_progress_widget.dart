@@ -36,6 +36,8 @@ class _WaterProgressWidgetState extends State<WaterProgressWidget>
   @override
   Widget build(BuildContext context) {
     double percentage = widget.current / widget.goal;
+    String percentageText = ((widget.current / widget.goal) * 100)
+        .toStringAsFixed(0);
 
     return SizedBox(
       width: 200,
@@ -69,27 +71,32 @@ class _WaterProgressWidgetState extends State<WaterProgressWidget>
           Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              RichText(
-                text: TextSpan(
-                  children: [
-                    TextSpan(
-                      text: "${widget.current}",
-                      style: const TextStyle(fontSize: 24, color: Colors.blue),
-                    ),
-                    TextSpan(
-                      text: "/${widget.goal} ml",
-                      style: const TextStyle(fontSize: 24, color: Colors.black),
-                    ),
-                  ],
+              SizedBox(height: 40),
+              Text(
+                "${widget.current}ml",
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: ColorConstant.primaryTextColor,
+                ),
+              ),
+              Text(
+                "of ${widget.goal}ml",
+                style: const TextStyle(
+                  fontSize: 16,
+                  color: ColorConstant.primaryTextColor,
+                ),
+              ),
+              SizedBox(height: 16),
+              Text(
+                '$percentageText%',
+                style: TextStyle(
+                  fontSize: 24,
+                  color: ColorConstant.primaryColor,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
               const SizedBox(height: 10),
-              CustomText.title(
-                text: "+Add Water",
-                color: Colors.blueAccent,
-                isBold: true,
-                size: 16,
-              ),
             ],
           ),
         ],

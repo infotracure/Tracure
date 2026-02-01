@@ -4,7 +4,7 @@ import 'package:tracure/utils/stagger_dot_loading.dart';
 
 import '../../../servies/hive_service.dart';
 import '../../../utils/custom_text.dart';
-import '../../homepage/view/homepage.dart';
+import '../../homepage/view/main_navigation.dart';
 import 'login_page.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -24,7 +24,7 @@ class _SplashScreenState extends State<SplashScreen> {
           HiveService.isUserLoggedIn,
         );
         if (loginData == true) {
-          Get.offAll(() => Homepage());
+          Get.offAll(() => MainNavigation());
         } else {
           Get.offAll(() => LoginPage());
         }

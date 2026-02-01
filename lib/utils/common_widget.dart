@@ -295,7 +295,7 @@ class CommonWidget {
     String? imgUrl,
     Color? color,
     double radius = 10,
-    bool boolShadow = true,
+    bool isShadow = true,
   }) {
     return BoxDecoration(
       color: color ?? Colors.white,
@@ -303,7 +303,7 @@ class CommonWidget {
       image: (imgUrl != null)
           ? DecorationImage(fit: BoxFit.cover, image: NetworkImage(imgUrl))
           : null,
-      boxShadow: (boolShadow)
+      boxShadow: (isShadow)
           ? [
               BoxShadow(
                 color: Colors.grey.withOpacity(0.1),

@@ -14,7 +14,7 @@ import 'package:tracure/utils/constant/string_constants.dart';
 import '../../../servies/api_service/response_handler.dart';
 import '../../../utils/common_widget.dart';
 import '../../../utils/loading_overlay.dart';
-import '../../homepage/view/homepage.dart';
+import '../../homepage/view/main_navigation.dart';
 
 class LoginController extends GetxController {
   final mobileTFC = TextEditingController();
@@ -70,7 +70,7 @@ class LoginController extends GetxController {
       if (verifyOTP?.code == 1) {
         saveTokenLocalStorage(verifyOTP);
         HiveService.instance.save(true, HiveService.isUserLoggedIn);
-        Get.offAll(Homepage());
+        Get.offAll(() => MainNavigation());
         return;
       } else if (verifyOTP?.code == 5) {
         saveTokenLocalStorage(verifyOTP);

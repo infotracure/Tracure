@@ -150,18 +150,7 @@ class _DrinkBottomSheetState extends State<DrinkBottomSheet> {
             onTap: () async {
               final waterController = Get.find<WaterIntakeController>();
               var data = [
-                {
-                  "uuid": generateWaterRecordId(
-                    DateTime.now().toIso8601String(),
-                  ),
-                  "intakeTime": DateTime.now().toIso8601String(),
-                  "amountMl": _value.round(),
-                  "beverageType": "WATER",
-                  "platform": Platform.isIOS ? "ios" : "android",
-                  "deviceId": await getOrCreateDeviceId(),
-                  "sourceId": "app",
-                  "sourceName": "Tracure",
-                },
+                await waterController.covertToWaterJson(value: _value),
               ];
               waterController.addWater(waterData: data);
               Navigator.pop(context);
@@ -170,11 +159,5 @@ class _DrinkBottomSheetState extends State<DrinkBottomSheet> {
         ],
       ),
     );
-  }
-
-  String generateWaterRecordId(String startTime) {
-    final bytes = utf8.encode(startTime);
-    final hash = sha1.convert(bytes).toString().substring(0, 8);
-    return 'water-$hash';
   }
 }

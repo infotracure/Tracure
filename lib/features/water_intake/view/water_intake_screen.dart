@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:tracure/features/water_intake/view/water_intake_overview.dart';
-import 'package:tracure/features/water_intake/view/water_intake_month.dart';
+import 'package:tracure/features/water_intake/view/water_intake_settings.dart';
 import 'package:tracure/features/water_intake/view/water_intake_acitvity.dart';
 import 'package:tracure/utils/extensions.dart';
 
@@ -32,7 +32,7 @@ class _WaterIntakeScreenState extends State<WaterIntakeScreen> {
         tabViews: const [
           WaterIntakeDay(),
           WaterIntakeWeek(),
-          WaterIntakeMonth(),
+          WaterIntakeSettings(),
         ],
       ).padOnly(t: 16),
     );

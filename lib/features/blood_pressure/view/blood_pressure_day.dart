@@ -112,7 +112,7 @@ class BloodPressureDay extends StatelessWidget {
       height: 40,
       decoration: CommonWidget.containerDecoration(
         color: ColorConstant.backgroundColor,
-        boolShadow: false,
+        isShadow: false,
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
