@@ -9,16 +9,16 @@ import 'package:tracure/utils/extensions.dart';
 import '../../../utils/common_appbar.dart';
 import '../../step_tracker/view/step_tracker_screen.dart';
 
-
 class BloodSugarScreen extends StatelessWidget {
-   BloodSugarScreen({super.key});
+  BloodSugarScreen({super.key});
   final bloodSugarController = Get.put(BloodSugarController());
-
+  // 0xFF4CAF50
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: CustomAppbar(title: "Blood Sugar"),
       body: RoundedTabBarExample(
+        color: const Color(0xFF4CAF50),
         tabs: const [
           Tab(text: 'Overview'),
           Tab(text: 'Activity'),

@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:crypto/crypto.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:tracure/features/blood_sugar/model/blood_sugar_day_log.dart';
 import 'package:tracure/features/homepage/controller/home_controller.dart';
 import 'package:tracure/features/water_intake/model/water_stats_model.dart';
 import 'package:tracure/features/water_intake/model/water_summary_by_range.dart';
@@ -25,7 +26,7 @@ class BloodSugarController extends GetxController {
   Rx<BloodSugarSummaryModel?> bloodSugarSummary = Rx<BloodSugarSummaryModel?>(
     null,
   );
-  Rx<BloodSugarTrendModel?> bloodSugarTrend = Rx<BloodSugarTrendModel?>(null);
+  Rx<BloodSugarDayLogModel?> bloodSugarTrend = Rx<BloodSugarDayLogModel?>(null);
   Rx<BloodSugarStatsModel?> bloodSugarStats = Rx<BloodSugarStatsModel?>(null);
   Rx<BloodSugarGoalModel?> bloodSugarGoal = Rx<BloodSugarGoalModel?>(null);
   Rx<BloodSugarTrendModel?> monthlyBloodSugarSummary =
@@ -41,7 +42,7 @@ class BloodSugarController extends GetxController {
   }
 
   Future<Map<String, Object>> convertToBloodSugarJson({
-    required String value,
+    required int value,
     required String measurementContext,
     required String notes,
   }) async {
@@ -108,11 +109,11 @@ class BloodSugarController extends GetxController {
   Future<void> getBloodSugarTrendByDate(String date) async {
     try {
       showGlobalLoader();
-      final param = {"startDate": date, "endDate": date};
-      final url = EndPoints.bloodSugarTrend;
+      final param = {"date": date};
+      final url = EndPoints.bloodSugarReadings;
       final res = await DioClient().get(url, queryParam: param);
       hideGlobalLoader();
-      bloodSugarTrend.value = jsonToObject(res, BloodSugarTrendModel.fromJson);
+      bloodSugarTrend.value = jsonToObject(res, BloodSugarDayLogModel.fromJson);
       if (bloodSugarTrend.value?.code != 1) {
         CommonWidget.showToast(
           bloodSugarTrend.value?.message ??

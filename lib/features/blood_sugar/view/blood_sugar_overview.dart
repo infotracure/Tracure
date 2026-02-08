@@ -8,6 +8,7 @@ import '../../../utils/common_widget.dart';
 import '../../../utils/constant/color_constants.dart';
 import '../../../utils/custom_text.dart';
 import '../controller/blood_sugar_controller.dart';
+import '../model/blood_sugar_day_log.dart';
 import '../model/blood_sugar_trend.dart';
 
 class BloodSugarOverview extends StatefulWidget {
@@ -32,16 +33,18 @@ class _BloodSugarOverviewState extends State<BloodSugarOverview> {
     return Obx(() {
       final summary = bloodSugarController.bloodSugarSummary.value?.data;
       final trendRecords =
-          (bloodSugarController.bloodSugarTrend.value?.data?.records ?? [])
+          (bloodSugarController.bloodSugarTrend.value?.data?.readings ?? [])
             ..sort(
-              (a, b) =>
-                  (b.date ?? DateTime(0)).compareTo(a.date ?? DateTime(0)),
+              (a, b) => (b.measurementTime ?? DateTime(0)).compareTo(
+                a.measurementTime ?? DateTime(0),
+              ),
             );
 
       final avgValue = summary?.avgValue ?? 0;
       final category = summary?.category ?? '';
-      final lastRecordDate =
-          trendRecords.isNotEmpty ? trendRecords.first.date : null;
+      final lastRecordDate = trendRecords.isNotEmpty
+          ? trendRecords.first.measurementTime
+          : null;
 
       return SingleChildScrollView(
         child: Column(
@@ -169,15 +172,14 @@ class _BloodSugarOverviewState extends State<BloodSugarOverview> {
               color: Colors.white.withValues(alpha: 0.2),
               shape: BoxShape.circle,
             ),
-            child:
-                const Icon(Icons.water_drop, color: Colors.white, size: 28),
+            child: const Icon(Icons.water_drop, color: Colors.white, size: 28),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildLogSection(List<Record> records) {
+  Widget _buildLogSection(List<Reading> records) {
     return Container(
       decoration: CommonWidget.containerDecoration(),
       child: Column(
@@ -253,11 +255,12 @@ class _BloodSugarOverviewState extends State<BloodSugarOverview> {
     );
   }
 
-  Widget _buildLogEntryItem(Record record) {
+  Widget _buildLogEntryItem(Reading record) {
     final category = record.category ?? 'Normal';
     final isElevated = category == 'Elevated' || category == 'High';
-    final statusColor =
-        isElevated ? const Color(0xFFFF9800) : const Color(0xFF4CAF50);
+    final statusColor = isElevated
+        ? const Color(0xFFFF9800)
+        : const Color(0xFF4CAF50);
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 12),
@@ -274,8 +277,7 @@ class _BloodSugarOverviewState extends State<BloodSugarOverview> {
               color: statusColor,
               shape: BoxShape.circle,
             ),
-            child:
-                const Icon(Icons.water_drop, color: Colors.white, size: 20),
+            child: const Icon(Icons.water_drop, color: Colors.white, size: 20),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -285,7 +287,7 @@ class _BloodSugarOverviewState extends State<BloodSugarOverview> {
                 Row(
                   children: [
                     CustomText.title(
-                      text: '${record.avgValue ?? 0}',
+                      text: '${record.value ?? 0}',
                       size: 16,
                       isBold: true,
                     ),
@@ -318,7 +320,7 @@ class _BloodSugarOverviewState extends State<BloodSugarOverview> {
                     ),
                     const SizedBox(width: 8),
                     CustomText.title(
-                      text: _formatDate(record.date),
+                      text: _formatDate(record.measurementTime),
                       size: 12,
                       color: ColorConstant.grayTextColor,
                     ),
@@ -425,17 +427,18 @@ class _BloodSugarOverviewState extends State<BloodSugarOverview> {
                           keyboardType: TextInputType.number,
                           decoration: InputDecoration(
                             hintText: "e.g., 120",
-                            hintStyle:
-                                TextStyle(color: Colors.grey.shade400),
+                            hintStyle: TextStyle(color: Colors.grey.shade400),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
-                              borderSide:
-                                  BorderSide(color: Colors.grey.shade300),
+                              borderSide: BorderSide(
+                                color: Colors.grey.shade300,
+                              ),
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
-                              borderSide:
-                                  BorderSide(color: Colors.grey.shade300),
+                              borderSide: BorderSide(
+                                color: Colors.grey.shade300,
+                              ),
                             ),
                             contentPadding: const EdgeInsets.symmetric(
                               horizontal: 16,
@@ -453,8 +456,7 @@ class _BloodSugarOverviewState extends State<BloodSugarOverview> {
                           width: double.infinity,
                           padding: const EdgeInsets.symmetric(horizontal: 16),
                           decoration: BoxDecoration(
-                            border:
-                                Border.all(color: Colors.grey.shade300),
+                            border: Border.all(color: Colors.grey.shade300),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: DropdownButtonHideUnderline(
@@ -490,17 +492,18 @@ class _BloodSugarOverviewState extends State<BloodSugarOverview> {
                           keyboardType: TextInputType.text,
                           decoration: InputDecoration(
                             hintText: "e.g., After breakfast",
-                            hintStyle:
-                                TextStyle(color: Colors.grey.shade400),
+                            hintStyle: TextStyle(color: Colors.grey.shade400),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
-                              borderSide:
-                                  BorderSide(color: Colors.grey.shade300),
+                              borderSide: BorderSide(
+                                color: Colors.grey.shade300,
+                              ),
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
-                              borderSide:
-                                  BorderSide(color: Colors.grey.shade300),
+                              borderSide: BorderSide(
+                                color: Colors.grey.shade300,
+                              ),
                             ),
                             contentPadding: const EdgeInsets.symmetric(
                               horizontal: 16,
@@ -528,12 +531,11 @@ class _BloodSugarOverviewState extends State<BloodSugarOverview> {
 
                         Navigator.pop(context);
                         final data = [
-                          await bloodSugarController
-                              .convertToBloodSugarJson(
-                                value: value.toString(),
-                                measurementContext: selectedContext,
-                                notes: notesController.text,
-                              ),
+                          await bloodSugarController.convertToBloodSugarJson(
+                            value: value,
+                            measurementContext: selectedContext,
+                            notes: notesController.text,
+                          ),
                         ];
                         bloodSugarController.addBloodSugar(
                           bloodSugarData: data,
@@ -651,19 +653,11 @@ class _BloodSugarOverviewState extends State<BloodSugarOverview> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          CustomText.title(
-            text: 'Reference Ranges',
-            size: 16,
-            isBold: true,
-          ),
+          CustomText.title(text: 'Reference Ranges', size: 16, isBold: true),
           const SizedBox(height: 16),
 
           // Fasting Section
-          CustomText.title(
-            text: 'Fasting',
-            size: 14,
-            isBold: true,
-          ),
+          CustomText.title(text: 'Fasting', size: 14, isBold: true),
           const SizedBox(height: 8),
           _referenceRow("Normal:", "70-100 mg/dL", Colors.green),
           _referenceRow("Prediabetes:", "100-125 mg/dL", Colors.orange),

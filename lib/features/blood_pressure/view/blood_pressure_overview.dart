@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:tracure/features/blood_pressure/model/blood_pressure_day_log.dart';
 import 'package:tracure/utils/extensions.dart';
 
 import '../../../utils/common_widget.dart';
@@ -31,11 +32,12 @@ class _BloodPressureOverviewState extends State<BloodPressureOverview> {
     return Obx(() {
       final summary = bloodPressureController.bloodPressureSummary.value?.data;
       final trendRecords =
-          (bloodPressureController.bloodPressureTrend.value?.data?.records ??
+          (bloodPressureController.bloodPressureTrend.value?.data?.readings ??
                 [])
             ..sort(
-              (a, b) =>
-                  (b.date ?? DateTime(0)).compareTo(a.date ?? DateTime(0)),
+              (a, b) => (b.measurementTime ?? DateTime(0)).compareTo(
+                a.measurementTime ?? DateTime(0),
+              ),
             );
 
       final avgSystolic = summary?.avgSystolic ?? 0;
@@ -43,7 +45,7 @@ class _BloodPressureOverviewState extends State<BloodPressureOverview> {
       final avgPulse = summary?.avgPulse ?? 0;
       final category = summary?.category ?? '';
       final lastRecordDate = trendRecords.isNotEmpty
-          ? trendRecords.first.date
+          ? trendRecords.first.measurementTime
           : null;
 
       // Calculate progress for gauge (normal is 120/80, higher values = higher progress)
@@ -95,7 +97,6 @@ class _BloodPressureOverviewState extends State<BloodPressureOverview> {
     if (systolic < 130) return 0.75; // Elevated
     if (systolic < 140) return 0.85; // Stage 1
     return 0.95; // Stage 2+
-    
   }
 
   String _formatDate(DateTime? date) {
@@ -284,7 +285,7 @@ class _BloodPressureOverviewState extends State<BloodPressureOverview> {
     );
   }
 
-  Widget _buildLogSection(List<Record> records) {
+  Widget _buildLogSection(List<Reading> records) {
     return Container(
       decoration: CommonWidget.containerDecoration(),
       child: Column(
@@ -360,7 +361,7 @@ class _BloodPressureOverviewState extends State<BloodPressureOverview> {
     );
   }
 
-  Widget _buildLogEntryItem(Record record) {
+  Widget _buildLogEntryItem(Reading record) {
     final category = record.category ?? 'Normal';
     final isStage1 = category == 'Stage 1' || category == 'Stage 2';
     final statusColor = isStage1
@@ -392,8 +393,7 @@ class _BloodPressureOverviewState extends State<BloodPressureOverview> {
                 Row(
                   children: [
                     CustomText.title(
-                      text:
-                          '${record.avgSystolic ?? 0}/${record.avgDiastolic ?? 0}',
+                      text: '${record.systolic ?? 0}/${record.diastolic ?? 0}',
                       size: 16,
                       isBold: true,
                     ),
@@ -411,7 +411,7 @@ class _BloodPressureOverviewState extends State<BloodPressureOverview> {
                     ),
                     const SizedBox(width: 2),
                     CustomText.title(
-                      text: '${record.avgPulse ?? 0}',
+                      text: '${record.pulse ?? 0}',
                       size: 14,
                       isBold: true,
                     ),
@@ -444,7 +444,7 @@ class _BloodPressureOverviewState extends State<BloodPressureOverview> {
                     ),
                     const SizedBox(width: 8),
                     CustomText.title(
-                      text: _formatDate(record.date),
+                      text: _formatDate(record.measurementTime),
                       size: 12,
                       color: ColorConstant.grayTextColor,
                     ),

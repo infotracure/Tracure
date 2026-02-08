@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:crypto/crypto.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:tracure/features/blood_pressure/model/blood_pressure_day_log.dart';
 import 'package:tracure/features/homepage/controller/home_controller.dart';
 import 'package:tracure/features/water_intake/model/water_stats_model.dart';
 import 'package:tracure/features/water_intake/model/water_summary_by_range.dart';
@@ -24,8 +25,8 @@ class BloodPressureController extends GetxController {
   // Add your methods and properties here
   Rx<BloodPressureSummaryModel?> bloodPressureSummary =
       Rx<BloodPressureSummaryModel?>(null);
-  Rx<BloodPressureTrendModel?> bloodPressureTrend =
-      Rx<BloodPressureTrendModel?>(null);
+  Rx<BloodPressureDayLogModel?> bloodPressureTrend =
+      Rx<BloodPressureDayLogModel?>(null);
   Rx<BloodPressureStatsModel?> bloodPressureStats =
       Rx<BloodPressureStatsModel?>(null);
   Rx<BloodPressureGoalModel?> bloodPressureGoal = Rx<BloodPressureGoalModel?>(
@@ -109,13 +110,13 @@ class BloodPressureController extends GetxController {
   Future<void> getBloodPressureTrendByDate(String date) async {
     try {
       showGlobalLoader();
-      final param = {"startDate": date, "endDate": date};
-      final url = EndPoints.bloodPressureTrend;
+      final param = {"date": date};
+      final url = EndPoints.bloodPressureReadings;
       final res = await DioClient().get(url, queryParam: param);
       hideGlobalLoader();
       bloodPressureTrend.value = jsonToObject(
         res,
-        BloodPressureTrendModel.fromJson,
+        BloodPressureDayLogModel.fromJson,
       );
       if (bloodPressureTrend.value?.code != 1) {
         CommonWidget.showToast(

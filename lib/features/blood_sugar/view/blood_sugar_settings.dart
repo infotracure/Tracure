@@ -76,9 +76,7 @@ class _BloodSugarSettingsState extends State<BloodSugarSettings> {
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(
-              primary: Color(0xFF7C4DFF),
-            ),
+            colorScheme: const ColorScheme.light(primary: Color(0xFF4CAF50)),
           ),
           child: child!,
         );
@@ -122,8 +120,11 @@ class _BloodSugarSettingsState extends State<BloodSugarSettings> {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF7C4DFF), Color(0xFFFF6E40)],
+                  gradient: LinearGradient(
+                    colors: [
+                      Color(0xFF4CAF50).withAlpha(150),
+                      Color(0xFF4CAF50),
+                    ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
@@ -138,10 +139,7 @@ class _BloodSugarSettingsState extends State<BloodSugarSettings> {
               const SizedBox(width: 12),
               const Text(
                 "Target Glucose Range",
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
               ),
             ],
           ),
@@ -185,7 +183,7 @@ class _BloodSugarSettingsState extends State<BloodSugarSettings> {
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
                           borderSide: const BorderSide(
-                            color: Color(0xFF7C4DFF),
+                            color: Color(0xFF4CAF50),
                           ),
                         ),
                         contentPadding: const EdgeInsets.symmetric(
@@ -228,7 +226,7 @@ class _BloodSugarSettingsState extends State<BloodSugarSettings> {
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
                           borderSide: const BorderSide(
-                            color: Color(0xFF7C4DFF),
+                            color: Color(0xFF4CAF50),
                           ),
                         ),
                         contentPadding: const EdgeInsets.symmetric(
@@ -279,10 +277,7 @@ class _BloodSugarSettingsState extends State<BloodSugarSettings> {
                 // Fasting Glucose
                 const Text(
                   "Fasting Glucose",
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 6),
                 _buildReferenceRow(
@@ -308,10 +303,7 @@ class _BloodSugarSettingsState extends State<BloodSugarSettings> {
                 // After Meal
                 const Text(
                   "After Meal (2h)",
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 6),
                 _buildReferenceRow(
@@ -353,22 +345,19 @@ class _BloodSugarSettingsState extends State<BloodSugarSettings> {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF3E5F5),
+                  color: const Color(0xFF4CAF50).withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Icon(
                   Icons.notifications_outlined,
-                  color: Color(0xFF7C4DFF),
+                  color: Color(0xFF4CAF50),
                   size: 20,
                 ),
               ),
               const SizedBox(width: 12),
               const Text(
                 "Testing Reminders",
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
               ),
             ],
           ),
@@ -383,18 +372,12 @@ class _BloodSugarSettingsState extends State<BloodSugarSettings> {
                 children: [
                   const Text(
                     "Enable Reminders",
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     "Get notifications to test glucose",
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey.shade600,
-                    ),
+                    style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
                   ),
                 ],
               ),
@@ -405,7 +388,7 @@ class _BloodSugarSettingsState extends State<BloodSugarSettings> {
                     _remindersEnabled = value;
                   });
                 },
-                activeColor: const Color(0xFF7C4DFF),
+                activeColor: const Color(0xFF4CAF50),
               ),
             ],
           ),
@@ -451,7 +434,7 @@ class _BloodSugarSettingsState extends State<BloodSugarSettings> {
               decoration: BoxDecoration(
                 gradient: item.isEnabled
                     ? const LinearGradient(
-                        colors: [Color(0xFF7C4DFF), Color(0xFF448AFF)],
+                        colors: [Color(0xFF4CAF50), Color(0xFF4CAF50)],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       )
@@ -480,10 +463,7 @@ class _BloodSugarSettingsState extends State<BloodSugarSettings> {
                 ),
                 Text(
                   item.subtitle,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey.shade600,
-                  ),
+                  style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
                 ),
               ],
             ),
@@ -493,16 +473,19 @@ class _BloodSugarSettingsState extends State<BloodSugarSettings> {
           GestureDetector(
             onTap: () => _selectTime(context, index),
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+              width: 90,
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
               decoration: BoxDecoration(
                 border: Border.all(color: Colors.grey.shade300),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Text(
-                _formatTime(item.time),
-                style: const TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
+              child: Center(
+                child: Text(
+                  _formatTime(item.time),
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ),
             ),
