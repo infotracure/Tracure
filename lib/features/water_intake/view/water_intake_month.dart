@@ -177,6 +177,7 @@ class _CustomCalendarState extends State<CustomCalendar> {
       focusedDay: _focusedDay,
       calendarFormat: CalendarFormat.month,
       startingDayOfWeek: StartingDayOfWeek.monday,
+      rowHeight: 52,
       selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
       calendarStyle: const CalendarStyle(outsideDaysVisible: false),
       daysOfWeekStyle: const DaysOfWeekStyle(
@@ -211,7 +212,10 @@ class _CustomCalendarState extends State<CustomCalendar> {
       ),
       headerStyle: HeaderStyle(
         formatButtonVisible: false,
-        titleTextStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
+        titleTextStyle: const TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: 17,
+        ),
         headerPadding: EdgeInsets.zero,
         titleCentered: true,
         leftChevronPadding: EdgeInsets.zero,
@@ -234,22 +238,26 @@ class _CustomCalendarState extends State<CustomCalendar> {
     final value = _monthlyWater[key];
 
     return Container(
-      margin: const EdgeInsets.all(4.0),
+      margin: const EdgeInsets.all(2.0),
       decoration: BoxDecoration(
         color: isSelected ? Colors.transparent : Colors.transparent,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Text(
             "${day.day}",
-            style: TextStyle(fontWeight: FontWeight.w500, fontSize: 14),
+            style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14),
           ),
-          const SizedBox(height: 4),
-          Text(
-            value != null && value > 0 ? _formatWaterValue(value) : "",
-            style: TextStyle(fontSize: 10, color: Colors.grey[700]),
+          const SizedBox(height: 2),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              value != null && value > 0 ? _formatWaterValue(value) : "",
+              style: TextStyle(fontSize: 10, color: Colors.grey[700]),
+            ),
           ),
         ],
       ),

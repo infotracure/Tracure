@@ -11,14 +11,14 @@ import 'package:tracure/utils/extensions.dart';
 import '../controller/water_intake_controller.dart';
 import 'water_intake_add_bts.dart';
 
-class WaterIntakeDay extends StatefulWidget {
-  const WaterIntakeDay({super.key});
+class WaterIntakeOverview extends StatefulWidget {
+  const WaterIntakeOverview({super.key});
 
   @override
-  State<WaterIntakeDay> createState() => _WaterIntakeDayState();
+  State<WaterIntakeOverview> createState() => _WaterIntakeOverviewState();
 }
 
-class _WaterIntakeDayState extends State<WaterIntakeDay> {
+class _WaterIntakeOverviewState extends State<WaterIntakeOverview> {
   final waterController = Get.find<WaterIntakeController>();
   final ScrollController _scrollController = ScrollController();
 

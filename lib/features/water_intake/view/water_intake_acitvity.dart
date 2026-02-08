@@ -13,14 +13,14 @@ import '../../step_tracker/view/view_monthly_bottom_sheet.dart';
 import '../controller/water_intake_controller.dart';
 import 'water_intake_month.dart';
 
-class WaterIntakeWeek extends StatefulWidget {
-  const WaterIntakeWeek({super.key});
+class WaterIntakeActivity extends StatefulWidget {
+  const WaterIntakeActivity({super.key});
 
   @override
-  State<WaterIntakeWeek> createState() => _WaterIntakeWeekState();
+  State<WaterIntakeActivity> createState() => _WaterIntakeActivityState();
 }
 
-class _WaterIntakeWeekState extends State<WaterIntakeWeek> {
+class _WaterIntakeActivityState extends State<WaterIntakeActivity> {
   final waterController = Get.find<WaterIntakeController>();
   DateTime _selectedWeek = DateTime.now();
   List<double> _weeklyWater = List.filled(7, 0.0);
@@ -36,92 +36,95 @@ class _WaterIntakeWeekState extends State<WaterIntakeWeek> {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      return Column(
-        spacing: 16,
-        children: [
-          Container(
-            decoration: CommonWidget.containerDecoration(),
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    LeftRightIconButton(
-                      iconColor: ColorConstant.primaryColor,
-                      onTap: () {
-                        setState(() {
-                          _selectedWeek = _selectedWeek.subtract(
-                            Duration(days: 7),
-                          );
-                          _loadWeeklyWater(_selectedWeek);
-                        });
-                      },
-                    ).padSymm(horizontal: 10, vertical: 10),
-                    CustomText.title(
-                      text: formatWeekRange(_selectedWeek),
-                      isBold: true,
-                      size: 14,
-                    ),
-                    _isCurrentWeek()
-                        ? const SizedBox(width: 55)
-                        : LeftRightIconButton(
-                            iconColor: ColorConstant.primaryColor,
-                            onTap: () {
-                              setState(() {
-                                _selectedWeek = _selectedWeek.add(
-                                  Duration(days: 7),
-                                );
-                                _loadWeeklyWater(_selectedWeek);
-                              });
-                            },
-                          ).rotate(180).padSymm(horizontal: 10, vertical: 10),
-                  ],
-                ),
-                SizedBox(height: 8),
-                SizedBox(
-                  height: 210,
-                  child: Stack(
+      return SingleChildScrollView(
+        child: Column(
+          spacing: 16,
+          children: [
+            Container(
+              decoration: CommonWidget.containerDecoration(),
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      SizedBox(
-                        height: 150,
-                        child: WeekBarChart(data: _weeklyWater),
+                      LeftRightIconButton(
+                        iconColor: ColorConstant.primaryColor,
+                        onTap: () {
+                          setState(() {
+                            _selectedWeek = _selectedWeek.subtract(
+                              Duration(days: 7),
+                            );
+                            _loadWeeklyWater(_selectedWeek);
+                          });
+                        },
+                      ).padSymm(horizontal: 10, vertical: 10),
+                      CustomText.title(
+                        text: formatWeekRange(_selectedWeek),
+                        isBold: true,
+                        size: 14,
                       ),
-                      CommonWidget.roundedButton(
-                            context: context,
-                            titleColor: ColorConstant.primaryColor,
-                            bgColor: ColorConstant.backgroundColor,
-                            title: "View Monthly Record",
-                            padding: EdgeInsets.symmetric(vertical: 10),
-                            elevation: 0,
-                            prefixIcon: Icon(
-                              Icons.calendar_month,
-                              color: ColorConstant.primaryColor,
-                              size: 20,
-                            ),
-                            onTap: () async {
-                              await waterController.getMonthlyWaterSummary(
-                                DateTime.now(),
-                              );
-                              if (!context.mounted) return;
-                              showRoundedBottomSheet(
-                                context: context,
-                                child: CustomCalendar(
-                                  initialMonth: DateTime.now(),
-                                ),
-                              );
-                            },
-                          )
-                          .padSymm(horizontal: 16, vertical: 8)
-                          .align(Alignment.bottomCenter),
+                      _isCurrentWeek()
+                          ? const SizedBox(width: 55)
+                          : LeftRightIconButton(
+                              iconColor: ColorConstant.primaryColor,
+                              onTap: () {
+                                setState(() {
+                                  _selectedWeek = _selectedWeek.add(
+                                    Duration(days: 7),
+                                  );
+                                  _loadWeeklyWater(_selectedWeek);
+                                });
+                              },
+                            ).rotate(180).padSymm(horizontal: 10, vertical: 10),
                     ],
                   ),
-                ),
-              ],
+                  SizedBox(height: 8),
+                  SizedBox(
+                    height: 210,
+                    child: Stack(
+                      children: [
+                        SizedBox(
+                          height: 150,
+                          child: WeekBarChart(data: _weeklyWater),
+                        ),
+                        CommonWidget.roundedButton(
+                              context: context,
+                              titleColor: ColorConstant.primaryColor,
+                              bgColor: ColorConstant.backgroundColor,
+                              title: "View Monthly Record",
+                              padding: EdgeInsets.symmetric(vertical: 10),
+                              elevation: 0,
+                              prefixIcon: Icon(
+                                Icons.calendar_month,
+                                color: ColorConstant.primaryColor,
+                                size: 20,
+                              ),
+                              onTap: () async {
+                                await waterController.getMonthlyWaterSummary(
+                                  DateTime.now(),
+                                );
+                                if (!context.mounted) return;
+                                showRoundedBottomSheet(
+                                  context: context,
+                                  child: CustomCalendar(
+                                    initialMonth: DateTime.now(),
+                                  ),
+                                );
+                              },
+                            )
+                            .padSymm(horizontal: 16, vertical: 8)
+                            .align(Alignment.bottomCenter),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-          stepDistanceWidget(),
-        ],
-      ).padSymm(horizontal: 16, vertical: 16);
+            stepDistanceWidget(),
+            keyHealthBenefits(),
+          ],
+        ).padSymm(horizontal: 16, vertical: 16),
+      );
     });
   }
 
@@ -235,6 +238,85 @@ class _WaterIntakeWeekState extends State<WaterIntakeWeek> {
               ),
               // Image.asset(img, height: 20, width: 20),
             ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget keyHealthBenefits() {
+    var benefitList = [
+      {
+        "icon": "assets/images/ic_heart.png",
+        "title": "Heart Health",
+        "subTitle": "Improves blood circulation by 20%",
+      },
+      {
+        "icon": "assets/images/ic_mental_clarity.png",
+        "title": "Brain Function",
+        "subTitle": "Boosts cognitive performance by 30%",
+      },
+      {
+        "icon": "assets/images/ic_energy_boost.png",
+        "title": "Energy Levels",
+        "subTitle": "Increases daily energy by 25%",
+      },
+      {
+        "icon": "assets/images/ic_immune_system.png",
+        "title": "Detoxification",
+        "subTitle": "Helps flush toxins effectively",
+      },
+    ];
+    return Container(
+      decoration: CommonWidget.containerDecoration(),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(height: 16),
+          CustomText.title(
+            text: "Key Health Benefits",
+            isBold: true,
+          ).padSymm(horizontal: 16),
+          GridView.builder(
+            shrinkWrap: true,
+            physics: NeverScrollableScrollPhysics(),
+            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            itemCount: benefitList.length,
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: 8,
+              mainAxisSpacing: 8,
+              childAspectRatio: 1.3,
+            ),
+            itemBuilder: (BuildContext context, int i) {
+              return Container(
+                padding: EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Color(0xffF9F9FA),
+                  border: Border.all(color: Colors.grey.shade300),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Image.asset(benefitList[i]["icon"]!, height: 24),
+                    SizedBox(height: 4),
+                    CustomText.title(
+                      text: benefitList[i]["title"],
+                      isBold: true,
+                      size: 12,
+                      overflow: TextOverflow.visible,
+                    ),
+                    SizedBox(height: 4),
+                    CustomText.title(
+                      text: benefitList[i]["subTitle"],
+                      size: 10,
+                      overflow: TextOverflow.visible,
+                    ),
+                  ],
+                ),
+              );
+            },
           ),
         ],
       ),

@@ -40,4 +40,16 @@ class EndPoints {
   //* Gym Chek-in Endpoints */
   static const String gymCheckIn = "$baseUrl/gym/checkins";
   static const String gymCheckInInsert = "$baseUrl/gym/checkin";
+  //* Blood Pressure Endpoints */
+  static const String bloodPressureSummry = "$baseUrl/blood-pressure/summary";
+  static const String bloodPressureInsert = "$baseUrl/blood-pressure";
+  static const String bloodPressureGoals = "$baseUrl/blood-pressure/goals";
+  static const String bloodPressureTrend = "$baseUrl/blood-pressure/trend";
+  static const String bloodPressureStats = "$baseUrl/blood-pressure/stats";
+  //* Blood Sugar Endpoints */
+  static const String bloodSugarSummry = "$baseUrl/blood-sugar/summary";
+  static const String bloodSugarInsert = "$baseUrl/blood-sugar";
+  static const String bloodSugarGoals = "$baseUrl/blood-sugar/goals";
+  static const String bloodSugarTrend = "$baseUrl/blood-sugar/trend";
+  static const String bloodSugarStats = "$baseUrl/blood-sugar/stats";
 }

@@ -686,13 +686,13 @@ class TrackWellbeing extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.only(top: 8),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            // mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Expanded(
                 child: iconLabelCard(
                   label: "BMI Calculator",
                   img: "assets/images/ic_personStanding.png",
-                  onTap: () => Get.to(() => const BloodSugarScreen()),
+                  onTap: () => Get.to(() =>  BloodSugarScreen()),
                 ),
               ),
               SizedBox(width: 6),
@@ -700,18 +700,25 @@ class TrackWellbeing extends StatelessWidget {
                 child: iconLabelCard(
                   label: "Blood Sugar",
                   img: "assets/images/fluent-emoji_drop-of-blood.png",
-                  onTap: () => Get.to(() => const BloodSugarScreen()),
+                  onTap: () => Get.to(() =>  BloodSugarScreen()),
                 ),
               ),
               SizedBox(width: 6),
               Expanded(
-                // child: iconLabelCard(
-                //   label: "Sleep Tracker",
-                //   img: "assets/images/fluent-emoji_sleeping-face.png",
-                //   onTap: () => Get.to(() => const SleepTrackerScreen()),
-                // ),
-                child: SizedBox.shrink(),
+                child: iconLabelCard(
+                  label: "Blood Pressure",
+                  img: "assets/images/fluent-emoji_drop-of-blood.png",
+                  onTap: () => Get.to(() => BloodPressureScreen()),
+                ),
               ),
+              // Expanded(
+              //   // child: iconLabelCard(
+              //   //   label: "Sleep Tracker",
+              //   //   img: "assets/images/fluent-emoji_sleeping-face.png",
+              //   //   onTap: () => Get.to(() => const SleepTrackerScreen()),
+              //   // ),
+              //   child: SizedBox.shrink(),
+              // ),
             ],
           ),
         ),

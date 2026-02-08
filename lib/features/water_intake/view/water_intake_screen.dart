@@ -30,8 +30,8 @@ class _WaterIntakeScreenState extends State<WaterIntakeScreen> {
           Tab(text: 'Settings'),
         ],
         tabViews: const [
-          WaterIntakeDay(),
-          WaterIntakeWeek(),
+          WaterIntakeOverview(),
+          WaterIntakeActivity(),
           WaterIntakeSettings(),
         ],
       ).padOnly(t: 16),
