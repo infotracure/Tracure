@@ -1,7 +1,11 @@
 {
   "permissions": {
     "allow": [
-      "Bash(flutter analyze:*)"
+      "Bash(flutter analyze:*)",
+      "Bash(flutter build:*)",
+      "Bash(del \"c:\\\\FlutterApplicaton\\\\tracure-main\\\\android\\\\app\\\\src\\\\main\\\\kotlin\\\\com\\\\example\\\\tracure\\\\SleepSession.kt\")",
+      "Bash(del \"c:\\\\FlutterApplicaton\\\\tracure-main\\\\android\\\\app\\\\src\\\\main\\\\kotlin\\\\com\\\\example\\\\tracure\\\\SleepSessionDao.kt\")",
+      "Bash(del \"c:\\\\FlutterApplicaton\\\\tracure-main\\\\android\\\\app\\\\src\\\\main\\\\kotlin\\\\com\\\\example\\\\tracure\\\\AppDatabase.kt\")"
     ]
   }
 }

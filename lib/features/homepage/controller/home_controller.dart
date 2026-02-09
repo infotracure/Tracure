@@ -99,6 +99,15 @@ class HomeController extends GetxController {
     final fetchDate = getDateToFetchSleep();
     final date = DateFormat('yyyy-MM-dd').format(fetchDate);
     var sessions = await SleepService.getSleepDataForDate(date);
+
+    // If no sessions found, trigger inference and retry
+    if (sessions.isEmpty) {
+      await SleepService.runInferenceNow();
+      // Give inference a moment to complete
+      await Future.delayed(const Duration(seconds: 2));
+      sessions = await SleepService.getSleepDataForDate(date);
+    }
+
     var convertedSessions = convertSleepRawToObject(sessions);
     final format = DateFormat("yyyy-MM-dd HH:mm:ss");
     Duration totalDuration = Duration();

@@ -48,6 +48,7 @@ class SleepTrackingService : Service(), SensorEventListener {
 
     companion object {
         var isRunning = false
+        var isEndService = false
     }
 
     override fun onCreate() {

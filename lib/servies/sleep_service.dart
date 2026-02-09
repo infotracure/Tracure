@@ -66,12 +66,12 @@ Future<void> getSleep() async {
 class SleepService {
   static const MethodChannel _channel = MethodChannel('sleep_service');
 
-  /// Starts the Android native sleep tracking service.
+  /// Starts sleep tracking via WorkManager (periodic sensor sampling + receivers).
   static Future<void> startTracking({
-    required String lSStartTime, // e.g., "22:00"
-    required String lSEndTime, // e.g., "07:00"
-    required String lSHardStopTime, // e.g., "10:00"
-    required int sleepInterval, // e.g., 1800 (seconds)
+    required String lSStartTime,
+    required String lSEndTime,
+    required String lSHardStopTime,
+    required int sleepInterval,
   }) async {
     await _channel.invokeMethod('startSleepTracking', {
       'lSStartTime': lSStartTime,
@@ -81,11 +81,12 @@ class SleepService {
     });
   }
 
-  /// Stops the Android native sleep tracking service.
+  /// Stops all sleep tracking (WorkManager + receivers).
   static Future<void> stopTracking() async {
     await _channel.invokeMethod('stopSleepTracking');
   }
 
+  /// Get sleep session data for a specific date.
   static Future<List<Map<String, dynamic>>> getSleepDataForDate(
     String date,
   ) async {
@@ -94,7 +95,6 @@ class SleepService {
       {"date": date},
     );
 
-    // Safely cast each item
     final List<Map<String, dynamic>> castedList = result.map((item) {
       return Map<String, dynamic>.from(item as Map);
     }).toList();
@@ -103,25 +103,64 @@ class SleepService {
     return castedList;
   }
 
-  static scheduleSleepTracking() async {
+  /// Schedule sleep tracking with WorkManager + AlarmManager backup.
+  static Future<void> scheduleSleepTracking() async {
     try {
-          await _channel.invokeMethod('scheduleSleepTracking', {
-      'lSStartTime': startTime,
-      'lSEndTime': endTime,
-      'lSInterval': '5',
-    });
+      await _channel.invokeMethod('scheduleSleepTracking', {
+        'lSStartTime': startTime,
+        'lSEndTime': endTime,
+        'lSInterval': '5',
+      });
     } catch (e) {
       debugPrint(e.toString());
     }
+  }
 
+  /// Trigger sleep inference immediately (for when user opens the app).
+  static Future<void> runInferenceNow() async {
+    try {
+      await _channel.invokeMethod('runInferenceNow');
+    } catch (e) {
+      debugPrint('Error running inference: $e');
+    }
+  }
+
+  /// Get sleep quality data including confidence scores.
+  static Future<List<Map<String, dynamic>>> getSleepQuality(
+    String date,
+  ) async {
+    try {
+      final List<dynamic> result = await _channel.invokeMethod(
+        'getSleepQuality',
+        {'date': date},
+      );
+      return result.map((item) {
+        return Map<String, dynamic>.from(item as Map);
+      }).toList();
+    } catch (e) {
+      debugPrint('Error getting sleep quality: $e');
+      return [];
+    }
+  }
+
+  /// Request battery optimization exemption for reliable background work.
+  static Future<bool> requestBatteryExemption() async {
+    try {
+      final result = await _channel.invokeMethod('requestBatteryExemption');
+      return result == true;
+    } catch (e) {
+      debugPrint('Error requesting battery exemption: $e');
+      return false;
+    }
   }
 
   static Future<bool> requestAlarmPermission() async {
-   var isGranted = await _channel.invokeMethod('checkExactAlarmPermission');
+    var isGranted = await _channel.invokeMethod('checkExactAlarmPermission');
     return isGranted == true;
   }
+
   static Future<bool> checkAlarmPermission() async {
-   var isGranted = await _channel.invokeMethod('checkExactAlarmPermission');
+    var isGranted = await _channel.invokeMethod('checkExactAlarmPermission');
     return isGranted == true;
   }
 }
