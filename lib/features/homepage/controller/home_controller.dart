@@ -31,6 +31,7 @@ import '../model/dashboard_activity_model.dart';
 
 var startTime = '22:00';
 var endTime = '07:00';
+var hardStop = '10:00';
 
 class HomeController extends GetxController {
   final GlobalKey<ScaffoldState> mainScaffoldKey = GlobalKey<ScaffoldState>();

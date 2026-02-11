@@ -13,14 +13,8 @@ interface SleepSessionDao {
     @Query("SELECT * FROM sleep_sessions WHERE date = :date")
     suspend fun getSessionsByDate(date: String): List<SleepSession>
 
-    @Query("SELECT * FROM sleep_sessions ORDER BY date DESC LIMIT :limit")
-    suspend fun getRecentSessions(limit: Int = 30): List<SleepSession>
-
     @Query("DELETE FROM sleep_sessions WHERE date < :cutoffDate")
     suspend fun deleteSessionsBefore(cutoffDate: String)
-
-    @Query("DELETE FROM sleep_sessions WHERE date = :date")
-    suspend fun deleteSessionsForDate(date: String)
 
     @Query("SELECT * FROM sleep_sessions")
     suspend fun getAllSessions(): List<SleepSession>

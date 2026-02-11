@@ -44,9 +44,9 @@ class SleepDataFetcher {
 
 Future<void> setSleepSettings() async {
   await SleepDataFetcher.setSleepSettings(
-    lSStartTime: "22:00",
+    lSStartTime: "21:00",
     lSHardStopTime: "10:00",
-    lSEndTime: "07:00",
+    lSEndTime: "21:05",
     sleepInterval: 1800,
   );
 }
@@ -109,7 +109,8 @@ class SleepService {
       await _channel.invokeMethod('scheduleSleepTracking', {
         'lSStartTime': startTime,
         'lSEndTime': endTime,
-        'lSInterval': '5',
+        'lSHardStopTime': hardStop,
+        'lSInterval': 1800,
       });
     } catch (e) {
       debugPrint(e.toString());
@@ -126,9 +127,7 @@ class SleepService {
   }
 
   /// Get sleep quality data including confidence scores.
-  static Future<List<Map<String, dynamic>>> getSleepQuality(
-    String date,
-  ) async {
+  static Future<List<Map<String, dynamic>>> getSleepQuality(String date) async {
     try {
       final List<dynamic> result = await _channel.invokeMethod(
         'getSleepQuality',

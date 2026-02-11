@@ -4,6 +4,7 @@ package com.tracure.main
 import android.app.*
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ServiceInfo
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
@@ -37,7 +38,7 @@ class SleepTrackingService : Service(), SensorEventListener {
     private var endTimeHour = 7
     private var hardStopTimeHour = 10
     private var idleDurationMs = 5 * 60 * 1000L // default 5 min
-    private var todayDate: String = ""
+//    private var todayDate: String = ""
 
     private var lastX = 0f
     private var lastY = 0f
@@ -48,7 +49,6 @@ class SleepTrackingService : Service(), SensorEventListener {
 
     companion object {
         var isRunning = false
-        var isEndService = false
     }
 
     override fun onCreate() {
@@ -74,7 +74,7 @@ class SleepTrackingService : Service(), SensorEventListener {
         val intervalSecs = intent?.getIntExtra("sleepInterval", 1800) ?: 1800
         val sleepDateStr = computeSleepStartDate(endTimeStr)
 
-        todayDate = sleepDateStr
+//        todayDate = sleepDateStr
 
         startTimeHour = startTimeStr.split(":").getOrNull(0)?.toIntOrNull() ?: 22
         endTimeHour = endTimeStr.split(":").getOrNull(0)?.toIntOrNull() ?: 7
@@ -85,8 +85,12 @@ class SleepTrackingService : Service(), SensorEventListener {
     }
 
     override fun onDestroy() {
-        super.onDestroy()
         sensorManager.unregisterListener(this)
+        if (isSleeping && sleepStartTime != null) {
+            val sleepEnd = getCurrentTime()
+            sendSleepData(sleepStartTime!!, sleepEnd)
+        }
+        isRunning = false
         super.onDestroy()
     }
 
@@ -162,9 +166,9 @@ class SleepTrackingService : Service(), SensorEventListener {
     }
 
     private fun sendSleepData(start: String, end: String) {
-        Log.d("SleepTracking", "Sleep on $todayDate from $start to $end")
         val startDateTime = LocalDateTime.parse(start)
         val sleepDate = calculateSleepDate(startDateTime)
+        Log.d("SleepTracking", "Sleep on $sleepDate from $start to $end")
 
         val session = SleepSession(
             date = sleepDate,
@@ -235,7 +239,11 @@ class SleepTrackingService : Service(), SensorEventListener {
             .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
             .build()
 
-        startForeground(1, notification)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            startForeground(1, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_HEALTH)
+        } else {
+            startForeground(1, notification)
+        }
     }
 }
 
