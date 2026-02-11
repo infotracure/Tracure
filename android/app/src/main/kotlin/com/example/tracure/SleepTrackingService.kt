@@ -37,7 +37,7 @@ class SleepTrackingService : Service(), SensorEventListener {
     private var startTimeHour = 22
     private var endTimeHour = 7
     private var hardStopTimeHour = 10
-    private var idleDurationMs = 5 * 60 * 1000L // default 5 min
+    private var idleDurationMs = 1 * 60 * 1000L // default 5 min
 //    private var todayDate: String = ""
 
     private var lastX = 0f
@@ -166,7 +166,8 @@ class SleepTrackingService : Service(), SensorEventListener {
     }
 
     private fun sendSleepData(start: String, end: String) {
-        val startDateTime = LocalDateTime.parse(start)
+        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+        val startDateTime = LocalDateTime.parse(start, formatter)
         val sleepDate = calculateSleepDate(startDateTime)
         Log.d("SleepTracking", "Sleep on $sleepDate from $start to $end")
 
