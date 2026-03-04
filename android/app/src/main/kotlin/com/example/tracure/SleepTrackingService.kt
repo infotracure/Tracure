@@ -31,6 +31,7 @@ class SleepTrackingService : Service(), SensorEventListener {
     private lateinit var sensorManager: SensorManager
     private var accelerometer: Sensor? = null
     private var lastMovementTime: Long = 0
+    private var lastSaveTime: Long = 0
     private var isSleeping = false
     private var sleepStartTime: String? = null
 
@@ -46,6 +47,10 @@ class SleepTrackingService : Service(), SensorEventListener {
     private var initialized = false
 
     private val THRESHOLD = 2f
+    private val PERIODIC_SAVE_INTERVAL_MS = 30 * 60 * 1000L // 30 minutes
+
+    // Noise detection
+    private lateinit var noiseDetector: NoiseDetector
 
     companion object {
         var isRunning = false
@@ -62,7 +67,10 @@ class SleepTrackingService : Service(), SensorEventListener {
             sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_NORMAL)
         }
         lastMovementTime = System.currentTimeMillis()
+        lastSaveTime = System.currentTimeMillis()
         sleepStartTime = getCurrentTime()
+        noiseDetector = NoiseDetector(this)
+        noiseDetector.start()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -79,13 +87,14 @@ class SleepTrackingService : Service(), SensorEventListener {
         startTimeHour = startTimeStr.split(":").getOrNull(0)?.toIntOrNull() ?: 22
         endTimeHour = endTimeStr.split(":").getOrNull(0)?.toIntOrNull() ?: 7
         hardStopTimeHour = hardStopStr.split(":").getOrNull(0)?.toIntOrNull() ?: 10
-        idleDurationMs = (intervalSecs * 1000L).coerceAtLeast(60000L)
+//        idleDurationMs = (intervalSecs * 1000L).coerceAtLeast(60000L)
 
-        return START_NOT_STICKY
+        return START_REDELIVER_INTENT
     }
 
     override fun onDestroy() {
         sensorManager.unregisterListener(this)
+        noiseDetector.stop()
         if (isSleeping && sleepStartTime != null) {
             val sleepEnd = getCurrentTime()
             sendSleepData(sleepStartTime!!, sleepEnd)
@@ -123,13 +132,24 @@ class SleepTrackingService : Service(), SensorEventListener {
 
         val movement = sqrt(deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ)
 
-        // Log the movement for debugging
-        Log.d("Sensor", "Δ Movement: $movement  : time: $sleepStartTime")
+        // Log the movement and noise for debugging
+        val noiseDb = noiseDetector.latestDb
+        val noiseStr = if (noiseDb >= 0) "${noiseDb}dB" else "N/A"
+        Log.d("Sensor", "Δ Movement: $movement | Noise: $noiseStr | time: $sleepStartTime")
 
         if (isSleeping && isEndService) {
             val sleepEnd = getCurrentTime()
             sendSleepData(sleepStartTime ?: "Unknown", sleepEnd)
             isEndService = false
+        }
+
+        // Periodic 30-min checkpoint: save sleep segment and start a new one
+        if (isSleeping && now - lastSaveTime >= PERIODIC_SAVE_INTERVAL_MS) {
+            val sleepEnd = getCurrentTime()
+            sendSleepData(sleepStartTime ?: "Unknown", sleepEnd)
+            sleepStartTime = sleepEnd
+            lastSaveTime = now
+            Log.d("SleepTracking", "30-min checkpoint saved")
         }
 
         if (movement > THRESHOLD) {
@@ -140,10 +160,12 @@ class SleepTrackingService : Service(), SensorEventListener {
 //                sleepStartTime = null
             }
             lastMovementTime = now
+            lastSaveTime = now
             sleepStartTime = getCurrentTime()
 
         } else if (!isSleeping && now - lastMovementTime > idleDurationMs) {
             isSleeping = true
+            lastSaveTime = now
             //sleepStartTime = getCurrentTime()
         }
     }
@@ -168,13 +190,28 @@ class SleepTrackingService : Service(), SensorEventListener {
     private fun sendSleepData(start: String, end: String) {
         val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
         val startDateTime = LocalDateTime.parse(start, formatter)
+        val endDateTime = LocalDateTime.parse(end, formatter)
+
+        // Skip segments shorter than 5 minutes
+        val durationMinutes = java.time.Duration.between(startDateTime, endDateTime).toMinutes()
+        if (durationMinutes < 5) {
+            Log.d("SleepTracking", "Skipping short segment ($durationMinutes min): $start to $end")
+            return
+        }
+
         val sleepDate = calculateSleepDate(startDateTime)
-        Log.d("SleepTracking", "Sleep on $sleepDate from $start to $end")
+
+        val noise = noiseDetector.getStatsAndReset()
+
+        Log.d("SleepTracking", "Sleep on $sleepDate from $start to $end | noise avg=${noise.avgDb} max=${noise.maxDb} min=${noise.minDb}")
 
         val session = SleepSession(
             date = sleepDate,
             startTime = start,
-            endTime = end
+            endTime = end,
+            avgNoise = noise.avgDb,
+            maxNoise = noise.maxDb,
+            minNoise = noise.minDb
         )
 
         CoroutineScope(Dispatchers.IO).launch {
@@ -185,7 +222,7 @@ class SleepTrackingService : Service(), SensorEventListener {
     }
 
     private fun calculateSleepDate(startDateTime: LocalDateTime): String {
-        val cutoffHour = 4
+        val cutoffHour = 12
 
         val sleepDate = if (startDateTime.hour < cutoffHour) {
             startDateTime.toLocalDate().minusDays(1)
@@ -241,7 +278,14 @@ class SleepTrackingService : Service(), SensorEventListener {
             .build()
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            startForeground(1, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_HEALTH)
+            val hasMicPermission = checkSelfPermission(android.Manifest.permission.RECORD_AUDIO) ==
+                    android.content.pm.PackageManager.PERMISSION_GRANTED
+            val serviceType = if (hasMicPermission) {
+                ServiceInfo.FOREGROUND_SERVICE_TYPE_HEALTH or ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE
+            } else {
+                ServiceInfo.FOREGROUND_SERVICE_TYPE_HEALTH
+            }
+            startForeground(1, notification, serviceType)
         } else {
             startForeground(1, notification)
         }

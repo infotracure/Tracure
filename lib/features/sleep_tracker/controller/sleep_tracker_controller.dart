@@ -1,9 +1,11 @@
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:tracure/features/sleep_tracker/model/sleep_goal_model.dart';
 import 'package:tracure/features/sleep_tracker/model/sleep_stats_model.dart';
 import 'package:tracure/features/sleep_tracker/model/sleep_summary_by_range_model.dart';
 import 'package:tracure/features/sleep_tracker/model/sleep_trend_model.dart';
+import 'package:tracure/servies/sleep_service.dart';
 
 import '../../../servies/api_service/dio_client.dart';
 import '../../../servies/api_service/end_points.dart';
@@ -23,6 +25,11 @@ class SleepTrackerController extends GetxController {
       Rx<SleepSummaryByRangeModel?>(null);
   Rx<SleepGoalModel?> sleepGoalModel = Rx<SleepGoalModel?>(null);
 
+  // Noise data from local sleep sessions
+  var avgNoise = ''.obs;
+  var maxNoise = ''.obs;
+  var minNoise = ''.obs;
+
   @override
   void onInit() async {
     super.onInit();
@@ -30,6 +37,7 @@ class SleepTrackerController extends GetxController {
     var todayFormatted = DateFormat('yyyy-MM-dd').format(now);
     await getSleepSummaryByDate(todayFormatted);
     await getSleepTrend(todayFormatted);
+    await fetchNoiseData(todayFormatted);
 
     // Calculate current week's start (Monday) and end (Sunday)
 
@@ -41,6 +49,53 @@ class SleepTrackerController extends GetxController {
     //   dateFormat.format(weekStart),
     //   dateFormat.format(weekEnd),
     // );
+  }
+
+  Future<void> fetchNoiseData(String date) async {
+    try {
+      final sessions = await SleepService.getSleepDataForDate(date);
+      if (sessions.isEmpty) {
+        avgNoise.value = '';
+        maxNoise.value = '';
+        minNoise.value = '';
+        return;
+      }
+
+      double sumAvg = 0;
+      double overallMax = 0;
+      double overallMin = double.infinity;
+      int count = 0;
+
+      for (final session in sessions) {
+        final avg = session['avgNoise'];
+        final max = session['maxNoise'];
+        final min = session['minNoise'];
+
+        // Skip sessions with no noise data (empty string or 0)
+        if (avg is! num || avg == 0) continue;
+
+        sumAvg += avg.toDouble();
+        if (max is num && max > overallMax) overallMax = max.toDouble();
+        if (min is num && min < overallMin) overallMin = min.toDouble();
+        count++;
+      }
+
+      if (count == 0) {
+        avgNoise.value = '';
+        maxNoise.value = '';
+        minNoise.value = '';
+        return;
+      }
+
+      avgNoise.value = '${(sumAvg / count).toStringAsFixed(1)} dB';
+      maxNoise.value = '${overallMax.toStringAsFixed(1)} dB';
+      minNoise.value = '${overallMin.toStringAsFixed(1)} dB';
+    } catch (e) {
+      debugPrint('Error fetching noise data: $e');
+      avgNoise.value = '';
+      maxNoise.value = '';
+      minNoise.value = '';
+    }
   }
 
   Future<void> getSleepSummaryByDate(String date) async {

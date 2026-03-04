@@ -8,5 +8,8 @@ data class SleepSession(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val date: String,
     val startTime: String,
-    val endTime: String
+    val endTime: String,
+    val avgNoise: Float = 0f,
+    val maxNoise: Float = 0f,
+    val minNoise: Float = 0f
 )

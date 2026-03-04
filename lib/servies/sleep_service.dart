@@ -162,4 +162,45 @@ class SleepService {
     var isGranted = await _channel.invokeMethod('checkExactAlarmPermission');
     return isGranted == true;
   }
+
+  /// Debug: check which alarms are currently scheduled.
+  static Future<Map<String, dynamic>> debugCheckAlarms() async {
+    try {
+      final result = await _channel.invokeMethod('debugCheckAlarms');
+      final map = Map<String, dynamic>.from(result as Map);
+
+      debugPrint('=== ALARM STATUS ===');
+      debugPrint('Start alarm scheduled: ${map['startAlarm']}');
+      debugPrint('Stop alarm scheduled: ${map['stopAlarm']}');
+      debugPrint('Service running: ${map['serviceRunning']}');
+      debugPrint('Scheduled window: ${map['scheduledStart']} - ${map['scheduledEnd']}');
+
+      final watchdogs = List<bool>.from(map['watchdogAlarms'] as List);
+      final activeCount = watchdogs.where((w) => w).length;
+      debugPrint('Watchdog alarms active: $activeCount / ${watchdogs.length}');
+      for (int i = 0; i < watchdogs.length; i++) {
+        if (watchdogs[i]) {
+          debugPrint('  Watchdog #$i (rc=${200 + i}): SCHEDULED');
+        }
+      }
+      debugPrint('====================');
+
+      return map;
+    } catch (e) {
+      debugPrint('Error checking alarms: $e');
+      return {};
+    }
+  }
+
+  /// If current time is within the sleep window and the service isn't running, start it.
+  static Future<String> startTrackingIfNeeded() async {
+    try {
+      final result = await _channel.invokeMethod('startIfInSleepWindow');
+      debugPrint('startTrackingIfNeeded: $result');
+      return result as String;
+    } catch (e) {
+      debugPrint('Error in startTrackingIfNeeded: $e');
+      return 'error';
+    }
+  }
 }

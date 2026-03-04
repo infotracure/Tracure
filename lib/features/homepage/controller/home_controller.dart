@@ -53,6 +53,8 @@ class HomeController extends GetxController {
     todaySleep.value = await getTotalDuration();
     // await startSleepTracking();
     await scheduleSleep();
+    await SleepService.startTrackingIfNeeded();
+    await SleepService.debugCheckAlarms(); // Debug: log alarm status
     await getDashboardData();
     checkForLastStepPushedData(silent: true);
     checkForLastSleepPushedData(silent: true);

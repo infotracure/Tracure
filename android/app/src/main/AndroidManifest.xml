@@ -6,7 +6,10 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_HEALTH" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"/>
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"/>
 
 
     <application
@@ -75,7 +78,7 @@
             android:name="com.tracure.main.SleepTrackingService"
             android:exported="false"
             android:enabled="true"
-            android:foregroundServiceType="health"
+            android:foregroundServiceType="health|microphone"
             android:permission="android.permission.FOREGROUND_SERVICE" />
         <receiver android:name="com.tracure.main.AlarmReceiver" android:exported="true"/>
 

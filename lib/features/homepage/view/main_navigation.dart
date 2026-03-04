@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:tracure/features/homepage/controller/home_controller.dart';
 import 'package:tracure/features/homepage/view/homepage.dart';
 import 'package:tracure/features/loginpage/view/login_page.dart';
+import 'package:tracure/features/profile/view/profile_screen.dart';
 import 'package:tracure/servies/hive_service.dart';
 import 'package:tracure/utils/common_widget.dart';
 import 'package:tracure/utils/constant/color_constants.dart';
@@ -22,7 +23,7 @@ class _MainNavigationState extends State<MainNavigation> {
   final List<Widget> _pages = [
     const Homepage(),
     const SizedBox(), // Activities placeholder
-    const SizedBox(), // Profile placeholder
+    const ProfileScreen(),
   ];
 
   @override

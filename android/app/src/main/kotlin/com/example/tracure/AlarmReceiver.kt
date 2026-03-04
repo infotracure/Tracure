@@ -48,7 +48,35 @@ class AlarmReceiver : BroadcastReceiver() {
                 Log.d("AlarmReceiver", "SleepTrackingService STOPPED")
             }
 
+            "WATCHDOG_SLEEP_TRACKING" -> {
+                if (SleepTrackingService.isRunning) {
+                    Log.d("AlarmReceiver", "Watchdog: service already running, skipping")
+                    return
+                }
 
+                Log.d("AlarmReceiver", "Watchdog: service NOT running, restarting...")
+                showNotification(context, "Sleep Tracking", "Service restarted by watchdog")
+
+                val prefs = context.getSharedPreferences("SleepPrefs", Context.MODE_PRIVATE)
+                val start = prefs.getString("lSStartTime", "22:00") ?: "22:00"
+                val end = prefs.getString("lSEndTime", "07:00") ?: "07:00"
+                val hardStop = prefs.getString("lSHardStopTime", "10:00") ?: "10:00"
+                val interval = prefs.getInt("sleepInterval", 1800)
+
+                val serviceIntent = Intent(context, SleepTrackingService::class.java).apply {
+                    putExtra("lSStartTime", start)
+                    putExtra("lSEndTime", end)
+                    putExtra("lSHardStopTime", hardStop)
+                    putExtra("sleepInterval", interval)
+                }
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    context.startForegroundService(serviceIntent)
+                } else {
+                    context.startService(serviceIntent)
+                }
+                Log.d("AlarmReceiver", "Watchdog: SleepTrackingService RESTARTED")
+            }
         }
     }
 

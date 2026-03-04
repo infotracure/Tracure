@@ -45,19 +45,23 @@ class _HomepageState extends State<Homepage> with WidgetsBindingObserver {
       // Sync steps silently in background
       homeController.checkForLastStepPushedData(silent: true);
       homeController.checkForLastSleepPushedData(silent: true);
-      SleepService.requestAlarmPermission()
-          .then((isGranted) async {
-            if (isGranted) {
-              await homeController.scheduleSleep();
-            }
-          })
-          .then((_) async {
-            await PermissionManager.requestActivityPermission();
-          })
-          .then((_) async {
-            await AppPermission.requestNotificationPermission();
-          });
+      _requestPermissionsOnResume();
     }
+  }
+
+  Future<void> _requestPermissionsOnResume() async {
+    final isAlarmGranted = await SleepService.requestAlarmPermission();
+    if (isAlarmGranted) {
+      await homeController.scheduleSleep();
+    }
+    // These permissions are required BEFORE starting the foreground service:
+    // - ACTIVITY_RECOGNITION → needed for FOREGROUND_SERVICE_TYPE_HEALTH
+    // - RECORD_AUDIO → needed for FOREGROUND_SERVICE_TYPE_MICROPHONE
+    await AppPermission.requestActivityPermission();
+    await AppPermission.requestMicrophonePermission();
+    await AppPermission.requestBatteryUnrestricted();
+    await SleepService.startTrackingIfNeeded();
+    await AppPermission.requestNotificationPermission();
   }
 
   @override
@@ -692,7 +696,7 @@ class TrackWellbeing extends StatelessWidget {
                 child: iconLabelCard(
                   label: "BMI Calculator",
                   img: "assets/images/ic_personStanding.png",
-                  onTap: () => Get.to(() =>  BloodSugarScreen()),
+                  onTap: () => Get.to(() => BloodSugarScreen()),
                 ),
               ),
               SizedBox(width: 6),
@@ -700,7 +704,7 @@ class TrackWellbeing extends StatelessWidget {
                 child: iconLabelCard(
                   label: "Blood Sugar",
                   img: "assets/images/fluent-emoji_drop-of-blood.png",
-                  onTap: () => Get.to(() =>  BloodSugarScreen()),
+                  onTap: () => Get.to(() => BloodSugarScreen()),
                 ),
               ),
               SizedBox(width: 6),

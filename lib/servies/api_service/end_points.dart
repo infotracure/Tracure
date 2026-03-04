@@ -54,4 +54,7 @@ class EndPoints {
   static const String bloodSugarTrend = "$baseUrl/blood-sugar/trend";
   static const String bloodSugarStats = "$baseUrl/blood-sugar/stats";
   static const String bloodSugarReadings = "$baseUrl/blood-sugar/readings";
+  //* Profile Endpoints */
+  static const String getProfile = "$baseUrl/user/profile";
+  static const String updateProfile = "$baseUrl/user/profile";
 }

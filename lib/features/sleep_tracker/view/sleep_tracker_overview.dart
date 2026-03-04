@@ -41,6 +41,7 @@ class _SleepTrackerDayState extends State<SleepTrackerOverview> {
           children: [
             SleepProgressWidget(currentMin: todaySleep, goal: 10 * 60),
             activitesCardGrid(),
+            noiseCardGrid(),
             SleepTrendWidget(),
             keyHealthBenefits(),
           ],
@@ -81,6 +82,44 @@ class _SleepTrackerDayState extends State<SleepTrackerOverview> {
               "Time to fall asleep",
               timeToFallAsleepMinutes.toTimeFormat(),
               "assets/images/mingcute_time-line.png",
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget noiseCardGrid() {
+    final avg = sleepTrackerController.avgNoise.value;
+    final max = sleepTrackerController.maxNoise.value;
+    final min = sleepTrackerController.minNoise.value;
+
+    // Hide the section entirely if no noise data
+    if (avg.isEmpty && max.isEmpty && min.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            tileCard(
+              "Avg Noise",
+              avg.isNotEmpty ? avg : "--",
+              "assets/images/ic_sleep_awake.png",
+            ),
+            SizedBox(width: 10),
+            tileCard(
+              "Max Noise",
+              max.isNotEmpty ? max : "--",
+              "assets/images/ic_sleep_awake.png",
+            ),
+            SizedBox(width: 10),
+            tileCard(
+              "Min Noise",
+              min.isNotEmpty ? min : "--",
+              "assets/images/ic_sleep_awake.png",
             ),
           ],
         ),
