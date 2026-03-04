@@ -69,6 +69,7 @@ class SleepServicePlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
 
                 if (AlarmPermissionHelper.ensureExactAlarmPermission(context)) {
+                    prefs.edit().putBoolean("sleepTrackingEnabled", true).apply()
                     SleepAlarmScheduler.scheduleSleepTracking(context, start, end)
                     result.success("Scheduled")
                 } else {
@@ -77,6 +78,8 @@ class SleepServicePlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             }
 
             "cancelSleepTracking" -> {
+                val prefs = context.getSharedPreferences("SleepPrefs", Context.MODE_PRIVATE)
+                prefs.edit().putBoolean("sleepTrackingEnabled", false).apply()
                 SleepAlarmScheduler.cancelSleepTracking(context)
                 result.success("Cancelled")
             }

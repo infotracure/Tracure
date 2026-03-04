@@ -18,6 +18,8 @@ class ProfileController extends GetxController {
   final lastNameController = TextEditingController();
   final emailController = TextEditingController();
   final dobController = TextEditingController();
+  final heightCmController = TextEditingController();
+  final weightKgController = TextEditingController();
   var selectedGender = ''.obs;
 
   @override
@@ -32,6 +34,8 @@ class ProfileController extends GetxController {
     lastNameController.dispose();
     emailController.dispose();
     dobController.dispose();
+    heightCmController.dispose();
+    weightKgController.dispose();
     super.onClose();
   }
 
@@ -42,11 +46,25 @@ class ProfileController extends GetxController {
     emailController.text = data?.email ?? '';
     dobController.text = _formatDobForEdit(data?.dateOfBirth ?? '');
     selectedGender.value = data?.gender ?? '';
+    heightCmController.text = data?.heightCm != null
+        ? formatNumber(data!.heightCm!)
+        : '';
+    weightKgController.text = data?.weightKg != null
+        ? formatNumber(data!.weightKg!)
+        : '';
     isEditing.value = true;
   }
 
   void cancelEdit() {
     isEditing.value = false;
+  }
+
+  String formatNumber(double value) {
+    if (value == value.roundToDouble()) {
+      return value.toInt().toString();
+    } else {
+      return value.toString();
+    }
   }
 
   String _formatDobForEdit(String dob) {
@@ -150,6 +168,26 @@ class ProfileController extends GetxController {
       CommonWidget.showToast("Please enter email");
       return;
     }
+    if (heightCmController.text.isEmpty ||
+        double.tryParse(heightCmController.text) == null) {
+      CommonWidget.showToast("Please enter a valid height");
+      return;
+    }
+    final heightValue = double.tryParse(heightCmController.text);
+    if (heightValue != null && (heightValue < 100 || heightValue > 250)) {
+      CommonWidget.showToast("Height must be between 100 and 250 cm");
+      return;
+    }
+    if (weightKgController.text.isEmpty ||
+        double.tryParse(weightKgController.text) == null) {
+      CommonWidget.showToast("Please enter a valid weight");
+      return;
+    }
+    final weightValue = double.tryParse(weightKgController.text);
+    if (weightValue != null && (weightValue < 30 || weightValue > 300)) {
+      CommonWidget.showToast("Weight must be between 30 and 300 kg");
+      return;
+    }
 
     try {
       showGlobalLoader();
@@ -159,9 +197,11 @@ class ProfileController extends GetxController {
         "gender": selectedGender.value,
         "dateOfBirth": _formatDobForApi(dobController.text),
         "email": emailController.text.trim(),
+        "heightCm": heightCmController.text,
+        "weightKg": weightKgController.text,
       };
       final url = EndPoints.updateProfile;
-      final res = await DioClient().post(url, data);
+      final res = await DioClient().put(url, data);
       hideGlobalLoader();
 
       if (res is DioResponse) {

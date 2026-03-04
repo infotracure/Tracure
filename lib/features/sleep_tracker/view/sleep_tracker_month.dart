@@ -173,56 +173,58 @@ class _CustomCalendarState extends State<CustomCalendar> {
 
   @override
   Widget build(BuildContext context) {
-    return TableCalendar(
-      firstDay: DateTime.utc(2025, 5, 25),
-      lastDay: DateTime.now(),
-      focusedDay: _focusedDay,
-      calendarFormat: CalendarFormat.month,
-      startingDayOfWeek: StartingDayOfWeek.monday,
-      selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
-      calendarStyle: const CalendarStyle(outsideDaysVisible: false),
-      daysOfWeekStyle: const DaysOfWeekStyle(
-        weekendStyle: TextStyle(fontSize: 14, height: 1),
-        weekdayStyle: TextStyle(fontSize: 14, height: 1),
-      ),
-      onDaySelected: (selectedDay, focusedDay) {
-        setState(() {
-          _selectedDay = selectedDay;
-          _focusedDay = focusedDay;
-        });
-        if (widget.onDaySelected != null) {
-          widget.onDaySelected!(selectedDay);
-        }
-      },
-      onPageChanged: (focusedDay) async {
-        setState(() {
-          _focusedDay = focusedDay;
-        });
-        await _loadMonthData(focusedDay);
-      },
-      calendarBuilders: CalendarBuilders(
-        defaultBuilder: (context, day, focusedDay) {
-          return _buildDayCell(day);
+    return SizedBox( height: 360,
+      child: TableCalendar(
+        firstDay: DateTime.utc(2025, 5, 25),
+        lastDay: DateTime.now(),
+        focusedDay: _focusedDay,
+        calendarFormat: CalendarFormat.month,
+        startingDayOfWeek: StartingDayOfWeek.monday,
+        selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
+        calendarStyle: const CalendarStyle(outsideDaysVisible: false),
+        daysOfWeekStyle: const DaysOfWeekStyle(
+          weekendStyle: TextStyle(fontSize: 14, height: 1),
+          weekdayStyle: TextStyle(fontSize: 14, height: 1),
+        ),
+        onDaySelected: (selectedDay, focusedDay) {
+          setState(() {
+            _selectedDay = selectedDay;
+            _focusedDay = focusedDay;
+          });
+          if (widget.onDaySelected != null) {
+            widget.onDaySelected!(selectedDay);
+          }
         },
-        selectedBuilder: (context, day, focusedDay) {
-          return _buildDayCell(day, isSelected: true);
+        onPageChanged: (focusedDay) async {
+          setState(() {
+            _focusedDay = focusedDay;
+          });
+          await _loadMonthData(focusedDay);
         },
-        todayBuilder: (context, day, focusedDay) {
-          return _buildDayCell(day, isToday: true);
-        },
-      ),
-      headerStyle: HeaderStyle(
-        formatButtonVisible: false,
-        titleTextStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
-        headerPadding: EdgeInsets.zero,
-        titleCentered: true,
-        leftChevronPadding: EdgeInsets.zero,
-        leftChevronIcon: LeftRightIconButton(
-          iconColor: ColorConstant.primaryColor,
-        ).padSymm(),
-        rightChevronIcon: LeftRightIconButton(
-          iconColor: ColorConstant.primaryColor,
-        ).rotate(180).padSymm(),
+        calendarBuilders: CalendarBuilders(
+          defaultBuilder: (context, day, focusedDay) {
+            return _buildDayCell(day);
+          },
+          selectedBuilder: (context, day, focusedDay) {
+            return _buildDayCell(day, isSelected: true);
+          },
+          todayBuilder: (context, day, focusedDay) {
+            return _buildDayCell(day, isToday: true);
+          },
+        ),
+        headerStyle: HeaderStyle(
+          formatButtonVisible: false,
+          titleTextStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
+          headerPadding: EdgeInsets.zero,
+          titleCentered: true,
+          leftChevronPadding: EdgeInsets.zero,
+          leftChevronIcon: LeftRightIconButton(
+            iconColor: ColorConstant.primaryColor,
+          ).padSymm(),
+          rightChevronIcon: LeftRightIconButton(
+            iconColor: ColorConstant.primaryColor,
+          ).rotate(180).padSymm(),
+        ),
       ),
     );
   }

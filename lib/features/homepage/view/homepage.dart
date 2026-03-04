@@ -74,24 +74,16 @@ class _HomepageState extends State<Homepage> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color(0xFFF2F3F7),
-      appBar: AppBar(
-        leading: IconButton(
-          icon: Icon(Icons.menu),
-          onPressed: () {
-            homeController.mainScaffoldKey.currentState?.openDrawer();
-          },
-        ),
-        actions: [
-          GestureDetector(
-            onTap: () async {
-              // await SleepService.stopTracking();
-            },
-            child: Icon(Icons.notifications),
-          ),
-          SizedBox(width: 10),
-        ],
-        backgroundColor: Color(0xFFF2F3F7),
-      ),
+      // appBar: AppBar(
+      //   leading: IconButton(
+      //     icon: Icon(Icons.menu),
+      //     onPressed: () {
+      //       homeController.mainScaffoldKey.currentState?.openDrawer();
+      //     },
+      //   ),
+      //   actions: [],
+      //   backgroundColor: Color(0xFFF2F3F7),
+      // ),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
@@ -99,6 +91,7 @@ class _HomepageState extends State<Homepage> with WidgetsBindingObserver {
             crossAxisAlignment: CrossAxisAlignment.start,
             spacing: 16,
             children: [
+              SizedBox(height: 8),
               WelcomeHeader(),
               SleepStepCalories(),
               BookSpecialistCard(),
@@ -394,7 +387,7 @@ class WelcomeHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Text(
-      "Welcome back, Dave",
+      "Welcome back,",
       style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
     );
   }
@@ -804,7 +797,7 @@ class Ecosystem extends StatelessWidget {
               SizedBox(width: 6),
               Expanded(
                 child: iconLabelCard(
-                  label: "Breathing Exercise",
+                  label: "Fasting Tracker",
                   img: "assets/images/ic_personStanding.png",
                   onTap: () => Get.to(() => const FastingTrackerScreen()),
                 ),

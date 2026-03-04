@@ -148,6 +148,41 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       //   keyboardType: TextInputType.number,
                       //   prefixIcon: Icon(Icons.phone),
                       // ),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: CommonWidget.customTextField(
+                              "Height (cm)",
+                              controller: registerController.heightCmController,
+                              keyboardType:
+                                  const TextInputType.numberWithOptions(
+                                    decimal: true,
+                                  ),
+                              prefixIcon: Icon(
+                                Icons.height,
+                                color: Colors.grey.shade800,
+                              ),
+                              suffixText: "cm",
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: CommonWidget.customTextField(
+                              "Weight (kg)",
+                              controller: registerController.weightKgController,
+                              keyboardType:
+                                  const TextInputType.numberWithOptions(
+                                    decimal: true,
+                                  ),
+                              prefixIcon: Icon(
+                                Icons.monitor_weight_outlined,
+                                color: Colors.grey.shade800,
+                              ),
+                              suffixText: "kg",
+                            ),
+                          ),
+                        ],
+                      ),
                       CommonWidget.roundedButton(
                         context: context,
                         title: "Register",

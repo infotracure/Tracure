@@ -23,6 +23,8 @@ class ProfileData {
   final String? mobileNumber;
   final String? profileImage;
   final String? memberSince;
+  final double? heightCm;
+  final double? weightKg;
 
   ProfileData({
     this.firstName,
@@ -33,6 +35,8 @@ class ProfileData {
     this.mobileNumber,
     this.profileImage,
     this.memberSince,
+    this.heightCm,
+    this.weightKg,
   });
 
   factory ProfileData.fromJson(Map<String, dynamic> json) {
@@ -45,6 +49,8 @@ class ProfileData {
       mobileNumber: json['mobileNumber'],
       profileImage: json['profileImage'],
       memberSince: json['memberSince'],
+      heightCm: double.tryParse(json['heightCm'] as String? ?? ''),
+      weightKg: double.tryParse(json['weightKg'] as String? ?? ''),
     );
   }
 }

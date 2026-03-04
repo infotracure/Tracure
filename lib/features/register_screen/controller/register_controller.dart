@@ -17,6 +17,8 @@ class RegisterController extends GetxController {
   final emailController = TextEditingController();
   final dobController = TextEditingController();
   final otpTFC = TextEditingController();
+  final heightCmController = TextEditingController();
+  final weightKgController = TextEditingController();
   var gender = ''.obs;
 
   Future<void> registerUser() async {
@@ -29,6 +31,8 @@ class RegisterController extends GetxController {
         "gender": gender.value,
         "dateOfBirth": dobController.text,
         "email": emailController.text,
+        "heightCm": heightCmController.text,
+        "weightKg": weightKgController.text,
       };
       final res = await DioClient().post(url, data);
       hideGlobalLoader();
@@ -67,6 +71,27 @@ class RegisterController extends GetxController {
     final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
     if (!emailRegex.hasMatch(emailController.text)) {
       CommonWidget.showToast("Please enter a valid email address");
+      return;
+    }
+    if (heightCmController.text.isEmpty ||
+        double.tryParse(heightCmController.text) == null) {
+      CommonWidget.showToast("Please enter a valid height");
+      return;
+    }
+
+    final heightValue = double.tryParse(heightCmController.text);
+    if (heightValue != null && (heightValue < 100 || heightValue > 250)) {
+      CommonWidget.showToast("Height must be between 100 and 250 cm");
+      return;
+    }
+    if (weightKgController.text.isEmpty ||
+        double.tryParse(weightKgController.text) == null) {
+      CommonWidget.showToast("Please enter a valid weight");
+      return;
+    }
+    final weightValue = double.tryParse(weightKgController.text);
+    if (weightValue != null && (weightValue < 30 || weightValue > 300)) {
+      CommonWidget.showToast("Weight must be between 30 and 300 kg");
       return;
     }
 

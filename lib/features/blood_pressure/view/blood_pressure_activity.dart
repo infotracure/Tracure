@@ -106,8 +106,8 @@ class _BloodPressureActivityState extends State<BloodPressureActivity> {
                               onTap: () async {
                                 await bloodPressureController
                                     .getMonthlyBloodPressureSummary(
-                                  DateTime.now(),
-                                );
+                                      DateTime.now(),
+                                    );
                                 if (!context.mounted) return;
                                 showRoundedBottomSheet(
                                   context: context,
@@ -146,7 +146,12 @@ class _BloodPressureActivityState extends State<BloodPressureActivity> {
 
     // Map API data to weekly lists
     final records =
-        bloodPressureController.weeklyBloodPressureSummary.value?.data?.records ?? [];
+        bloodPressureController
+            .weeklyBloodPressureSummary
+            .value
+            ?.data
+            ?.records ??
+        [];
 
     // Create maps for quick lookup
     final Map<DateTime, int> systolicPerDay = {};
@@ -190,9 +195,11 @@ class _BloodPressureActivityState extends State<BloodPressureActivity> {
 
   Widget statsWidget() {
     final avgSystolic =
-        bloodPressureController.bloodPressureStats.value?.data?.avgSystolic ?? 0;
+        bloodPressureController.bloodPressureStats.value?.data?.avgSystolic ??
+        0;
     final avgDiastolic =
-        bloodPressureController.bloodPressureStats.value?.data?.avgDiastolic ?? 0;
+        bloodPressureController.bloodPressureStats.value?.data?.avgDiastolic ??
+        0;
     final avgPulse =
         bloodPressureController.bloodPressureStats.value?.data?.avgPulse ?? 0;
 
@@ -415,7 +422,9 @@ class _BloodPressureWeekBarChartState extends State<BloodPressureWeekBarChart> {
         ),
         borderData: FlBorderData(show: false),
         titlesData: FlTitlesData(
-          topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          topTitles: const AxisTitles(
+            sideTitles: SideTitles(showTitles: false),
+          ),
           rightTitles: AxisTitles(
             sideTitles: SideTitles(
               showTitles: true,
@@ -430,7 +439,9 @@ class _BloodPressureWeekBarChartState extends State<BloodPressureWeekBarChart> {
               },
             ),
           ),
-          leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          leftTitles: const AxisTitles(
+            sideTitles: SideTitles(showTitles: false),
+          ),
           bottomTitles: AxisTitles(
             sideTitles: SideTitles(
               showTitles: true,
@@ -453,13 +464,17 @@ class _BloodPressureWeekBarChartState extends State<BloodPressureWeekBarChart> {
             x: i,
             barRods: [
               BarChartRodData(
-                toY: widget.systolicData[i].isFinite ? widget.systolicData[i] : 0,
+                toY: widget.systolicData[i].isFinite
+                    ? widget.systolicData[i]
+                    : 0,
                 color: const Color(0xFFE53935),
                 width: 8,
                 borderRadius: BorderRadius.circular(2),
               ),
               BarChartRodData(
-                toY: widget.diastolicData[i].isFinite ? widget.diastolicData[i] : 0,
+                toY: widget.diastolicData[i].isFinite
+                    ? widget.diastolicData[i]
+                    : 0,
                 color: const Color(0xFFEC407A),
                 width: 8,
                 borderRadius: BorderRadius.circular(2),
@@ -507,7 +522,12 @@ class _BloodPressureCalendarState extends State<BloodPressureCalendar> {
 
   void _updateDataFromController() {
     final records =
-        _bloodPressureController.monthlyBloodPressureSummary.value?.data?.records ?? [];
+        _bloodPressureController
+            .monthlyBloodPressureSummary
+            .value
+            ?.data
+            ?.records ??
+        [];
     final Map<DateTime, Record> dataPerDay = {};
 
     for (var record in records) {
@@ -539,57 +559,63 @@ class _BloodPressureCalendarState extends State<BloodPressureCalendar> {
 
   @override
   Widget build(BuildContext context) {
-    return TableCalendar(
-      firstDay: DateTime.utc(2025, 5, 25),
-      lastDay: DateTime.now(),
-      focusedDay: _focusedDay,
-      calendarFormat: CalendarFormat.month,
-      startingDayOfWeek: StartingDayOfWeek.monday,
-      rowHeight: 52,
-      selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
-      calendarStyle: const CalendarStyle(outsideDaysVisible: false),
-      daysOfWeekStyle: const DaysOfWeekStyle(
-        weekendStyle: TextStyle(fontSize: 14, height: 1),
-        weekdayStyle: TextStyle(fontSize: 14, height: 1),
-      ),
-      onDaySelected: (selectedDay, focusedDay) {
-        setState(() {
-          _selectedDay = selectedDay;
-          _focusedDay = focusedDay;
-        });
-        if (widget.onDaySelected != null) {
-          widget.onDaySelected!(selectedDay);
-        }
-      },
-      onPageChanged: (focusedDay) async {
-        setState(() {
-          _focusedDay = focusedDay;
-        });
-        await _loadMonthData(focusedDay);
-      },
-      calendarBuilders: CalendarBuilders(
-        defaultBuilder: (context, day, focusedDay) {
-          return _buildDayCell(day);
+    return SizedBox(
+      height: 360,
+      child: TableCalendar(
+        firstDay: DateTime.utc(2025, 5, 25),
+        lastDay: DateTime.now(),
+        focusedDay: _focusedDay,
+        calendarFormat: CalendarFormat.month,
+        startingDayOfWeek: StartingDayOfWeek.monday,
+        rowHeight: 52,
+        selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
+        calendarStyle: const CalendarStyle(outsideDaysVisible: false),
+        daysOfWeekStyle: const DaysOfWeekStyle(
+          weekendStyle: TextStyle(fontSize: 14, height: 1),
+          weekdayStyle: TextStyle(fontSize: 14, height: 1),
+        ),
+        onDaySelected: (selectedDay, focusedDay) {
+          setState(() {
+            _selectedDay = selectedDay;
+            _focusedDay = focusedDay;
+          });
+          if (widget.onDaySelected != null) {
+            widget.onDaySelected!(selectedDay);
+          }
         },
-        selectedBuilder: (context, day, focusedDay) {
-          return _buildDayCell(day, isSelected: true);
+        onPageChanged: (focusedDay) async {
+          setState(() {
+            _focusedDay = focusedDay;
+          });
+          await _loadMonthData(focusedDay);
         },
-        todayBuilder: (context, day, focusedDay) {
-          return _buildDayCell(day, isToday: true);
-        },
-      ),
-      headerStyle: HeaderStyle(
-        formatButtonVisible: false,
-        titleTextStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
-        headerPadding: EdgeInsets.zero,
-        titleCentered: true,
-        leftChevronPadding: EdgeInsets.zero,
-        leftChevronIcon: LeftRightIconButton(
-          iconColor: widget.headerColor,
-        ).padSymm(),
-        rightChevronIcon: LeftRightIconButton(
-          iconColor: widget.headerColor,
-        ).rotate(180).padSymm(),
+        calendarBuilders: CalendarBuilders(
+          defaultBuilder: (context, day, focusedDay) {
+            return _buildDayCell(day);
+          },
+          selectedBuilder: (context, day, focusedDay) {
+            return _buildDayCell(day, isSelected: true);
+          },
+          todayBuilder: (context, day, focusedDay) {
+            return _buildDayCell(day, isToday: true);
+          },
+        ),
+        headerStyle: HeaderStyle(
+          formatButtonVisible: false,
+          titleTextStyle: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 17,
+          ),
+          headerPadding: EdgeInsets.zero,
+          titleCentered: true,
+          leftChevronPadding: EdgeInsets.zero,
+          leftChevronIcon: LeftRightIconButton(
+            iconColor: widget.headerColor,
+          ).padSymm(),
+          rightChevronIcon: LeftRightIconButton(
+            iconColor: widget.headerColor,
+          ).rotate(180).padSymm(),
+        ),
       ),
     );
   }

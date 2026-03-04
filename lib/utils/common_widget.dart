@@ -107,6 +107,8 @@ class CommonWidget {
     bool readOnly = false,
     Function()? onTap,
     Widget? prefixIcon,
+    Widget? suffixIcon,
+    String? suffixText,
 
     List<TextInputFormatter>? inputFormatters,
   }) {
@@ -137,6 +139,8 @@ class CommonWidget {
           horizontal: 12,
         ),
         prefixIcon: prefixIcon,
+        suffixIcon: suffixIcon,
+        suffixText: suffixText,
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
           borderSide: BorderSide.none,

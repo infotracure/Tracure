@@ -37,7 +37,8 @@ class AlarmReceiver : BroadcastReceiver() {
                     context.startService(serviceIntent)
                 }
                 Log.d("AlarmReceiver", "SleepTrackingService STARTED")
-//                SleepAlarmScheduler.scheduleSleepTracking(context, start, end)
+                // Re-schedule for the next day so alarms repeat daily
+                SleepAlarmScheduler.scheduleSleepTracking(context, start, end)
 
             }
             "STOP_SLEEP_TRACKING" -> {

@@ -1,57 +1,106 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:tracure/utils/constant/color_constants.dart';
-import 'package:tracure/utils/custom_text.dart';
 
-class FastingProgress extends StatelessWidget {
-  final Duration elapsed;
-  final Duration total;
+const Color _fastingRed = Color(0xFFE53935);
+const Color _fastingPinkBg = Color(0xFFFCE4EC);
 
-  const FastingProgress({Key? key, required this.elapsed, required this.total})
-    : super(key: key);
+class FastingProgressWidget extends StatelessWidget {
+  final int elapsedHours;
+  final int goalHours;
+  final String timerText;
+  final bool isFasting;
+  final double progress;
 
-  String _formatTime(Duration d) {
-    String twoDigits(int n) => n.toString().padLeft(2, "0");
-    return "${twoDigits(d.inHours)}:${twoDigits(d.inMinutes.remainder(60))}";
-  }
+  const FastingProgressWidget({
+    super.key,
+    required this.elapsedHours,
+    required this.goalHours,
+    required this.timerText,
+    required this.isFasting,
+    required this.progress,
+  });
 
   @override
   Widget build(BuildContext context) {
-    double percent = elapsed.inSeconds / total.inSeconds;
-    percent = percent.clamp(0.0, 1.0);
-
-    return SizedBox(
-      width: 180,
-      height: 180,
-      child: CustomPaint(
-        painter: _CircleProgressPainter(percent),
-        child: Center(
-          child: RichText(
-            textAlign: TextAlign.center,
-            text: TextSpan(
-              style: const TextStyle(fontSize: 16, color: Colors.black),
-              children: [
-                TextSpan(
-                  text: _formatTime(elapsed),
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.blue,
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 24),
+      decoration: BoxDecoration(
+        color: _fastingPinkBg,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Center(
+        child: SizedBox(
+          width: 200,
+          height: 200,
+          child: CustomPaint(
+            painter: _FastingCirclePainter(
+              progress: progress,
+              isFasting: isFasting,
+            ),
+            child: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (isFasting)
+                    Container(
+                      width: 12,
+                      height: 12,
+                      decoration: const BoxDecoration(
+                        color: _fastingRed,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  const SizedBox(height: 4),
+                  const Icon(Icons.favorite, color: Colors.pinkAccent, size: 28),
+                  const SizedBox(height: 4),
+                  RichText(
+                    textAlign: TextAlign.center,
+                    text: TextSpan(
+                      children: [
+                        TextSpan(
+                          text: '$elapsedHours',
+                          style: const TextStyle(
+                            fontSize: 36,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                          ),
+                        ),
+                        TextSpan(
+                          text: ' / $goalHours',
+                          style: const TextStyle(
+                            fontSize: 36,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                const TextSpan(text: "/"),
-                TextSpan(
-                  text: _formatTime(total),
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
+                  const Text(
+                    'HRS',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.black54,
+                      letterSpacing: 2,
+                    ),
                   ),
-                ),
-                const TextSpan(
-                  text: " hr",
-                  style: TextStyle(fontSize: 12, color: Colors.black54),
-                ),
-              ],
+                  const SizedBox(height: 4),
+                  Text(
+                    isFasting ? timerText : '0 bpm',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: isFasting ? _fastingRed : Colors.teal,
+                    ),
+                  ),
+                  Text(
+                    isFasting ? 'In Progress' : 'Ready to Start',
+                    style: const TextStyle(fontSize: 12, color: Colors.black45),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -60,44 +109,63 @@ class FastingProgress extends StatelessWidget {
   }
 }
 
-class _CircleProgressPainter extends CustomPainter {
-  final double percent;
+class _FastingCirclePainter extends CustomPainter {
+  final double progress;
+  final bool isFasting;
 
-  _CircleProgressPainter(this.percent);
+  _FastingCirclePainter({required this.progress, required this.isFasting});
 
   @override
   void paint(Canvas canvas, Size size) {
-    final strokeWidth = 10.0;
+    final strokeWidth = 12.0;
     final center = Offset(size.width / 2, size.height / 2);
     final radius = (size.width / 2) - strokeWidth / 2;
 
-    final backgroundPaint = Paint()
-      ..color = const Color(0xFFADC2E8).withAlpha(150)
+    // Background circle
+    final bgPaint = Paint()
+      ..color = _fastingPinkBg
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth;
+    canvas.drawCircle(center, radius, bgPaint);
 
-    final progressPaint = Paint()
-      ..shader = LinearGradient(
-        colors: [ColorConstant.primaryColor, ColorConstant.primaryColor],
-      ).createShader(Rect.fromCircle(center: center, radius: radius))
+    // White track
+    final trackPaint = Paint()
+      ..color = Colors.white
       ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round
       ..strokeWidth = strokeWidth;
+    canvas.drawCircle(center, radius, trackPaint);
 
-    // Draw background circle
-    canvas.drawCircle(center, radius, backgroundPaint);
+    if (progress > 0) {
+      // Progress arc
+      final progressPaint = Paint()
+        ..color = _fastingRed
+        ..style = PaintingStyle.stroke
+        ..strokeCap = StrokeCap.round
+        ..strokeWidth = strokeWidth;
 
-    // Draw progress arc
-    final sweepAngle = 2 * 3.1415926535 * percent;
-    canvas.drawArc(
-      Rect.fromCircle(center: center, radius: radius),
-      -3.1415926535 / 2, // start from top
-      sweepAngle,
-      false,
-      progressPaint,
-    );
+      final sweepAngle = 2 * pi * progress;
+      canvas.drawArc(
+        Rect.fromCircle(center: center, radius: radius),
+        -pi / 2,
+        sweepAngle,
+        false,
+        progressPaint,
+      );
+
+      // Red dot at progress tip
+      if (isFasting) {
+        final dotAngle = -pi / 2 + sweepAngle;
+        final dotX = center.dx + radius * cos(dotAngle);
+        final dotY = center.dy + radius * sin(dotAngle);
+        final dotPaint = Paint()..color = _fastingRed;
+        canvas.drawCircle(Offset(dotX, dotY), strokeWidth / 2 + 2, dotPaint);
+      }
+    }
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+  bool shouldRepaint(covariant _FastingCirclePainter oldDelegate) {
+    return oldDelegate.progress != progress ||
+        oldDelegate.isFasting != isFasting;
+  }
 }

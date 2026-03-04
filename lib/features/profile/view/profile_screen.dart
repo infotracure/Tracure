@@ -4,6 +4,9 @@ import 'package:intl/intl.dart';
 import 'package:tracure/utils/common_widget.dart';
 import 'package:tracure/utils/constant/color_constants.dart';
 import 'package:tracure/utils/custom_text.dart';
+import 'package:tracure/utils/extensions.dart';
+import '../../../servies/hive_service.dart';
+import '../../loginpage/view/login_page.dart';
 import '../controller/profile_controller.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -25,11 +28,7 @@ class ProfileScreen extends StatelessWidget {
                   child: Icon(Icons.person_outline, size: 22),
                 ),
           automaticallyImplyLeading: false,
-          title: CustomText.title(
-            text: "My Profile",
-            size: 16,
-            isBold: true,
-          ),
+          title: CustomText.title(text: "My Profile", size: 16, isBold: true),
           actions: [
             if (!isEditing)
               GestureDetector(
@@ -39,7 +38,7 @@ class ProfileScreen extends StatelessWidget {
                   padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   decoration: BoxDecoration(
                     color: ColorConstant.primaryColor,
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -68,35 +67,75 @@ class ProfileScreen extends StatelessWidget {
                     child: SingleChildScrollView(
                       child: Column(
                         children: [
+                          SizedBox(height: 20),
                           _profileHeader(controller),
-                          SizedBox(height: 16),
                           isEditing
                               ? _editForm(context, controller)
                               : _viewForm(controller),
+                          SizedBox(height: 20),
+                          logoutBtn(),
+                          SizedBox(height: 20),
                         ],
                       ),
                     ),
                   ),
-                  if (isEditing) _bottomButtons(context, controller),
+                  // if (isEditing) _bottomButtons(context, controller),
                 ],
               ),
       );
     });
   }
 
+  Widget logoutBtn() {
+    return GestureDetector(
+      onTap: () async {
+        await HiveService.instance.clear();
+        Get.offAll(() => LoginPage());
+      },
+      child: Container(
+        margin: EdgeInsets.only(right: 16),
+        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        decoration: BoxDecoration(
+          color: ColorConstant.red,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.logout, color: Colors.white, size: 16),
+            SizedBox(width: 6),
+            Text(
+              "Logout",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+                fontSize: 14,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _profileHeader(ProfileController controller) {
     return Container(
       width: double.infinity,
+      margin: EdgeInsets.symmetric(horizontal: 16),
       padding: EdgeInsets.symmetric(horizontal: 20, vertical: 24),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [Color(0xFF7B61FF), Color(0xFFB48CFF)],
+          stops: [0.6, 1],
+          colors: [
+            ColorConstant.primaryColor,
+            ColorConstant.primaryColor.withValues(alpha: 0.8),
+          ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(20),
-          bottomRight: Radius.circular(20),
+          topLeft: Radius.circular(20),
+          topRight: Radius.circular(20),
         ),
       ),
       child: Row(
@@ -115,28 +154,28 @@ class ProfileScreen extends StatelessWidget {
                   ),
                 ),
               ),
-              Positioned(
-                bottom: 0,
-                right: 0,
-                child: Container(
-                  padding: EdgeInsets.all(6),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black12,
-                        blurRadius: 4,
-                      ),
-                    ],
-                  ),
-                  child: Icon(
-                    Icons.camera_alt,
-                    size: 16,
-                    color: Colors.grey.shade700,
-                  ),
-                ),
-              ),
+              // Positioned(
+              //   bottom: 0,
+              //   right: 0,
+              //   child: Container(
+              //     padding: EdgeInsets.all(6),
+              //     decoration: BoxDecoration(
+              //       color: Colors.white,
+              //       shape: BoxShape.circle,
+              //       boxShadow: [
+              //         BoxShadow(
+              //           color: Colors.black12,
+              //           blurRadius: 4,
+              //         ),
+              //       ],
+              //     ),
+              //     child: Icon(
+              //       Icons.camera_alt,
+              //       size: 16,
+              //       color: Colors.grey.shade700,
+              //     ),
+              // ),
+              // ),
             ],
           ),
           SizedBox(width: 16),
@@ -155,10 +194,7 @@ class ProfileScreen extends StatelessWidget {
                 if (controller.memberSince.isNotEmpty)
                   Text(
                     "Member since ${controller.memberSince}",
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: Colors.white70,
-                    ),
+                    style: TextStyle(fontSize: 13, color: Colors.white70),
                   ),
                 SizedBox(height: 8),
                 Row(
@@ -188,10 +224,7 @@ class ProfileScreen extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Text(
-            label,
-            style: TextStyle(fontSize: 11, color: Colors.white70),
-          ),
+          Text(label, style: TextStyle(fontSize: 11, color: Colors.white70)),
           Text(
             value,
             style: TextStyle(
@@ -210,39 +243,60 @@ class ProfileScreen extends StatelessWidget {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 16),
       padding: EdgeInsets.all(20),
-      decoration: CommonWidget.containerDecoration(),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(20),
+          bottomRight: Radius.circular(20),
+        ),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _viewField(
-            "First Name",
-            data?.firstName ?? '',
-            Icons.person_outline,
-          ),
-          _viewField(
-            "Last Name",
-            data?.lastName ?? '',
-            Icons.person_outline,
-          ),
-          _viewField(
-            "Gender",
-            data?.gender ?? '',
-            Icons.male,
-          ),
+          _viewField("First Name", data?.firstName ?? '', Icons.person_outline),
+          _viewField("Last Name", data?.lastName ?? '', Icons.person_outline),
+          _viewField("Gender", data?.gender ?? '', Icons.male),
           _viewField(
             "Date of Birth",
             controller.displayDob,
             Icons.calendar_today_outlined,
           ),
-          _viewField(
-            "Email Address",
-            data?.email ?? '',
-            Icons.email_outlined,
+          _viewField("Email Address", data?.email ?? '', Icons.email_outlined),
+          Row(
+            children: [
+              Expanded(
+                child: _viewField(
+                  "Height",
+                  data?.heightCm != null
+                      ? '${formatNumber(data!.heightCm!)} cm'
+                      : '--',
+                  Icons.height,
+                ),
+              ),
+              SizedBox(width: 16),
+              Expanded(
+                child: _viewField(
+                  "Weight",
+                  data?.weightKg != null
+                      ? '${formatNumber(data!.weightKg!)} kg'
+                      : '--',
+                  Icons.monitor_weight_outlined,
+                ),
+              ),
+            ],
           ),
           _mobileField(controller.mobileNumber),
         ],
       ),
     );
+  }
+
+  String formatNumber(double value) {
+    if (value == value.roundToDouble()) {
+      return value.toInt().toString();
+    } else {
+      return value.toString();
+    }
   }
 
   Widget _viewField(String label, String value, IconData icon) {
@@ -254,7 +308,8 @@ class ProfileScreen extends StatelessWidget {
           CustomText.title(
             text: label,
             size: 12,
-            color: ColorConstant.primaryColor,
+            isBold: true,
+            color: ColorConstant.primaryTextColor,
           ),
           SizedBox(height: 8),
           Container(
@@ -282,21 +337,22 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _mobileField(String mobile) {
+  Widget _mobileField(String mobile, {bool isEditable = false}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         CustomText.title(
           text: "Mobile Number",
           size: 12,
-          color: ColorConstant.primaryColor,
+          isBold: true,
+          color: ColorConstant.primaryTextColor,
         ),
         SizedBox(height: 8),
         Container(
           width: double.infinity,
           padding: EdgeInsets.symmetric(horizontal: 14, vertical: 14),
           decoration: BoxDecoration(
-            color: Colors.grey.shade100,
+            color: !isEditable ? Colors.white : Colors.grey.shade100,
             border: Border.all(color: Colors.grey.shade300),
             borderRadius: BorderRadius.circular(10),
           ),
@@ -318,12 +374,9 @@ class ProfileScreen extends StatelessWidget {
                 ),
                 child: Text(
                   "Not Editable",
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: Colors.grey.shade600,
-                  ),
+                  style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
                 ),
-              ),
+              ).visible(isVisible: isEditable),
             ],
           ),
         ),
@@ -331,7 +384,7 @@ class ProfileScreen extends StatelessWidget {
         CustomText.title(
           text: "Contact support to update your mobile number",
           size: 11,
-          color: ColorConstant.primaryColor,
+          color: ColorConstant.primaryTextColor,
         ),
       ],
     );
@@ -339,7 +392,7 @@ class ProfileScreen extends StatelessWidget {
 
   Widget _editForm(BuildContext context, ProfileController controller) {
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 16),
+      margin: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       padding: EdgeInsets.all(20),
       decoration: CommonWidget.containerDecoration(),
       child: Column(
@@ -367,7 +420,29 @@ class ProfileScreen extends StatelessWidget {
             TextInputType.emailAddress,
           ),
           SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: _editField(
+                  "Height (cm)",
+                  controller.heightCmController,
+                  const TextInputType.numberWithOptions(decimal: true),
+                ),
+              ),
+              SizedBox(width: 16),
+              Expanded(
+                child: _editField(
+                  "Weight (kg)",
+                  controller.weightKgController,
+                  const TextInputType.numberWithOptions(decimal: true),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 16),
           _mobileField(controller.mobileNumber),
+          SizedBox(height: 16),
+          _bottomButtons(context, controller),
         ],
       ),
     );
@@ -384,7 +459,8 @@ class ProfileScreen extends StatelessWidget {
         CustomText.title(
           text: label,
           size: 12,
-          color: ColorConstant.primaryColor,
+          isBold: true,
+          color: ColorConstant.primaryTextColor,
         ),
         SizedBox(height: 8),
         TextFormField(
@@ -412,8 +488,8 @@ class ProfileScreen extends StatelessWidget {
   }
 
   Widget _genderSelector(ProfileController controller) {
-    final genders = ['Male', 'Female', 'Other'];
-    final emojis = ['\u{1F466}', '\u{1F467}', '\u{1F9D1}'];
+    final genders = ['Male', 'Female'];
+    final emojis = ['\u{1F466}', '\u{1F467}'];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -421,51 +497,54 @@ class ProfileScreen extends StatelessWidget {
         CustomText.title(
           text: "Gender",
           size: 12,
-          color: ColorConstant.primaryColor,
+          isBold: true,
+          color: ColorConstant.primaryTextColor,
         ),
         SizedBox(height: 8),
-        Obx(() => Row(
-              children: List.generate(genders.length, (i) {
-                final isSelected = controller.selectedGender.value == genders[i];
-                return Expanded(
-                  child: GestureDetector(
-                    onTap: () => controller.selectedGender.value = genders[i],
-                    child: Container(
-                      margin: EdgeInsets.only(right: i < 2 ? 10 : 0),
-                      padding: EdgeInsets.symmetric(vertical: 12),
-                      decoration: BoxDecoration(
+        Obx(
+          () => Row(
+            children: List.generate(genders.length, (i) {
+              final isSelected = controller.selectedGender.value == genders[i];
+              return Expanded(
+                child: GestureDetector(
+                  onTap: () => controller.selectedGender.value = genders[i],
+                  child: Container(
+                    margin: EdgeInsets.only(right: i < 2 ? 10 : 0),
+                    padding: EdgeInsets.symmetric(vertical: 12),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? ColorConstant.primaryColor.withValues(alpha: 0.1)
+                          : Colors.white,
+                      border: Border.all(
                         color: isSelected
-                            ? ColorConstant.primaryColor.withValues(alpha: 0.1)
-                            : Colors.white,
-                        border: Border.all(
-                          color: isSelected
-                              ? ColorConstant.primaryColor
-                              : Colors.grey.shade300,
-                        ),
-                        borderRadius: BorderRadius.circular(10),
+                            ? ColorConstant.primaryColor
+                            : Colors.grey.shade300,
                       ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(emojis[i], style: TextStyle(fontSize: 18)),
-                          SizedBox(width: 6),
-                          Text(
-                            genders[i],
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: isSelected
-                                  ? ColorConstant.primaryColor
-                                  : Colors.grey.shade700,
-                            ),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(emojis[i], style: TextStyle(fontSize: 18)),
+                        SizedBox(width: 6),
+                        Text(
+                          genders[i],
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: isSelected
+                                ? ColorConstant.primaryColor
+                                : Colors.grey.shade700,
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
-                );
-              }),
-            )),
+                ),
+              );
+            }),
+          ),
+        ),
       ],
     );
   }
@@ -477,7 +556,8 @@ class ProfileScreen extends StatelessWidget {
         CustomText.title(
           text: "Date of Birth",
           size: 12,
-          color: ColorConstant.primaryColor,
+          isBold: true,
+          color: ColorConstant.primaryTextColor,
         ),
         SizedBox(height: 8),
         TextFormField(
@@ -487,8 +567,9 @@ class ProfileScreen extends StatelessWidget {
             final now = DateTime.now();
             DateTime initialDate;
             try {
-              initialDate =
-                  DateFormat('dd-MM-yyyy').parse(controller.dobController.text);
+              initialDate = DateFormat(
+                'dd-MM-yyyy',
+              ).parse(controller.dobController.text);
             } catch (_) {
               initialDate = DateTime(2000);
             }
@@ -500,14 +581,17 @@ class ProfileScreen extends StatelessWidget {
               lastDate: now,
             );
             if (pickedDate != null) {
-              controller.dobController.text =
-                  DateFormat('dd-MM-yyyy').format(pickedDate);
+              controller.dobController.text = DateFormat(
+                'dd-MM-yyyy',
+              ).format(pickedDate);
             }
           },
           decoration: InputDecoration(
             contentPadding: EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-            suffixIcon:
-                Icon(Icons.calendar_today_outlined, color: Colors.grey.shade600),
+            suffixIcon: Icon(
+              Icons.calendar_today_outlined,
+              color: Colors.grey.shade600,
+            ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
               borderSide: BorderSide(color: Colors.grey.shade300),
@@ -527,53 +611,40 @@ class ProfileScreen extends StatelessWidget {
   }
 
   Widget _bottomButtons(BuildContext context, ProfileController controller) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.shade300,
-            blurRadius: 6,
-            offset: Offset(0, -2),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: OutlinedButton.icon(
-              onPressed: () => controller.cancelEdit(),
-              icon: Icon(Icons.close, size: 18),
-              label: Text("Cancel"),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: Colors.grey.shade700,
-                side: BorderSide(color: Colors.grey.shade300),
-                padding: EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
+    return Row(
+      children: [
+        Expanded(
+          child: OutlinedButton.icon(
+            onPressed: () => controller.cancelEdit(),
+            icon: Icon(Icons.close, size: 18),
+            label: Text("Cancel"),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: Colors.grey.shade700,
+              side: BorderSide(color: Colors.grey.shade300),
+              padding: EdgeInsets.symmetric(vertical: 14),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
               ),
             ),
           ),
-          SizedBox(width: 12),
-          Expanded(
-            child: ElevatedButton.icon(
-              onPressed: () => controller.updateProfile(),
-              icon: Icon(Icons.save, size: 18),
-              label: Text("Save Changes"),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: ColorConstant.primaryColor,
-                foregroundColor: Colors.white,
-                padding: EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
+        ),
+        SizedBox(width: 12),
+        Expanded(
+          child: ElevatedButton.icon(
+            onPressed: () => controller.updateProfile(),
+            // icon: Icon(Icons.save, size: 18),
+            label: Text("Save Changes"),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: ColorConstant.primaryColor,
+              foregroundColor: Colors.white,
+              padding: EdgeInsets.symmetric(vertical: 14),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
               ),
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 

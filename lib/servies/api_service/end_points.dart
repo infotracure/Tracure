@@ -45,8 +45,9 @@ class EndPoints {
   static const String bloodPressureInsert = "$baseUrl/blood-pressure";
   static const String bloodPressureGoals = "$baseUrl/blood-pressure/goals";
   static const String bloodPressureTrend = "$baseUrl/blood-pressure/trend";
-  static const String bloodPressureStats = "$baseUrl/blood-pressure/stats"; 
-  static const String bloodPressureReadings = "$baseUrl/blood-pressure/readings"; 
+  static const String bloodPressureStats = "$baseUrl/blood-pressure/stats";
+  static const String bloodPressureReadings =
+      "$baseUrl/blood-pressure/readings";
   //* Blood Sugar Endpoints */
   static const String bloodSugarSummry = "$baseUrl/blood-sugar/summary";
   static const String bloodSugarInsert = "$baseUrl/blood-sugar";
@@ -54,7 +55,23 @@ class EndPoints {
   static const String bloodSugarTrend = "$baseUrl/blood-sugar/trend";
   static const String bloodSugarStats = "$baseUrl/blood-sugar/stats";
   static const String bloodSugarReadings = "$baseUrl/blood-sugar/readings";
+  //* Fasting Endpoints */
+  static const String fastingInsert = "$baseUrl/fasting";
+  static const String fastingSummary = "$baseUrl/fasting/summary";
+  static const String fastingSummaryByRange = "$baseUrl/fasting/summarybyrange";
+  static const String fastingByDate = "$baseUrl/fasting/bydate";
+  static const String fastingStats = "$baseUrl/fasting/stats";
+  static const String fastingGoals = "$baseUrl/fasting/goals";
   //* Profile Endpoints */
   static const String getProfile = "$baseUrl/user/profile";
   static const String updateProfile = "$baseUrl/user/profile";
+  //* Medicine Tracker Endpoints */
+  static const String medicineSchedule = "$baseUrl/medicine/schedule";
+  static const String medicineSummary = "$baseUrl/medicine/summary";
+  static const String medicineScheduleUpdate = "$baseUrl/medicine/schedule";
+  static const String medicineScheduleDelete = "$baseUrl/medicine/schedule";
+  static const String medicineScheduleStatus =
+      "$baseUrl/medicine/schedule/status";
+  static const String medicineIntakeTaken = "$baseUrl/medicine/intake";
+  static const String medicineIntakeUdo = "$baseUrl/medicine/intake";
 }

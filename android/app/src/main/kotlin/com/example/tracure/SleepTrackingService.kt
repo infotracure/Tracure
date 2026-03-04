@@ -50,7 +50,7 @@ class SleepTrackingService : Service(), SensorEventListener {
     private val PERIODIC_SAVE_INTERVAL_MS = 30 * 60 * 1000L // 30 minutes
 
     // Noise detection
-    private lateinit var noiseDetector: NoiseDetector
+    private var noiseDetector: NoiseDetector? = null
 
     companion object {
         var isRunning = false
@@ -69,8 +69,20 @@ class SleepTrackingService : Service(), SensorEventListener {
         lastMovementTime = System.currentTimeMillis()
         lastSaveTime = System.currentTimeMillis()
         sleepStartTime = getCurrentTime()
-        noiseDetector = NoiseDetector(this)
-        noiseDetector.start()
+        // Only start noise detection if microphone permission is granted
+        val hasMicPermission = checkSelfPermission(android.Manifest.permission.RECORD_AUDIO) ==
+                android.content.pm.PackageManager.PERMISSION_GRANTED
+        if (hasMicPermission) {
+            try {
+                noiseDetector = NoiseDetector(this)
+                noiseDetector?.start()
+            } catch (e: Exception) {
+                Log.w("SleepTracking", "Failed to start NoiseDetector: ${e.message}")
+                noiseDetector = null
+            }
+        } else {
+            Log.d("SleepTracking", "Skipping NoiseDetector - RECORD_AUDIO not granted")
+        }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -94,7 +106,7 @@ class SleepTrackingService : Service(), SensorEventListener {
 
     override fun onDestroy() {
         sensorManager.unregisterListener(this)
-        noiseDetector.stop()
+        noiseDetector?.stop()
         if (isSleeping && sleepStartTime != null) {
             val sleepEnd = getCurrentTime()
             sendSleepData(sleepStartTime!!, sleepEnd)
@@ -133,7 +145,7 @@ class SleepTrackingService : Service(), SensorEventListener {
         val movement = sqrt(deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ)
 
         // Log the movement and noise for debugging
-        val noiseDb = noiseDetector.latestDb
+        val noiseDb = noiseDetector?.latestDb ?: -1f
         val noiseStr = if (noiseDb >= 0) "${noiseDb}dB" else "N/A"
         Log.d("Sensor", "Δ Movement: $movement | Noise: $noiseStr | time: $sleepStartTime")
 
@@ -201,8 +213,8 @@ class SleepTrackingService : Service(), SensorEventListener {
 
         val sleepDate = calculateSleepDate(startDateTime)
 
-        val noise = noiseDetector.getStatsAndReset()
-
+        val noise = noiseDetector?.getStatsAndReset()
+            ?: NoiseStats(0f, 0f, 0f)
         Log.d("SleepTracking", "Sleep on $sleepDate from $start to $end | noise avg=${noise.avgDb} max=${noise.maxDb} min=${noise.minDb}")
 
         val session = SleepSession(

@@ -50,8 +50,6 @@ class DioClient {
     CancelToken? cancelToken,
   }) async {
     try {
-
-
       final response = await _dio.post(
         url,
         data: data,
@@ -60,6 +58,55 @@ class DioClient {
         cancelToken: cancelToken,
       );
 
+      return DioResponse(response);
+    } catch (e) {
+      // debugPrint(e.toString());
+      var dioError = DioExceptions.fromDioError(e as DioException);
+      return dioError;
+    }
+  }
+
+  Future<ApiResponse> put(
+    String url,
+    data, {
+    Map<String, dynamic>? queryParam,
+    ProgressCallback? onResponse,
+    Options? options,
+    CancelToken? cancelToken,
+  }) async {
+    try {
+      final response = await _dio.put(
+        url,
+        data: data,
+        queryParameters: queryParam,
+        options: options,
+        cancelToken: cancelToken,
+      );
+
+      return DioResponse(response);
+    } catch (e) {
+      // debugPrint(e.toString());
+      var dioError = DioExceptions.fromDioError(e as DioException);
+      return dioError;
+    }
+  }
+
+  Future<ApiResponse> delete(
+    String url, {
+    Object? data,
+    Map<String, dynamic>? queryParam,
+    ProgressCallback? onResponse,
+    Options? options,
+    CancelToken? cancelToken,
+  }) async {
+    try {
+      final response = await _dio.delete(
+        url,
+        data: data,
+        queryParameters: queryParam,
+        options: options,
+        cancelToken: cancelToken,
+      );
 
       return DioResponse(response);
     } catch (e) {

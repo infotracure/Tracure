@@ -10,6 +10,7 @@
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"/>
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"/>
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
 
 
     <application
@@ -81,6 +82,13 @@
             android:foregroundServiceType="health|microphone"
             android:permission="android.permission.FOREGROUND_SERVICE" />
         <receiver android:name="com.tracure.main.AlarmReceiver" android:exported="true"/>
+        <receiver
+            android:name="com.tracure.main.BootReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
 
     </application>
     <!-- Required to query activities that can process text, see:
