@@ -27,6 +27,17 @@ class StepTrackerController extends GetxController {
     null,
   );
   Rx<StepByDateModel?> todayAllSteps = Rx<StepByDateModel?>(null);
+
+  // Toggle between steps and calories view
+  final showCalories = false.obs;
+
+  /// Calories calculated from today's steps using 0.04 kcal/step formula
+  int get calculatedCalories =>
+      ((stepsSummaryByDate.value?.data?.steps ?? 0) * 0.04).round();
+
+  int get calorieGoal =>
+      ((stepsSummaryByDate.value?.data?.stepGoals ?? 0) * 0.04).round();
+
   @override
   void onInit() async {
     super.onInit();
@@ -98,7 +109,11 @@ class StepTrackerController extends GetxController {
     }
   }
 
-  Future<void> getStepSummaryByRange(String startDate, String endDate) async {
+  Future<void> getStepSummaryByRange(
+    String startDate,
+    String endDate, {
+    bool toast = false,
+  }) async {
     try {
       showGlobalLoader();
 
@@ -111,6 +126,9 @@ class StepTrackerController extends GetxController {
         StepSummaryByRangeModel.fromJson,
       );
       if (stepWeeklyModel.value?.code != 1) {
+        if (!toast) {
+          return;
+        }
         CommonWidget.showToast(
           stepWeeklyModel.value?.message ??
               StringConstant.internalErrorExceptionMessage,

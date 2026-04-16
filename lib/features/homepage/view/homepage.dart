@@ -4,22 +4,21 @@ import 'package:intl/intl.dart';
 
 import 'package:tracure/features/blood_pressure/view/blood_pressure_screen.dart';
 import 'package:tracure/features/blood_sugar/view/blood_sugar_screen.dart';
+import 'package:tracure/features/blood_sugar/view/blood_sugar_settings.dart';
+import 'package:tracure/features/fasting_tracker/controller/fasting_tracker_controller.dart';
 import 'package:tracure/features/fasting_tracker/view/fasting_tracker__screen.dart';
 import 'package:tracure/features/homepage/controller/home_controller.dart';
-import 'package:tracure/features/homepage/view/CircularProgressWidget.dart'
-    show CircularProgressWidget;
 import 'package:tracure/features/medicine_tracker/view/medicine_tracker_screen.dart';
+import 'package:tracure/features/profile/controller/profile_controller.dart';
 import 'package:tracure/features/sleep_tracker/view/sleep_tracker_screen.dart';
 import 'package:tracure/features/step_tracker/view/step_tracker_screen.dart';
 import 'package:tracure/features/water_intake/view/water_intake_screen.dart';
 import 'package:tracure/servies/app_permission.dart';
-import 'package:tracure/servies/health_service.dart';
 import 'package:tracure/utils/common_widget.dart';
 import 'package:tracure/utils/extensions.dart';
 
 import '../../../servies/sleep_service.dart';
 import '../../../utils/constant/color_constants.dart';
-import '../../../utils/custom_text.dart';
 import 'gym_checkin_dialog.dart';
 
 class Homepage extends StatefulWidget {
@@ -31,10 +30,11 @@ class Homepage extends StatefulWidget {
 
 class _HomepageState extends State<Homepage> with WidgetsBindingObserver {
   final homeController = Get.find<HomeController>();
+
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this); // start listening
+    WidgetsBinding.instance.addObserver(this);
   }
 
   @override
@@ -42,7 +42,6 @@ class _HomepageState extends State<Homepage> with WidgetsBindingObserver {
     if (state == AppLifecycleState.resumed) {
       homeController.setStepValue();
       homeController.setSleepValue();
-      // Sync steps silently in background
       homeController.checkForLastStepPushedData(silent: true);
       homeController.checkForLastSleepPushedData(silent: true);
       _requestPermissionsOnResume();
@@ -54,9 +53,6 @@ class _HomepageState extends State<Homepage> with WidgetsBindingObserver {
     if (isAlarmGranted) {
       await homeController.scheduleSleep();
     }
-    // These permissions are required BEFORE starting the foreground service:
-    // - ACTIVITY_RECOGNITION → needed for FOREGROUND_SERVICE_TYPE_HEALTH
-    // - RECORD_AUDIO → needed for FOREGROUND_SERVICE_TYPE_MICROPHONE
     await AppPermission.requestActivityPermission();
     await AppPermission.requestMicrophonePermission();
     await AppPermission.requestBatteryUnrestricted();
@@ -66,40 +62,41 @@ class _HomepageState extends State<Homepage> with WidgetsBindingObserver {
 
   @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this); // cleanup
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFF2F3F7),
-      // appBar: AppBar(
-      //   leading: IconButton(
-      //     icon: Icon(Icons.menu),
-      //     onPressed: () {
-      //       homeController.mainScaffoldKey.currentState?.openDrawer();
-      //     },
-      //   ),
-      //   actions: [],
-      //   backgroundColor: Color(0xFFF2F3F7),
-      // ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            spacing: 16,
-            children: [
-              SizedBox(height: 8),
-              WelcomeHeader(),
-              SleepStepCalories(),
-              BookSpecialistCard(),
-              WaterFastinWidget(),
-              GymCheckinWidget(),
-              HealthEcosystem(),
-              WeeklyHealthInsight(),
-            ],
+      backgroundColor: const Color(0xFFF2F3F7),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: const [
+                _WelcomeHeader(),
+                SizedBox(height: 16),
+                _DailyProgressCard(),
+                SizedBox(height: 16),
+                _SleepStepsCaloriesCard(),
+                // SizedBox(height: 16),
+                // _YogaPromoCard(),
+                SizedBox(height: 16),
+                _WaterFastingRow(),
+                SizedBox(height: 16),
+                GymCheckinWidget(),
+                SizedBox(height: 16),
+                _ExploreHealthEcosystem(),
+                SizedBox(height: 16),
+                _WeeklyHealthHighlights(),
+                SizedBox(height: 16),
+                _OtherHighlights(),
+                SizedBox(height: 24),
+              ],
+            ),
           ),
         ),
       ),
@@ -107,41 +104,114 @@ class _HomepageState extends State<Homepage> with WidgetsBindingObserver {
   }
 }
 
-class WaterFastinWidget extends StatelessWidget {
-  WaterFastinWidget({super.key});
-  final homeController = Get.find<HomeController>();
+// ---------------------------------------------------------------------------
+// Welcome Header
+// ---------------------------------------------------------------------------
+class _WelcomeHeader extends StatelessWidget {
+  const _WelcomeHeader();
 
   @override
   Widget build(BuildContext context) {
-    return Obx(() {
-      final waterData =
-          homeController.dashboardActivityModel?.value?.data?.water;
-      final totalMl = waterData?.totalMl ?? 0;
-      final waterProgress = (waterData?.percentageAchieved ?? 0) / 100;
+    ProfileController? profileCtrl;
+    try {
+      profileCtrl = Get.find<ProfileController>();
+    } catch (_) {}
 
-      return SizedBox(
-        height: 90,
+    if (profileCtrl != null) {
+      return Obx(() {
+        final name = profileCtrl!.profileModel.value?.data?.firstName ?? 'User';
+        return Text(
+          'Welcome back, $name',
+          style: const TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
+          ),
+        );
+      });
+    }
+    return const Text(
+      'Welcome back,',
+      style: TextStyle(
+        fontSize: 22,
+        fontWeight: FontWeight.bold,
+        color: Colors.black87,
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Daily Progress Card (white with green circular progress)
+// ---------------------------------------------------------------------------
+class _DailyProgressCard extends StatelessWidget {
+  const _DailyProgressCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final homeController = Get.find<HomeController>();
+    return Obx(() {
+      final dashboard = homeController.dashboardActivityModel?.value?.data;
+      final overallScore = (dashboard?.overallScore ?? 0);
+      final percent = (overallScore / 100).clamp(0.0, 1.0);
+
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+        decoration: CommonWidget.containerDecoration(),
         child: Row(
           children: [
             Expanded(
-              child: iconLabelCard(
-                label: "Water Intake",
-                img: "assets/images/fluent-emoji_glass-of-milk.png",
-                color: Color(0xFF5B84D0),
-                value: _formatWaterValue(totalMl),
-                progress: waterProgress.clamp(0.0, 1.0),
-                onTap: () => Get.to(() => const WaterIntakeScreen()),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    _heading(percent),
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'Keep up the momentum by finishing your\ndaily goals.',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Colors.grey.shade600,
+                      height: 1.4,
+                    ),
+                  ),
+                ],
               ),
             ),
-            SizedBox(width: 16),
-            Expanded(
-              child: iconLabelCard(
-                label: "Fasting",
-                img: "assets/images/ic_fasting.png",
-                color: Color(0xFF40C057),
-                value: "01:02 hr",
-                progress: 0.0,
-                onTap: () => Get.to(() => const FastingTrackerScreen()),
+            const SizedBox(width: 16),
+            SizedBox(
+              width: 80,
+              height: 80,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  SizedBox(
+                    width: 80,
+                    height: 80,
+                    child: CircularProgressIndicator(
+                      value: percent,
+                      strokeWidth: 7,
+                      backgroundColor: Colors.grey.shade200,
+                      valueColor: const AlwaysStoppedAnimation<Color>(
+                        Color(0xFF2ECC71),
+                      ),
+                    ),
+                  ),
+                  Text(
+                    '${overallScore.round()}',
+                    style: const TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
@@ -150,49 +220,142 @@ class WaterFastinWidget extends StatelessWidget {
     });
   }
 
-  String _formatWaterValue(int ml) {
-    if (ml >= 1000) {
-      return '${(ml / 1000).toStringAsFixed(1)} L';
-    }
-    return '$ml ml';
+  String _heading(double p) {
+    if (p >= 0.7) return "You're Doing Great!";
+    if (p >= 0.4) return "Keep Going!";
+    return "Let's Get Moving!";
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Sleep / Steps / Calories — single card, 3 columns
+// ---------------------------------------------------------------------------
+class _SleepStepsCaloriesCard extends StatelessWidget {
+  const _SleepStepsCaloriesCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final homeController = Get.find<HomeController>();
+    return Obx(() {
+      final dashboard = homeController.dashboardActivityModel?.value?.data;
+
+      // Sleep
+      final sleepMinutes = dashboard?.sleep?.totalSleepMinutes ?? 0;
+      final sleepRaw = homeController.todaySleep.value;
+      final sleepDisplay = _formatSleep(sleepRaw);
+      final sleepProgress = (sleepMinutes / 480).clamp(0.0, 1.0);
+
+      // Steps
+      final totalSteps = dashboard?.steps?.totalSteps ?? 0;
+      final stepsProgress = ((dashboard?.steps?.stepsPercentage ?? 0) / 100)
+          .clamp(0.0, 1.0);
+      final stepsDisplay = _fmtNum(totalSteps);
+
+      // Calories — calculated from today's steps using 0.04 kcal/step
+      final calories = (totalSteps * 0.04).round();
+      final caloriesProgress = (calories / 500).clamp(0.0, 1.0);
+      final caloriesDisplay = _fmtNum(calories);
+
+      return Container(
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 4),
+        decoration: CommonWidget.containerDecoration(),
+        child: Row(
+          children: [
+            Expanded(
+              child: _statColumn(
+                label: 'Sleep',
+                value: sleepDisplay,
+                icon: "assets/images/fluent-emoji_sleeping-face.png",
+                iconColor: const Color(0xFF5B84D0),
+                progress: sleepProgress,
+                progressColor: const Color(0xFF5B84D0),
+                onTap: () => Get.to(() => const SleepTrackerScreen()),
+              ),
+            ),
+            _divider(),
+            Expanded(
+              child: _statColumn(
+                label: 'Steps',
+                value: stepsDisplay,
+                icon: "assets/images/emojione_running-shoe.png",
+                iconColor: const Color(0xFF20C997),
+                progress: stepsProgress,
+                progressColor: const Color(0xFF5B84D0),
+                onTap: () => Get.to(() => const StepTrackerScreen()),
+              ),
+            ),
+            _divider(),
+            Expanded(
+              child: _statColumn(
+                label: 'Calories',
+                value: '$caloriesDisplay kcal',
+                icon: "assets/images/fluent-emoji_fire.png",
+                iconColor: const Color(0xFFFF922B),
+                progress: caloriesProgress,
+                progressColor: const Color(0xFFFF922B),
+                onTap: () => Get.to(() => const StepTrackerScreen(initialShowCalories: true)),
+              ),
+            ),
+          ],
+        ),
+      );
+    });
   }
 
-  Widget iconLabelCard({
+  Widget _divider() =>
+      Container(width: 1, height: 64, color: Colors.grey.shade200);
+
+  Widget _statColumn({
     required String label,
-    required String img,
-    required Color color,
     required String value,
+    required String icon,
+    required Color iconColor,
     required double progress,
+    required Color progressColor,
     VoidCallback? onTap,
   }) {
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-        decoration: CommonWidget.containerDecoration(),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            CustomText.title(text: label, size: 14, isBold: true),
-            SizedBox(height: 8),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.grey.shade500,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 6),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Text(
-                  value,
-                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                Expanded(
+                  child: Text(
+                    value,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
-                Image.asset(img, height: 20, width: 20),
+                const SizedBox(width: 4),
+                Image.asset(icon, width: 20, height: 20),
               ],
             ),
-            SizedBox(height: 6),
+            const SizedBox(height: 8),
             ClipRRect(
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(4),
               child: LinearProgressIndicator(
                 value: progress,
-                minHeight: 6,
+                minHeight: 4,
                 backgroundColor: Colors.grey.shade200,
-                valueColor: AlwaysStoppedAnimation<Color>(color),
+                valueColor: AlwaysStoppedAnimation<Color>(progressColor),
               ),
             ),
           ],
@@ -200,8 +363,399 @@ class WaterFastinWidget extends StatelessWidget {
       ),
     );
   }
+
+  String _fmtNum(int n) => n >= 1000 ? NumberFormat('#,###').format(n) : '$n';
+
+  String _formatSleep(String raw) {
+    // "8h 14min" → "8 h 14m"
+    return raw.replaceAll('min', 'm').replaceAll('h ', ' h ');
+  }
 }
 
+// ---------------------------------------------------------------------------
+// Yoga Gurukul Promo Card (static recommendation card)
+// ---------------------------------------------------------------------------
+class _YogaPromoCard extends StatelessWidget {
+  const _YogaPromoCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: CommonWidget.containerDecoration(),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Yoga Gurukul',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    RichText(
+                      text: TextSpan(
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Colors.grey.shade600,
+                          height: 1.4,
+                        ),
+                        children: const [
+                          TextSpan(
+                            text:
+                                'Know the benefits of yoga from world renowned specialist ',
+                          ),
+                          TextSpan(
+                            text: 'Dr. David Frawley',
+                            style: TextStyle(
+                              color: Color(0xFF5B84D0),
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '02nd June 2025',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey.shade400,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Row(
+                      children: const [
+                        Text(
+                          'Book Now',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Color(0xFF5B84D0),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        SizedBox(width: 4),
+                        Icon(
+                          Icons.arrow_forward,
+                          size: 14,
+                          color: Color(0xFF5B84D0),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+              ClipOval(
+                child: Container(
+                  width: 72,
+                  height: 72,
+                  color: Colors.grey.shade200,
+                  child: Icon(
+                    Icons.self_improvement,
+                    size: 36,
+                    color: Colors.grey.shade500,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          // Pagination dots
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: List.generate(5, (i) {
+              return Container(
+                margin: const EdgeInsets.symmetric(horizontal: 3),
+                width: i == 0 ? 20 : 8,
+                height: 8,
+                decoration: BoxDecoration(
+                  color: i == 0
+                      ? const Color(0xFF5B84D0)
+                      : Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              );
+            }),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Water Intake & Fasting Row
+// ---------------------------------------------------------------------------
+class _WaterFastingRow extends StatelessWidget {
+  const _WaterFastingRow();
+
+  @override
+  Widget build(BuildContext context) {
+    final homeController = Get.find<HomeController>();
+
+    FastingTrackerController? fastingCtrl;
+    try {
+      fastingCtrl = Get.find<FastingTrackerController>();
+    } catch (_) {}
+
+    return Obx(() {
+      final waterData =
+          homeController.dashboardActivityModel?.value?.data?.water;
+      final totalMl = waterData?.totalMl ?? 0;
+      final waterProgress = ((waterData?.percentageAchieved ?? 0) / 100).clamp(
+        0.0,
+        1.0,
+      );
+
+      return Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Water Intake
+          Expanded(
+            child: GestureDetector(
+              onTap: () => Get.to(() => const WaterIntakeScreen()),
+              child: Container(
+                padding: const EdgeInsets.all(14),
+                decoration: CommonWidget.containerDecoration(),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Water Intake',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                    Row(
+                      children: [
+                        Text(
+                          '$totalMl',
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          'ml',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey.shade500,
+                          ),
+                        ),
+                        const Spacer(),
+                        Image.asset(
+                          "assets/images/fluent-emoji_glass-of-milk.png",
+                          width: 23,
+                          height: 23,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(4),
+                      child: LinearProgressIndicator(
+                        value: waterProgress,
+                        minHeight: 5,
+                        backgroundColor: Colors.grey.shade200,
+                        valueColor: const AlwaysStoppedAnimation<Color>(
+                          Color(0xFF5B84D0),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          // Fasting
+          Expanded(
+            child: GestureDetector(
+              onTap: () => Get.to(() => const FastingTrackerScreen()),
+              child: Container(
+                padding: const EdgeInsets.all(14),
+                decoration: CommonWidget.containerDecoration(),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Fasting',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                    if (fastingCtrl != null)
+                      Obx(() {
+                        final totalMinutes =
+                            fastingCtrl!.fastingByDateModel.value?.data
+                                ?.fold<int>(
+                                  0,
+                                  (sum, d) => sum + (d.durationMinutes ?? 0),
+                                ) ??
+                            0;
+                        final goalMinutes =
+                            fastingCtrl.selectedPlan.value.fastHours * 60;
+                        final progress = goalMinutes > 0
+                            ? (totalMinutes / goalMinutes).clamp(0.0, 1.0)
+                            : 0.0;
+                        return Column(
+                          children: [
+                            Row(
+                              children: [
+                                Text(
+                                  _formatFasting(totalMinutes * 60),
+                                  style: const TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black87,
+                                  ),
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  'hr',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey.shade500,
+                                  ),
+                                ),
+                                const Spacer(),
+                                Image.asset(
+                                  "assets/images/ic_fasting.png",
+                                  width: 23,
+                                  height: 23,
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 10),
+                            Row(
+                              children: [
+                                if (fastingCtrl.isFasting.value) ...[
+                                  Container(
+                                    width: 10,
+                                    height: 10,
+                                    decoration: const BoxDecoration(
+                                      color: Color(0xFF51CF66),
+                                      shape: BoxShape.circle,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 6),
+                                ],
+                                Expanded(
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(4),
+                                    child: LinearProgressIndicator(
+                                      value: progress,
+                                      minHeight: 5,
+                                      backgroundColor: Colors.grey.shade200,
+                                      valueColor:
+                                          const AlwaysStoppedAnimation<Color>(
+                                            Color(0xFF51CF66),
+                                          ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        );
+                      })
+                    else
+                      Column(
+                        children: [
+                          Row(
+                            children: [
+                              const Text(
+                                '--:--',
+                                style: TextStyle(
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black87,
+                                ),
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                'hr',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.grey.shade500,
+                                ),
+                              ),
+                              const Spacer(),
+                              Image.asset(
+                                "assets/images/ic_fasting.png",
+                                width: 25,
+                                height: 25,
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 10),
+                          Row(
+                            children: [
+                              Container(
+                                width: 10,
+                                height: 10,
+                                decoration: const BoxDecoration(
+                                  color: Color(0xFF51CF66),
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              Expanded(
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(4),
+                                  child: LinearProgressIndicator(
+                                    value: 0.0,
+                                    minHeight: 5,
+                                    backgroundColor: Colors.grey.shade200,
+                                    valueColor:
+                                        const AlwaysStoppedAnimation<Color>(
+                                          Color(0xFF51CF66),
+                                        ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      );
+    });
+  }
+
+  String _formatFasting(int seconds) {
+    final h = seconds ~/ 3600;
+    final m = (seconds % 3600) ~/ 60;
+    return '${h.toString().padLeft(2, '0')}:${m.toString().padLeft(2, '0')}';
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Gym Check-in Widget (colored circles for each day)
+// ---------------------------------------------------------------------------
 class GymCheckinWidget extends StatefulWidget {
   const GymCheckinWidget({super.key});
 
@@ -211,7 +765,17 @@ class GymCheckinWidget extends StatefulWidget {
 
 class _GymCheckinWidgetState extends State<GymCheckinWidget> {
   final homeController = Get.find<HomeController>();
-  int _weekOffset = 0; // 0 = current week, -1 = previous week, etc.
+  int _weekOffset = 0;
+
+  static const _dayColors = [
+    Color(0xFFFF6B6B),
+    Color(0xFF51CF66),
+    Color(0xFF20C997),
+    Color(0xFF339AF0),
+    Color(0xFF51CF66),
+    Color(0xFF845EF7),
+    Color(0xFFFF922B),
+  ];
 
   void _onWeekChanged(int newOffset) {
     setState(() => _weekOffset = newOffset);
@@ -219,104 +783,130 @@ class _GymCheckinWidgetState extends State<GymCheckinWidget> {
   }
 
   void _fetchGymCheckIn() {
-    final weekDates = getWeekDates(_weekOffset);
-    final dateFormat = DateFormat('yyyy-MM-dd');
+    final weekDates = _getWeekDates(_weekOffset);
+    final fmt = DateFormat('yyyy-MM-dd');
     homeController.getGymCheckIn(
-      startDate: dateFormat.format(weekDates.first),
-      endDate: dateFormat.format(weekDates.last),
+      startDate: fmt.format(weekDates.first),
+      endDate: fmt.format(weekDates.last),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final weekList = ["M", "T", "W", "T", "F", "S", "S"];
-    final weekDates = getWeekDates(_weekOffset);
+    const weekLabels = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+    final weekDates = _getWeekDates(_weekOffset);
     final isCurrentWeek = _weekOffset == 0;
 
     return Obx(() {
       final checkInData = homeController.gymCheckInModel?.value?.data ?? [];
 
       return Container(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         decoration: CommonWidget.containerDecoration(),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                CustomText.title(
-                  text: "Gym Check-in",
-                  size: 16,
-                  isBold: true,
-                ).padOnly(b: 8),
-                Spacer(),
+                const Text(
+                  'Gym Check-in',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                const Spacer(),
                 GestureDetector(
                   onTap: () => _onWeekChanged(_weekOffset - 1),
                   child: Icon(
                     Icons.arrow_back_ios_new,
-                    size: 16,
+                    size: 14,
+                    color: Colors.grey.shade500,
                   ).padAll(all: 6),
                 ),
-                SizedBox(width: 8),
                 GestureDetector(
                   onTap: isCurrentWeek
                       ? null
                       : () => _onWeekChanged(_weekOffset + 1),
                   child: Icon(
                     Icons.arrow_forward_ios,
-                    size: 16,
-                    color: isCurrentWeek ? Colors.grey.shade300 : null,
+                    size: 14,
+                    color: isCurrentWeek
+                        ? Colors.grey.shade300
+                        : Colors.grey.shade500,
                   ).padAll(all: 6),
                 ),
               ],
             ),
+            const SizedBox(height: 12),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                ...weekList.map((day) {
-                  return Container(
-                    width: 40,
-                    height: 40,
-                    alignment: Alignment.center,
-                    child: Text(day, style: TextStyle(fontSize: 16)),
-                  );
-                }),
-              ],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                ...weekDates.map((date) {
-                  final isCheckedIn = _isCheckedIn(date, checkInData);
-                  final isToday = _isSameDay(date, DateTime.now());
-                  final isFuture = _isFutureDate(date);
-
-                  return GestureDetector(
-                    onTap: () {
-                      if (isToday && !isCheckedIn) {
-                        showCheckInDialog(context, date);
-                      }
-                    },
-                    child: Container(
-                      width: 40,
-                      height: 40,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: _getDayColor(isCheckedIn, isToday, isFuture),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        "${date.day}",
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: _getTextColor(isCheckedIn, isToday, isFuture),
-                        ),
+              children: weekLabels.map((day) {
+                return SizedBox(
+                  width: 38,
+                  child: Center(
+                    child: Text(
+                      day,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.grey.shade400,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
-                  );
-                }),
-              ],
+                  ),
+                );
+              }).toList(),
+            ),
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: List.generate(7, (i) {
+                final date = weekDates[i];
+                final isCheckedIn = _isCheckedIn(date, checkInData);
+                final isToday = _isSameDay(date, DateTime.now());
+                final isFuture = _isFutureDate(date);
+                final dayColor = _dayColors[i];
+
+                return GestureDetector(
+                  onTap: () {
+                    if (isToday && !isCheckedIn) {
+                      showCheckInDialog(context, date);
+                    }
+                  },
+                  child: Container(
+                    width: 38,
+                    height: 38,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: isCheckedIn
+                          ? dayColor.withValues(alpha: 0.12)
+                          : isToday
+                          ? ColorConstant.backgroundColor
+                          : Colors.transparent,
+                      border: Border.all(
+                        color: isCheckedIn
+                            ? dayColor
+                            : isToday
+                            ? ColorConstant.primaryColor
+                            : Colors.transparent,
+                        width: isCheckedIn || isToday ? 1.5 : 0,
+                      ),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Text(
+                      '${date.day}',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: isCheckedIn
+                            ? dayColor
+                            : isToday
+                            ? ColorConstant.primaryColor
+                            : isFuture
+                            ? Colors.grey.shade300
+                            : Colors.grey.shade600,
+                      ),
+                    ),
+                  ),
+                );
+              }),
             ),
           ],
         ),
@@ -333,631 +923,331 @@ class _GymCheckinWidgetState extends State<GymCheckinWidget> {
     );
   }
 
-  bool _isSameDay(DateTime a, DateTime b) {
-    return a.year == b.year && a.month == b.month && a.day == b.day;
-  }
-
-  Color _getDayColor(bool isCheckedIn, bool isToday, bool isFuture) {
-    if (isFuture) {
-      return Colors.white;
-    } else if (isCheckedIn) {
-      return Colors.green.withAlpha(50);
-    } else if (isToday) {
-      return ColorConstant.backgroundColor;
-    }
-    return Colors.redAccent.withAlpha(50);
-  }
-
-  Color _getTextColor(bool isCheckedIn, bool isToday, bool isFuture) {
-    if (isFuture) {
-      return Colors.grey.shade400;
-    } else if (isCheckedIn) {
-      return Colors.green;
-    } else if (isToday) {
-      return ColorConstant.primaryColor;
-    }
-    return Colors.redAccent;
-  }
+  bool _isSameDay(DateTime a, DateTime b) =>
+      a.year == b.year && a.month == b.month && a.day == b.day;
 
   bool _isFutureDate(DateTime date) {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final checkDate = DateTime(date.year, date.month, date.day);
-    return checkDate.isAfter(today);
+    final today = DateTime(
+      DateTime.now().year,
+      DateTime.now().month,
+      DateTime.now().day,
+    );
+    return DateTime(date.year, date.month, date.day).isAfter(today);
   }
 
-  List<DateTime> getWeekDates(int weekOffset) {
+  List<DateTime> _getWeekDates(int weekOffset) {
     final now = DateTime.now();
-
-    // Start of this week (Monday), then apply offset
     final startOfWeek = now
         .subtract(Duration(days: now.weekday - 1))
         .add(Duration(days: weekOffset * 7));
-
-    // Generate all 7 dates (Mon → Sun)
-    return List.generate(7, (index) {
-      return startOfWeek.add(Duration(days: index));
-    });
+    return List.generate(7, (i) => startOfWeek.add(Duration(days: i)));
   }
 }
 
-class WelcomeHeader extends StatelessWidget {
-  const WelcomeHeader({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      "Welcome back,",
-      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-    );
-  }
-}
-
-class SleepStepCalories extends StatelessWidget {
-  SleepStepCalories({super.key});
-  final homeController = Get.find<HomeController>();
-
-  @override
-  Widget build(BuildContext context) {
-    return Obx(() {
-      final dashboard = homeController.dashboardActivityModel?.value?.data;
-      final overallScore = (dashboard?.overallScore ?? 0) / 100;
-
-      // Steps data
-      final stepsData = dashboard?.steps;
-      final totalSteps = stepsData?.totalSteps ?? 0;
-      final stepsProgress = (stepsData?.stepsPercentage ?? 0) / 100;
-
-      // Sleep data
-      final sleepData = dashboard?.sleep;
-      final sleepHours = sleepData?.totalSleepHours ?? '0h 0m';
-      final sleepProgress = (sleepData?.qualityScore ?? 0) / 100;
-
-      // Calories (using steps data for now as API doesn't have calories)
-      final caloriesValue = homeController.todayCalories.value;
-
-      return Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.shade300,
-              spreadRadius: 0,
-              blurRadius: 3,
-              offset: Offset(0, 1),
-            ),
-          ],
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Column(
-          children: [
-            Padding(
-              padding: EdgeInsets.symmetric(vertical: 12, horizontal: 12),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          _getMotivationalMessage(overallScore),
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(
-                          "Keep up the momentum by finishing your daily goals.",
-                          style: TextStyle(fontSize: 14),
-                        ),
-                      ],
-                    ),
-                  ),
-                  CircularProgressWidget(percent: overallScore.clamp(0.0, 1.0)),
-                ],
-              ),
-            ),
-            SizedBox(height: 10),
-            Divider(height: 8, thickness: 1, color: Colors.grey.shade300),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              child: SizedBox(
-                height: 80,
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: iconLabelCard(
-                        label: "Steps",
-                        img: "assets/images/emojione_running-shoe.png",
-                        color: Color(0xFFFAB005),
-                        value: totalSteps.toString(),
-                        progress: stepsProgress.clamp(0.0, 1.0),
-                        onTap: () => Get.to(() => const StepTrackerScreen()),
-                      ),
-                    ),
-                    VerticalDivider(thickness: 1, color: Colors.grey.shade300),
-                    Expanded(
-                      child: iconLabelCard(
-                        label: "Sleep",
-                        img: "assets/images/fluent-emoji_sleeping-face.png",
-                        color: Color(0xFF228BE6),
-                        value: sleepHours,
-                        progress: sleepProgress.clamp(0.0, 1.0),
-                        onTap: () => Get.to(() => const SleepTrackerScreen()),
-                      ),
-                    ),
-                    VerticalDivider(thickness: 1, color: Colors.grey.shade300),
-                    Expanded(
-                      child: iconLabelCard(
-                        label: "Calories",
-                        img: "assets/images/fluent-emoji_fire.png",
-                        color: ColorConstant.verdigris,
-                        value: caloriesValue.isEmpty ? '0' : caloriesValue,
-                        progress: 0.0,
-                        onTap: () => Get.to(() => const StepTrackerScreen()),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      );
-    });
-  }
-
-  String _getMotivationalMessage(double progress) {
-    if (progress >= 0.8) return "You're Doing Great!";
-    if (progress >= 0.5) return "Keep Going!";
-    if (progress >= 0.25) return "Good Start!";
-    return "Let's Get Moving!";
-  }
-
-  Widget iconLabelCard({
-    required String label,
-    required String img,
-    required Color color,
-    required String value,
-    required double progress,
-    VoidCallback? onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        height: 80,
-        width: 100,
-        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-        decoration: BoxDecoration(color: Colors.white),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(label, style: TextStyle(fontSize: 12)),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Flexible(
-                  child: Text(
-                    value,
-                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                Image.asset(img, height: 20, width: 20),
-              ],
-            ),
-            SizedBox(height: 6),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(10),
-              child: LinearProgressIndicator(
-                value: progress,
-                minHeight: 6,
-                backgroundColor: Colors.grey.shade200,
-                valueColor: AlwaysStoppedAnimation<Color>(color),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class BookSpecialistCard extends StatelessWidget {
-  const BookSpecialistCard({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(vertical: 12, horizontal: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.shade300,
-            spreadRadius: 0,
-            blurRadius: 3,
-            offset: Offset(0, 1),
-          ),
-        ],
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "Yoga Gurukul",
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-                Text(
-                  "Know the benefits of yoga from world renowned specialist Dr. David Frawley",
-                  style: TextStyle(fontSize: 14),
-                ),
-                Text(
-                  "02 June 2025",
-                  style: TextStyle(fontSize: 14, color: Colors.grey),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4),
-                  child: GestureDetector(
-                    onTap: () async {
-                      // await PermissionManager.requestActivityPermission();
-                      // printTodaySteps();
-                      // HealthDataService().fetchSleepData();
-                      // getSleep();
-                      SleepService.getSleepDataForDate('2025-06-30');
-                      // printWeeklySteps();
-                      printMonthlySteps();
-                    },
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min, // Wraps content tightly
-                      children: [
-                        Text(
-                          'Book Now',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.blue,
-                          ),
-                        ),
-                        SizedBox(width: 8),
-                        Icon(Icons.arrow_forward, size: 18, color: Colors.blue),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          CircleAvatar(
-            radius: 50,
-            backgroundImage: AssetImage("assets/images/bg_quickaction.png"),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class HealthEcosystem extends StatelessWidget {
-  const HealthEcosystem({super.key});
+// ---------------------------------------------------------------------------
+// Explore Health Ecosystem (deep blue, 3+2 button layout)
+// ---------------------------------------------------------------------------
+class _ExploreHealthEcosystem extends StatelessWidget {
+  const _ExploreHealthEcosystem();
 
   @override
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        image: DecorationImage(
-          image: AssetImage("assets/images/bg_quickaction.png"),
-          fit: BoxFit.fill,
-        ),
+        color: const Color(0xFF3B5BDB),
+        borderRadius: BorderRadius.circular(16),
       ),
-      child: Column(
-        children: [Ecosystem(), SizedBox(height: 10), TrackWellbeing()],
-      ),
-    );
-  }
-}
-
-class TrackWellbeing extends StatelessWidget {
-  const TrackWellbeing({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          "Track you well-being",
-          style: TextStyle(
-            fontSize: 16,
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.only(top: 8),
-          child: Row(
-            // mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: iconLabelCard(
-                  label: "BMI Calculator",
-                  img: "assets/images/ic_personStanding.png",
-                  onTap: () => Get.to(() => BloodSugarScreen()),
-                ),
-              ),
-              SizedBox(width: 6),
-              Expanded(
-                child: iconLabelCard(
-                  label: "Blood Sugar",
-                  img: "assets/images/fluent-emoji_drop-of-blood.png",
-                  onTap: () => Get.to(() => BloodSugarScreen()),
-                ),
-              ),
-              SizedBox(width: 6),
-              Expanded(
-                child: iconLabelCard(
-                  label: "Blood Pressure",
-                  img: "assets/images/fluent-emoji_drop-of-blood.png",
-                  onTap: () => Get.to(() => BloodPressureScreen()),
-                ),
-              ),
-              // Expanded(
-              //   // child: iconLabelCard(
-              //   //   label: "Sleep Tracker",
-              //   //   img: "assets/images/fluent-emoji_sleeping-face.png",
-              //   //   onTap: () => Get.to(() => const SleepTrackerScreen()),
-              //   // ),
-              //   child: SizedBox.shrink(),
-              // ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget iconLabelCard({
-    required String label,
-    required String img,
-    VoidCallback? onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        height: 80,
-        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Image.asset(img, height: 20, width: 20),
-            SizedBox(height: 4),
-            Text(
-              label,
-              maxLines: 2,
-              overflow: TextOverflow.visible,
-              style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class Ecosystem extends StatelessWidget {
-  const Ecosystem({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          "Explore Health Ecosystem",
-          style: TextStyle(
-            fontSize: 16,
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        Text(
-          "Here’s our recommendations based on your history",
-          style: TextStyle(fontSize: 14, color: Colors.white),
-        ),
-        Padding(
-          padding: const EdgeInsets.only(top: 8),
-          child: Row(
-            children: [
-              Expanded(
-                child: iconLabelCard(
-                  label: "Medicine Tracker",
-                  img: "assets/images/fluent-emoji_pill.png",
-                  onTap: () => Get.to(() => const MedicineTrackerScreen()),
-                ),
-              ),
-              SizedBox(width: 6),
-              Expanded(
-                child: iconLabelCard(
-                  label: "Menstrual Cycle",
-                  img: "assets/images/ic_female.png",
-                  onTap: () => Get.to(() => const MedicineTrackerScreen()),
-                ),
-              ),
-              SizedBox(width: 6),
-              Expanded(
-                child: iconLabelCard(
-                  label: "Fasting Tracker",
-                  img: "assets/images/ic_personStanding.png",
-                  onTap: () => Get.to(() => const FastingTrackerScreen()),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget iconLabelCard({
-    required String label,
-    required String img,
-    VoidCallback? onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        height: 80,
-        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Image.asset(img, height: 20, width: 20),
-            SizedBox(height: 4),
-            Text(
-              label,
-              maxLines: 2,
-              overflow: TextOverflow.visible,
-              style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class WeeklyHealthInsight extends StatelessWidget {
-  const WeeklyHealthInsight({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(children: [keyHealthBenefits()]);
-  }
-
-  Widget keyHealthBenefits() {
-    var benefitList = [
-      {
-        "icon": "assets/images/ion_water-outline.png",
-        "title": "Hydration",
-        "subTitle": "Daily water intake increased by 20%",
-      },
-      {
-        "icon": "assets/images/ic_heart.png",
-        "title": "Heart Health",
-        "subTitle": "Improved resting heart rate by 12%",
-      },
-      {
-        "icon": "assets/images/hugeicons_energy.png",
-        "title": "Daily Activity",
-        "subTitle": "Increased step count by 35%",
-      },
-      {
-        "icon": "assets/images/solar_moon-sleep-linear.png",
-        "title": "Sleep Quality",
-        "subTitle": "Deep sleep extended by 13%",
-      },
-    ];
-    return Container(
-      decoration: CommonWidget.containerDecoration(),
-
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(height: 16),
-          CustomText.title(
-            text: "Weekly Health Highlights",
-            isBold: true,
-          ).padSymm(horizontal: 16),
+          const Text(
+            'Explore Health Ecosystem',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(height: 4),
+          const Text(
+            "Here's our recommendations based on your history",
+            style: TextStyle(fontSize: 13, color: Colors.white70),
+          ),
+          const SizedBox(height: 16),
+          // Row 1: 3 buttons
+          Row(
+            children: [
+              _ecoBtn(
+                icon: "assets/images/fluent-emoji_pill.png",
+                label: 'Medicine\nTracker',
+                onTap: () => Get.to(() => const MedicineTrackerScreen()),
+              ),
+              const SizedBox(width: 10),
+              _ecoBtn(
+                icon: "assets/images/ic_drop-of-blood.png",
+                label: 'Blood\nSugar',
+                onTap: () => Get.to(() => BloodSugarScreen()),
+              ),
+              const SizedBox(width: 10),
+              _ecoBtn(
+                icon: "assets/images/hypertension.png",
+                label: 'Blood\nPressure',
+                onTap: () => Get.to(() => BloodPressureScreen()),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          // Row 2: 2 buttons (same width via Expanded inside a Row with padding)
+          // Row(
+          //   children: [
+          //     // _ecoBtn(
+          //     //   icon: "assets/images/fluent-emoji_pill.png",
+          //     //   label: 'BMI\nCalculator',
+          //     //   onTap: () {},
+          //     // ),
+          //     // const SizedBox(width: 10),
+          //     _ecoBtn(
+          //       icon: "assets/images/fluent-emoji_pill.png",
+          //       label: 'Menstrual\nCycle',
+          //       onTap: () {},
+          //     ),
+          //     const SizedBox(width: 10),
+          //     _ecoBtn(
+          //       icon: "assets/images/fluent-emoji_pill.png",
+          //       label: 'Breathing\nExercise',
+          //       onTap: () {},
+          //     ),
+          //     const SizedBox(width: 10),
+          //     const Expanded(child: SizedBox()),
+          //   ],
+          // ),
+        ],
+      ),
+    );
+  }
+
+  Widget _ecoBtn({
+    required String icon,
+    required String label,
+    VoidCallback? onTap,
+  }) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Image.asset(icon, width: 24, height: 24),
+              // Icon(icon, color: const Color(0xFF3B5BDB), size: 24),
+              const SizedBox(height: 8),
+              Text(
+                label,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black87,
+                  height: 1.3,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Weekly Health Highlights (section title outside, 2x2 separate cards)
+// ---------------------------------------------------------------------------
+class _WeeklyHealthHighlights extends StatelessWidget {
+  const _WeeklyHealthHighlights();
+
+  @override
+  Widget build(BuildContext context) {
+    final homeController = Get.find<HomeController>();
+    return Obx(() {
+      final water = homeController.dashboardActivityModel?.value?.data?.water;
+      final waterPct = (water?.percentageAchieved ?? 0).round();
+      final steps = homeController.dashboardActivityModel?.value?.data?.steps;
+      final stepsPct = (steps?.stepsPercentage ?? 0).round();
+
+      final items = [
+        _HighlightItem(
+          icon: Icons.water_drop_outlined,
+          iconColor: const Color(0xFF339AF0),
+          label: 'Hydration',
+          desc: 'Daily water increased by $waterPct%',
+        ),
+        _HighlightItem(
+          icon: Icons.favorite_outline,
+          iconColor: const Color(0xFFFA5252),
+          label: 'Heart Health',
+          desc: 'Improved resting rate by 12%',
+        ),
+        _HighlightItem(
+          icon: Icons.directions_walk_outlined,
+          iconColor: const Color(0xFF20C997),
+          label: 'Daily Activity',
+          desc: 'You have taken $stepsPct%',
+        ),
+        _HighlightItem(
+          icon: Icons.bedtime_outlined,
+          iconColor: const Color(0xFFAE3EC9),
+          label: 'Sleep Quality',
+          desc: 'Deep sleep achieved by 13%',
+        ),
+      ];
+
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Weekly Health Highlights',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 12),
           GridView.builder(
             shrinkWrap: true,
-            physics: NeverScrollableScrollPhysics(),
-            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-            itemCount: benefitList.length,
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: items.length,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
-              crossAxisSpacing: 8,
-              mainAxisSpacing: 8,
-              childAspectRatio: 1.3,
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 12,
+              childAspectRatio: 1.45,
             ),
-            itemBuilder: (BuildContext context, int i) {
+            itemBuilder: (_, i) {
+              final item = items[i];
               return Container(
-                padding: EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Color(0xffF9F9FA),
-                  border: Border.all(color: Colors.grey.shade300),
-                  borderRadius: BorderRadius.circular(12),
-                ),
+                padding: const EdgeInsets.all(14),
+                decoration: CommonWidget.containerDecoration(),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Image.asset(benefitList[i]["icon"]!, height: 24),
-                    SizedBox(height: 4),
-                    CustomText.title(
-                      text: benefitList[i]["title"],
-                      isBold: true,
-                      size: 12,
-                      overflow: TextOverflow.visible,
+                    Icon(item.icon, color: item.iconColor, size: 22),
+                    const SizedBox(height: 8),
+                    Text(
+                      item.label,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
                     ),
-                    SizedBox(height: 4),
-                    CustomText.title(
-                      text: benefitList[i]["subTitle"],
-                      size: 10,
-                      overflow: TextOverflow.visible,
+                    const SizedBox(height: 3),
+                    Text(
+                      item.desc,
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: Colors.grey.shade500,
+                        height: 1.3,
+                      ),
                     ),
                   ],
                 ),
               );
             },
           ),
-          Container(
-            margin: EdgeInsets.fromLTRB(16, 0, 16, 16),
-            padding: EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Color(0xffF9F9FA),
-              border: Border.all(color: Colors.grey.shade300),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Row(
-              children: [
-                Image.asset("assets/images/ic_target_goal.png", height: 24),
-                SizedBox(width: 10),
-                Column(
+        ],
+      );
+    });
+  }
+}
+
+class _HighlightItem {
+  final IconData icon;
+  final Color iconColor;
+  final String label;
+  final String desc;
+  const _HighlightItem({
+    required this.icon,
+    required this.iconColor,
+    required this.label,
+    required this.desc,
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Other Highlights
+// ---------------------------------------------------------------------------
+class _OtherHighlights extends StatelessWidget {
+  const _OtherHighlights();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Other Highlights',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 12),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          decoration: CommonWidget.containerDecoration(),
+          child: Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: const BoxDecoration(
+                  color: Color(0xFFD3F9D8),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.sentiment_satisfied_alt_outlined,
+                  color: Color(0xFF2ECC71),
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    CustomText.title(
-                      text: "Goal Achievement",
-                      isBold: true,
-                      size: 12,
-                      overflow: TextOverflow.visible,
+                    const Text(
+                      'Goal Achievement',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
                     ),
-                    SizedBox(height: 4),
-                    CustomText.title(
-                      text: "You've achieved 85% of your weekly goals",
-                      size: 10,
-                      overflow: TextOverflow.visible,
+                    const SizedBox(height: 2),
+                    Text(
+                      'Workout goal completion by',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey.shade500,
+                      ),
+                    ),
+                    Text(
+                      '42%',
+                      style: TextStyle(
+                        fontSize: 26,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF2ECC71),
+                      ),
                     ),
                   ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

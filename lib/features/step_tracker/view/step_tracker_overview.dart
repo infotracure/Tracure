@@ -28,31 +28,42 @@ class _StepTrackerOverviewState extends State<StepTrackerOverview> {
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       child: Obx(
-        () => Column(
-          spacing: 16,
-          children: [
-            Column(
-              children: [
-                StepProgressWidget(
-                  current:
-                      stepController.stepsSummaryByDate.value?.data?.steps ?? 0,
-                  goal:
-                      stepController
-                          .stepsSummaryByDate
-                          .value
-                          ?.data
-                          ?.stepGoals ??
-                      0,
-                ),
-                SizedBox(height: 16),
-                activitesCardGrid(stepController),
-                SizedBox(height: 16),
-                dayBarChartWidget(),
-              ],
-            ),
-            keyHealthBenefits(),
-          ],
-        ).padSymm(horizontal: 16, vertical: 16),
+        () {
+          final isCalories = stepController.showCalories.value;
+          return Column(
+            spacing: 16,
+            children: [
+              Column(
+                children: [
+                  if (isCalories)
+                    StepProgressWidget(
+                      current: stepController.calculatedCalories,
+                      goal: stepController.calorieGoal,
+                      unit: 'kcal',
+                    )
+                  else
+                    StepProgressWidget(
+                      current:
+                          stepController.stepsSummaryByDate.value?.data?.steps ??
+                          0,
+                      goal:
+                          stepController
+                              .stepsSummaryByDate
+                              .value
+                              ?.data
+                              ?.stepGoals ??
+                          0,
+                    ),
+                  SizedBox(height: 16),
+                  activitesCardGrid(stepController),
+                  SizedBox(height: 16),
+                  dayBarChartWidget(showCalories: isCalories),
+                ],
+              ),
+              keyHealthBenefits(),
+            ],
+          ).padSymm(horizontal: 16, vertical: 16);
+        },
       ),
     );
   }
@@ -126,9 +137,12 @@ class _StepTrackerOverviewState extends State<StepTrackerOverview> {
     );
   }
 
-  Container dayBarChartWidget() {
+  Container dayBarChartWidget({bool showCalories = false}) {
     final todayData = stepController.todayAllSteps.value?.data ?? [];
-    final stepData = _bucketStepsToHourlyIntervals(todayData);
+    final stepBuckets = _bucketStepsToHourlyIntervals(todayData);
+    final stepData = showCalories
+        ? stepBuckets.map((s) => s * 0.04).toList()
+        : stepBuckets;
     final dateFormat = DateFormat('EEEE, dd MMMM yyyy');
 
     return Container(

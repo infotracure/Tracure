@@ -1,6 +1,8 @@
 // lib/api/interceptors/auth_interceptor.dart
 import 'package:dio/dio.dart';
+import 'package:get/get.dart';
 import 'package:tracure/features/loginpage/model/verify_otp_model.dart';
+import 'package:tracure/features/loginpage/view/login_page.dart';
 import 'package:tracure/servies/api_service/end_points.dart';
 import 'package:tracure/servies/hive_service.dart';
 
@@ -50,6 +52,15 @@ class AuthInterceptor extends Interceptor {
         _isRefreshing = true;
         try {
           final newToken = await _refreshToken(refreshToken);
+
+          if (newToken == null) {
+            _retryQueue.clear();
+            await HiveService.instance.clear();
+            CommonWidget.showToast(StringConstant.sessionExpired);
+            Get.offAll(() => LoginPage());
+            return handler.reject(err);
+          }
+
           // 🔄 Retry queued requests
           for (final retry in _retryQueue) {
             retry(err.requestOptions);
@@ -62,6 +73,8 @@ class AuthInterceptor extends Interceptor {
           return handler.resolve(cloneReq);
         } catch (e) {
           await HiveService.instance.clear();
+          CommonWidget.showToast(StringConstant.sessionExpired);
+          Get.offAll(() => LoginPage());
           return handler.reject(err);
         } finally {
           _isRefreshing = false;
@@ -75,11 +88,13 @@ class AuthInterceptor extends Interceptor {
     try {
       showGlobalLoader();
       // Use plain Dio without interceptors to avoid infinite loop
-      final dio = Dio(BaseOptions(
-        baseUrl: EndPoints.baseUrl,
-        connectTimeout: Duration(seconds: 60),
-        receiveTimeout: Duration(seconds: 60),
-      ));
+      final dio = Dio(
+        BaseOptions(
+          baseUrl: EndPoints.baseUrl,
+          connectTimeout: Duration(seconds: 60),
+          receiveTimeout: Duration(seconds: 60),
+        ),
+      );
       final response = await dio.post(
         EndPoints.refreshToken,
         data: {"refreshToken": refreshToken},

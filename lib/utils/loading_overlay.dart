@@ -20,9 +20,10 @@ void showGlobalLoader({bool coverAppBar = false}) {
     final overlay = navigatorKey.currentState?.overlay;
     if (overlay == null) return;
 
-    final topOffset = coverAppBar
-        ? 0.0
-        : kToolbarHeight + MediaQuery.of(overlay.context).padding.top;
+    // final topOffset = coverAppBar
+    //     ? 0.0
+    //     : kToolbarHeight + MediaQuery.of(overlay.context).padding.top;
+    final topOffset = 0.0;
 
     _loaderOverlayEntry = OverlayEntry(
       builder: (context) => Positioned.fill(

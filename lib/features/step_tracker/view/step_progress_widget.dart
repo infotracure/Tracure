@@ -8,11 +8,13 @@ import 'package:tracure/utils/string_extension.dart';
 class StepProgressWidget extends StatefulWidget {
   final int current;
   final int goal;
+  final String unit;
 
   const StepProgressWidget({
     super.key,
     required this.current,
     required this.goal,
+    this.unit = 'steps',
   });
 
   @override
@@ -59,7 +61,7 @@ class _StepProgressWidgetState extends State<StepProgressWidget> {
               ),
               const SizedBox(height: 5),
               CustomText.title(
-                text: "${"${widget.goal}".toFormattedNumber()} steps",
+                text: "${"${widget.goal}".toFormattedNumber()} ${widget.unit}",
                 isBold: true,
                 size: 12,
               ),

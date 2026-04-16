@@ -164,7 +164,11 @@ class SleepTrackerController extends GetxController {
     }
   }
 
-  Future<void> getWeeklySleepSummary(String startDate, String endDate) async {
+  Future<void> getWeeklySleepSummary(
+    String startDate,
+    String endDate, {
+    bool toast = false,
+  }) async {
     try {
       showGlobalLoader();
 
@@ -177,6 +181,9 @@ class SleepTrackerController extends GetxController {
         SleepSummaryByRangeModel.fromJson,
       );
       if (weeklySleepSummary.value?.code != 1) {
+        if (!toast) {
+          return;
+        }
         CommonWidget.showToast(
           weeklySleepSummary.value?.message ??
               StringConstant.internalErrorExceptionMessage,

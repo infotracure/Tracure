@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:tracure/features/fasting_tracker/controller/fasting_tracker_controller.dart';
 import 'package:tracure/features/homepage/controller/home_controller.dart';
+import 'package:tracure/features/homepage/view/activity_screen.dart';
 import 'package:tracure/features/homepage/view/homepage.dart';
 import 'package:tracure/features/loginpage/view/login_page.dart';
 import 'package:tracure/features/profile/view/profile_screen.dart';
@@ -22,9 +24,15 @@ class _MainNavigationState extends State<MainNavigation> {
 
   final List<Widget> _pages = [
     const Homepage(),
-    const SizedBox(), // Activities placeholder
+    const ActivityScreen(),
     const ProfileScreen(),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    Get.put(FastingTrackerController());
+  }
 
   @override
   Widget build(BuildContext context) {

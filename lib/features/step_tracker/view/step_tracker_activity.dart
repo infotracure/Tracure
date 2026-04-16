@@ -36,106 +36,118 @@ class _StepTrackerActivityState extends State<StepTrackerActivity> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(
-        spacing: 16,
-        children: [
-          Container(
-            decoration: CommonWidget.containerDecoration(),
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    LeftRightIconButton(
-                      onTap: () {
-                        setState(() {
-                          _selectedWeek = _selectedWeek.subtract(
-                            Duration(days: 7),
-                          );
-                          _loadWeeklySteps(_selectedWeek);
-                        });
-                      },
-                    ).padSymm(horizontal: 10, vertical: 10),
-                    CustomText.title(
-                      text: formatWeekRange(_selectedWeek),
-                      isBold: true,
-                      size: 14,
-                    ),
-                    _isCurrentWeek()
-                        ? const SizedBox(width: 55)
-                        : LeftRightIconButton(
-                            onTap: () {
-                              setState(() {
-                                _selectedWeek = _selectedWeek.add(
-                                  Duration(days: 7),
-                                );
-                                _loadWeeklySteps(_selectedWeek);
-                              });
-                            },
-                          ).rotate(180).padSymm(horizontal: 10, vertical: 10),
-                  ],
-                ),
-                SizedBox(height: 8),
-                SizedBox(
-                  height: 210,
-                  child: Stack(
+    return Obx(() {
+      final isCalories = stepTrackerController.showCalories.value;
+      final chartData = isCalories
+          ? _weeklySteps.map((s) => s * 0.04).toList()
+          : _weeklySteps;
+
+      return SingleChildScrollView(
+        child: Column(
+          spacing: 16,
+          children: [
+            Container(
+              decoration: CommonWidget.containerDecoration(),
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      SizedBox(
-                        height: 150,
-                        child: WeekBarChart(weeklySteps: _weeklySteps),
+                      LeftRightIconButton(
+                        onTap: () {
+                          setState(() {
+                            _selectedWeek = _selectedWeek.subtract(
+                              Duration(days: 7),
+                            );
+                            _loadWeeklySteps(_selectedWeek);
+                          });
+                        },
+                      ).padSymm(horizontal: 10, vertical: 10),
+                      CustomText.title(
+                        text: formatWeekRange(_selectedWeek),
+                        isBold: true,
+                        size: 14,
                       ),
-                      CommonWidget.roundedButton(
-                            context: context,
-                            titleColor: ColorConstant.verdigris,
-                            bgColor: Color(0xffCFEDEC),
-                            title: "View Monthly Record",
-                            padding: EdgeInsets.symmetric(vertical: 10),
-                            elevation: 0,
-                            prefixIcon: Icon(
-                              Icons.calendar_month,
-                              color: ColorConstant.verdigris,
-                              size: 20,
-                            ),
-                            onTap: () async {
-                              await stepTrackerController.getStepSummaryByMonth(
-                                DateTime.now(),
-                              );
-                              if (!context.mounted) return;
-                              showRoundedBottomSheet(
-                                context: context,
-                                child: CustomCalendar(
-                                  initialMonth: DateTime.now(),
-                                ),
-                              );
-                            },
-                          )
-                          .padSymm(horizontal: 16, vertical: 8)
-                          .align(Alignment.bottomCenter),
+                      _isCurrentWeek()
+                          ? const SizedBox(width: 55)
+                          : LeftRightIconButton(
+                              onTap: () {
+                                setState(() {
+                                  _selectedWeek = _selectedWeek.add(
+                                    Duration(days: 7),
+                                  );
+                                  _loadWeeklySteps(_selectedWeek);
+                                });
+                              },
+                            ).rotate(180).padSymm(horizontal: 10, vertical: 10),
                     ],
                   ),
-                ),
-              ],
+                  SizedBox(height: 8),
+                  SizedBox(
+                    height: 210,
+                    child: Stack(
+                      children: [
+                        SizedBox(
+                          height: 150,
+                          child: WeekBarChart(weeklySteps: chartData),
+                        ),
+                        CommonWidget.roundedButton(
+                              context: context,
+                              titleColor: ColorConstant.verdigris,
+                              bgColor: Color(0xffCFEDEC),
+                              title: "View Monthly Record",
+                              padding: EdgeInsets.symmetric(vertical: 10),
+                              elevation: 0,
+                              prefixIcon: Icon(
+                                Icons.calendar_month,
+                                color: ColorConstant.verdigris,
+                                size: 20,
+                              ),
+                              onTap: () async {
+                                await stepTrackerController
+                                    .getStepSummaryByMonth(DateTime.now());
+                                if (!context.mounted) return;
+                                showRoundedBottomSheet(
+                                  context: context,
+                                  child: CustomCalendar(
+                                    initialMonth: DateTime.now(),
+                                  ),
+                                );
+                              },
+                            )
+                            .padSymm(horizontal: 16, vertical: 8)
+                            .align(Alignment.bottomCenter),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-          activitesCardGrid(),
-
-          keyHealthBenefits(),
-        ],
-      ).padSymm(horizontal: 16, vertical: 16),
-    );
+            _activitesCardGrid(isCalories),
+            keyHealthBenefits(),
+          ],
+        ).padSymm(horizontal: 16, vertical: 16),
+      );
+    });
   }
 
-  Column activitesCardGrid() {
+  Column _activitesCardGrid(bool isCalories) {
     final avgDataModel = stepTrackerController.stepAverageModel.value?.data;
+    final avgSteps = avgDataModel?.avgSteps ?? 0;
+    final avgCaloriesFromSteps = (avgSteps * 0.04).round();
+
     return Column(
       children: [
         Row(
           children: [
             tileCard(
-              "Weekly Average",
-              avgDataModel?.avgSteps?.toFormattedNumber() ?? "0",
-              "assets/images/tabler_activity.png",
+              isCalories ? "Avg. Calories" : "Weekly Average",
+              isCalories
+                  ? "$avgCaloriesFromSteps kcal"
+                  : avgSteps.toFormattedNumber(),
+              isCalories
+                  ? "assets/images/flowbite_fire-outline.png"
+                  : "assets/images/tabler_activity.png",
             ),
             SizedBox(width: 10),
             tileCard(

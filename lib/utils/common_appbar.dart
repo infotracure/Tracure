@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:tracure/utils/common_widget.dart';
-import 'package:tracure/utils/extensions.dart';
 
 import '../utils/custom_text.dart';
 
@@ -9,9 +8,11 @@ class CustomAppbar extends StatelessWidget implements PreferredSize {
     super.key,
     required this.title,
     this.bgColor = Colors.white,
+    this.trailing,
   });
   final String title;
   final Color bgColor;
+  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
@@ -32,13 +33,18 @@ class CustomAppbar extends StatelessWidget implements PreferredSize {
                   child: Image.asset("assets/images/arrow_back_black.png"),
                 ),
               ),
-              Center(
-                child: CustomText.title(text: title, size: 16, isBold: true),
+              Expanded(
+                child: Center(
+                  child: CustomText.title(text: title, size: 16, isBold: true),
+                ),
               ),
-              const SizedBox(
-                height: 40,
-                width: 40,
-              ).padSymm(horizontal: 10, vertical: 10),
+              if (trailing != null)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  child: trailing!,
+                )
+              else
+                const SizedBox(width: 60),
             ],
           ),
         ),

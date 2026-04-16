@@ -196,7 +196,7 @@ class WaterIntakeController extends GetxController {
     }
   }
 
-  Future<void> getWeeklyWaterSummary(String startDate, String endDate) async {
+  Future<void> getWeeklyWaterSummary(String startDate, String endDate, {bool toast = false}) async {
     try {
       showGlobalLoader();
 
@@ -209,6 +209,9 @@ class WaterIntakeController extends GetxController {
         WaterSummaryByRangeModel.fromJson,
       );
       if (weeklyWaterSummary.value?.code != 1) {
+        if (!toast) {
+          return;
+        }
         CommonWidget.showToast(
           weeklyWaterSummary.value?.message ??
               StringConstant.internalErrorExceptionMessage,

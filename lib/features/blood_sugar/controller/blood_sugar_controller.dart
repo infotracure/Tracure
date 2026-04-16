@@ -211,6 +211,7 @@ class BloodSugarController extends GetxController {
   Future<void> getWeeklyBloodSugarSummary(
     String startDate,
     String endDate,
+    {bool toast = false}
   ) async {
     try {
       showGlobalLoader();
@@ -224,6 +225,9 @@ class BloodSugarController extends GetxController {
         BloodSugarTrendModel.fromJson,
       );
       if (weeklyBloodSugarSummary.value?.code != 1) {
+        if (!toast) {
+          return;
+        }
         CommonWidget.showToast(
           weeklyBloodSugarSummary.value?.message ??
               StringConstant.internalErrorExceptionMessage,

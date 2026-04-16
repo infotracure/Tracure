@@ -10,7 +10,9 @@ import 'package:tracure/utils/constant/color_constants.dart';
 import 'package:tracure/utils/extensions.dart';
 
 class StepTrackerScreen extends StatefulWidget {
-  const StepTrackerScreen({super.key});
+  final bool initialShowCalories;
+
+  const StepTrackerScreen({super.key, this.initialShowCalories = false});
 
   @override
   State<StepTrackerScreen> createState() => _StepTrackerScreenState();
@@ -31,6 +33,7 @@ class _StepTrackerScreenState extends State<StepTrackerScreen>
   @override
   void initState() {
     super.initState();
+    stepTrackerController.showCalories.value = widget.initialShowCalories;
     tabController = TabController(length: tabData.length, vsync: this);
     tabController?.animation?.addListener(() {
       setState(() {});
@@ -46,7 +49,28 @@ class _StepTrackerScreenState extends State<StepTrackerScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppbar(title: "Step Tracking"),
+      appBar: CustomAppbar(
+        title: "Step Tracking",
+        trailing: Obx(() {
+          final isCalories = stepTrackerController.showCalories.value;
+          return Container(
+            height: 34,
+            decoration: BoxDecoration(
+              color: Colors.grey.shade100,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _toggleTab('Steps', !isCalories, ColorConstant.verdigris,
+                    () => stepTrackerController.showCalories.value = false),
+                _toggleTab('Calories', isCalories, ColorConstant.verdigris,
+                    () => stepTrackerController.showCalories.value = true),
+              ],
+            ),
+          );
+        }),
+      ),
       body: RoundedTabBarExample(
         controller: tabController,
         color: ColorConstant.verdigris,
@@ -58,10 +82,9 @@ class _StepTrackerScreenState extends State<StepTrackerScreen>
           return createTabs(
             title: title,
             icon: icon,
-            index: index, // ✅ pass index here
+            index: index,
           );
         }).toList(),
-
         tabViews: const [
           StepTrackerOverview(),
           StepTrackerActivity(),
@@ -108,6 +131,33 @@ class _StepTrackerScreenState extends State<StepTrackerScreen>
         tabController?.animation?.value.round() ?? tabController?.index;
     return currentPage == tabIndex;
   }
+
+  Widget _toggleTab(
+    String label,
+    bool selected,
+    Color activeColor,
+    VoidCallback onTap,
+  ) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: selected ? activeColor : Colors.transparent,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: selected ? Colors.white : Colors.grey.shade600,
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class RoundedTabBarExample extends StatelessWidget {
@@ -115,6 +165,7 @@ class RoundedTabBarExample extends StatelessWidget {
   final List<Widget> tabViews;
   final Color? color;
   final TabController? controller;
+  final Widget? headerWidget;
 
   const RoundedTabBarExample({
     super.key,
@@ -122,6 +173,7 @@ class RoundedTabBarExample extends StatelessWidget {
     required this.tabViews,
     this.color,
     this.controller,
+    this.headerWidget,
   }) : assert(
          tabs.length == tabViews.length,
          'Tabs and TabViews must have the same length.',
@@ -149,10 +201,7 @@ class RoundedTabBarExample extends StatelessWidget {
                 padding: EdgeInsets.zero,
                 indicatorPadding: EdgeInsetsGeometry.all(3),
                 indicator: BoxDecoration(
-                  color:
-                      color ??
-                      ColorConstant
-                          .primaryColor, // Replace with ColorConstant.primaryColor if defined
+                  color: color ?? ColorConstant.primaryColor,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 indicatorSize: TabBarIndicatorSize.tab,
@@ -163,6 +212,12 @@ class RoundedTabBarExample extends StatelessWidget {
               ),
             ),
           ),
+          if (headerWidget != null)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: headerWidget!,
+            ),
+          if (headerWidget != null) const SizedBox(height: 12),
           Expanded(
             child: TabBarView(controller: controller, children: tabViews),
           ),

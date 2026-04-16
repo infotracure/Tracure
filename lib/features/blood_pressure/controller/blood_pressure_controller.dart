@@ -218,6 +218,7 @@ class BloodPressureController extends GetxController {
   Future<void> getWeeklyBloodPressureSummary(
     String startDate,
     String endDate,
+    {bool toast = false}
   ) async {
     try {
       showGlobalLoader();
@@ -231,6 +232,9 @@ class BloodPressureController extends GetxController {
         BloodPressureTrendModel.fromJson,
       );
       if (weeklyBloodPressureSummary.value?.code != 1) {
+        if (!toast) {
+          return;
+        }
         CommonWidget.showToast(
           weeklyBloodPressureSummary.value?.message ??
               StringConstant.internalErrorExceptionMessage,
