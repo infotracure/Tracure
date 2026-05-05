@@ -193,6 +193,7 @@ class _SleepTrackerSettingState extends State<SleepTrackerSetting> {
           SizedBox(height: 18),
           CommonWidget.roundedButton(
             title: "Save Changes",
+            bgColor: ColorConstant.sleepGlobal,
             onTap: _saveSettings,
             context: context,
           ),
@@ -232,7 +233,7 @@ class _SleepTrackerSettingState extends State<SleepTrackerSetting> {
             child: Switch(
               value: value,
               onChanged: onChanged,
-              activeColor: ColorConstant.verdigris,
+              activeColor: ColorConstant.sleepGlobal,
             ),
           ),
         ),

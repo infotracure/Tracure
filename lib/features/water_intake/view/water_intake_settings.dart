@@ -76,7 +76,7 @@ class _WaterIntakeSettingsState extends State<WaterIntakeSettings> {
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.light(primary: ColorConstant.primaryColor),
+            colorScheme: ColorScheme.light(primary: ColorConstant.waterGlobal),
           ),
           child: child!,
         );
@@ -122,12 +122,12 @@ class _WaterIntakeSettingsState extends State<WaterIntakeSettings> {
                     Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: ColorConstant.primaryColor.withAlpha(30),
+                        color: ColorConstant.waterGlobal.withAlpha(30),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Icon(
                         Icons.track_changes,
-                        color: ColorConstant.primaryColor,
+                        color: ColorConstant.waterGlobal,
                         size: 20,
                       ),
                     ),
@@ -170,7 +170,7 @@ class _WaterIntakeSettingsState extends State<WaterIntakeSettings> {
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10),
                             borderSide: BorderSide(
-                              color: ColorConstant.primaryColor,
+                              color: ColorConstant.waterGlobal,
                             ),
                           ),
                           contentPadding: const EdgeInsets.symmetric(
@@ -189,7 +189,7 @@ class _WaterIntakeSettingsState extends State<WaterIntakeSettings> {
                           vertical: 10,
                         ),
                         decoration: BoxDecoration(
-                          color: ColorConstant.primaryColor,
+                          color: ColorConstant.waterGlobal,
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: const Text(
@@ -224,12 +224,12 @@ class _WaterIntakeSettingsState extends State<WaterIntakeSettings> {
                           ),
                           decoration: BoxDecoration(
                             color: isSelected
-                                ? ColorConstant.primaryColor.withAlpha(30)
+                                ? ColorConstant.waterGlobal.withAlpha(30)
                                 : Colors.white,
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(
                               color: isSelected
-                                  ? ColorConstant.primaryColor
+                                  ? ColorConstant.waterGlobal
                                   : Colors.grey.shade300,
                             ),
                           ),
@@ -237,7 +237,7 @@ class _WaterIntakeSettingsState extends State<WaterIntakeSettings> {
                             "${goal}ml",
                             style: TextStyle(
                               color: isSelected
-                                  ? ColorConstant.primaryColor
+                                  ? ColorConstant.waterGlobal
                                   : Colors.grey.shade700,
                               fontWeight: FontWeight.w500,
                             ),
@@ -267,12 +267,12 @@ class _WaterIntakeSettingsState extends State<WaterIntakeSettings> {
                     Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: ColorConstant.primaryColor.withAlpha(30),
+                        color: ColorConstant.waterGlobal.withAlpha(30),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Icon(
                         Icons.notifications_outlined,
-                        color: ColorConstant.primaryColor,
+                        color: ColorConstant.waterGlobal,
                         size: 20,
                       ),
                     ),
@@ -319,7 +319,7 @@ class _WaterIntakeSettingsState extends State<WaterIntakeSettings> {
                           _remindersEnabled = value;
                         });
                       },
-                      activeColor: ColorConstant.primaryColor,
+                      activeColor: ColorConstant.waterGlobal,
                     ),
                   ],
                 ),

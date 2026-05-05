@@ -277,7 +277,7 @@ class _SleepTrackerDayState extends State<SleepTrackerOverview> {
                 child: iconLabelCard(
                   label: "Wake-up",
                   img: "assets/images/emojione_running-shoe.png",
-                  color: ColorConstant.verdigris,
+                  color: ColorConstant.sleepGlobal,
                   value: "08h 38m",
                 ),
               ),
@@ -430,7 +430,7 @@ class _SleepTrendWidgetState extends State<SleepTrendWidget> {
                   height: 32,
                   width: 32,
                   decoration: BoxDecoration(
-                    color: ColorConstant.primaryColor,
+                    color: ColorConstant.sleepGlobal,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: const Icon(
@@ -449,7 +449,7 @@ class _SleepTrendWidgetState extends State<SleepTrendWidget> {
                   decoration: BoxDecoration(
                     color: _isToday()
                         ? Colors.grey.shade300
-                        : ColorConstant.primaryColor,
+                        : ColorConstant.sleepGlobal,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(
@@ -705,7 +705,7 @@ class DayBarChart extends StatelessWidget {
             barRods: [
               BarChartRodData(
                 toY: data[i].isFinite ? data[i] : 0,
-                color: Colors.teal,
+                color: ColorConstant.sleepGlobal,
                 width: 2,
                 borderRadius: BorderRadius.circular(4),
               ),

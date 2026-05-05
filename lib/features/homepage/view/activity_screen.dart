@@ -80,11 +80,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
       width: double.infinity,
       margin: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Color(0xFF2980ff), ColorConstant.primaryColor],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        color: const Color(0xFF3B5BDB),
         borderRadius: BorderRadius.circular(16),
       ),
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
@@ -213,13 +209,13 @@ class _ActivityScreenState extends State<ActivityScreen> {
       final pct = (data?.stepsPercentage ?? 0).round();
       return _buildMetricCard(
         icon: Icons.directions_walk_rounded,
-        iconColor: const Color(0xFF00BFA5),
-        iconBg: const Color(0xFFE0F7F5),
+        iconColor: ColorConstant.stepGlobal,
+        iconBg: ColorConstant.stepGlobal.withValues(alpha: 0.15),
         title: 'Steps',
         todayValue: '${_fmt(steps)} steps',
         goalPercent: pct,
         barValues: controller.weeklyStepBars(),
-        barColor: const Color(0xFF00BFA5),
+        barColor: ColorConstant.stepGlobal,
         onTap: () => Get.to(() => StepTrackerScreen()),
       );
     });
@@ -235,13 +231,13 @@ class _ActivityScreenState extends State<ActivityScreen> {
       final qualityScore = data?.qualityScore ?? 0;
       return _buildMetricCard(
         icon: Icons.bedtime_rounded,
-        iconColor: const Color(0xFF7E57C2),
-        iconBg: const Color(0xFFF3E5FF),
+        iconColor: ColorConstant.sleepGlobal,
+        iconBg: ColorConstant.sleepGlobal.withValues(alpha: 0.15),
         title: 'Sleep',
         todayValue: displayVal,
         goalPercent: qualityScore,
         barValues: controller.weeklySleepBars(),
-        barColor: const Color(0xFF9575CD),
+        barColor: ColorConstant.sleepGlobal,
         onTap: () => Get.to(() => SleepTrackerScreen()),
       );
     });
@@ -257,13 +253,13 @@ class _ActivityScreenState extends State<ActivityScreen> {
       final displayVal = ml > 0 ? '${liters.toStringAsFixed(1)} L' : '--';
       return _buildMetricCard(
         icon: Icons.water_drop_rounded,
-        iconColor: const Color(0xFF1E88E5),
-        iconBg: const Color(0xFFE3F2FD),
+        iconColor: ColorConstant.waterGlobal,
+        iconBg: ColorConstant.waterGlobal.withValues(alpha: 0.15),
         title: 'Water Intake',
         todayValue: displayVal,
         goalPercent: pct,
         barValues: controller.weeklyWaterBars(),
-        barColor: const Color(0xFF42A5F5),
+        barColor: ColorConstant.waterGlobal,
         onTap: () => Get.to(() => WaterIntakeScreen()),
       );
     });
@@ -278,13 +274,13 @@ class _ActivityScreenState extends State<ActivityScreen> {
       final displayVal = scheduled > 0 ? '$taken/$scheduled taken' : '--';
       return _buildMetricCard(
         icon: Icons.medication_rounded,
-        iconColor: const Color(0xFF43A047),
-        iconBg: const Color(0xFFE8F5E9),
+        iconColor: ColorConstant.medicineGlobal,
+        iconBg: ColorConstant.medicineGlobal.withValues(alpha: 0.15),
         title: 'Medicine Intake',
         todayValue: displayVal,
         goalPercent: pct,
         barValues: controller.weeklyMedicineBars(),
-        barColor: const Color(0xFF66BB6A),
+        barColor: ColorConstant.medicineGlobal,
         onTap: () => Get.to(() => MedicineTrackerScreen()),
       );
     });
@@ -299,13 +295,13 @@ class _ActivityScreenState extends State<ActivityScreen> {
       final inRange = data?.inTargetRange ?? false;
       return _buildMetricCard(
         icon: Icons.favorite_rounded,
-        iconColor: const Color(0xFFE53935),
-        iconBg: const Color(0xFFFFEBEE),
+        iconColor: ColorConstant.bloodPressureGlobal,
+        iconBg: ColorConstant.bloodPressureGlobal.withValues(alpha: 0.15),
         title: 'Blood Pressure',
         todayValue: displayVal,
         goalPercent: inRange ? 100 : (sys != null ? 80 : 0),
         barValues: controller.weeklyBloodPressureBars(),
-        barColor: const Color(0xFFEF5350),
+        barColor: ColorConstant.bloodPressureGlobal,
         onTap: () => Get.to(() => BloodPressureScreen()),
       );
     });
@@ -319,13 +315,13 @@ class _ActivityScreenState extends State<ActivityScreen> {
       final inRange = data?.inTargetRange ?? false;
       return _buildMetricCard(
         icon: Icons.water_rounded,
-        iconColor: const Color(0xFF8E24AA),
-        iconBg: const Color(0xFFF3E5F5),
+        iconColor: ColorConstant.bloodSugarGlobal,
+        iconBg: ColorConstant.bloodSugarGlobal.withValues(alpha: 0.15),
         title: 'Blood Sugar',
         todayValue: displayVal,
         goalPercent: inRange ? 100 : (avg != null ? 85 : 0),
         barValues: controller.weeklyBloodSugarBars(),
-        barColor: const Color(0xFFAB47BC),
+        barColor: ColorConstant.bloodSugarGlobal,
         onTap: () => Get.to(() => BloodSugarScreen()),
       );
     });
@@ -467,51 +463,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
   // ── Mini 7-day bar chart ──────────────────────────────────────────────────
 
   Widget _buildMiniBarChart(List<double> values, Color barColor) {
-    const days = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
-    final maxVal = values.reduce(max);
-    const maxBarHeight = 44.0;
-    const minBarHeight = 6.0;
-    final todayIndex = DateTime.now().weekday - 1; // 0=Mon … 6=Sun
-
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: List.generate(7, (i) {
-        final val = i < values.length ? values[i] : 0.0;
-        final barH = maxVal > 0
-            ? (val / maxVal * maxBarHeight).clamp(minBarHeight, maxBarHeight)
-            : minBarHeight;
-        final isToday = i == todayIndex;
-        final isFuture = i > todayIndex;
-
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 32,
-              height: barH,
-              decoration: BoxDecoration(
-                color: isFuture
-                    ? Colors.grey.shade200
-                    : isToday
-                    ? barColor
-                    : barColor.withValues(alpha: 0.45),
-                borderRadius: BorderRadius.circular(6),
-              ),
-            ),
-            const SizedBox(height: 5),
-            Text(
-              days[i],
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
-                color: isToday ? barColor : ColorConstant.grayTextColor,
-              ),
-            ),
-          ],
-        );
-      }),
-    );
+    return _MiniBarChart(values: values, barColor: barColor);
   }
 
   // ── Motivational card ─────────────────────────────────────────────────────
@@ -581,5 +533,123 @@ class _ActivityScreenState extends State<ActivityScreen> {
       );
     }
     return value.toString();
+  }
+}
+
+// ── Mini 7-day bar chart widget ───────────────────────────────────────────────
+
+class _MiniBarChart extends StatefulWidget {
+  final List<double> values;
+  final Color barColor;
+
+  const _MiniBarChart({required this.values, required this.barColor});
+
+  @override
+  State<_MiniBarChart> createState() => _MiniBarChartState();
+}
+
+class _MiniBarChartState extends State<_MiniBarChart> {
+  int? _selectedIndex;
+
+  String _formatValue(double val) {
+    if (val == val.roundToDouble()) {
+      final intVal = val.toInt();
+      if (intVal >= 1000) {
+        return intVal.toString().replaceAllMapped(
+          RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+          (m) => '${m[1]},',
+        );
+      }
+      return intVal.toString();
+    }
+    return val.toStringAsFixed(1);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    const days = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+    final maxVal = widget.values.reduce(max);
+    const maxBarHeight = 44.0;
+    const minBarHeight = 6.0;
+    final todayIndex = DateTime.now().weekday - 1;
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: List.generate(7, (i) {
+        final val = i < widget.values.length ? widget.values[i] : 0.0;
+        final barH = maxVal > 0
+            ? (val / maxVal * maxBarHeight).clamp(minBarHeight, maxBarHeight)
+            : minBarHeight;
+        final isToday = i == todayIndex;
+        final isFuture = i > todayIndex;
+        final isSelected = _selectedIndex == i;
+
+        return GestureDetector(
+          onTap: () {
+            if (isFuture || val == 0) return;
+            setState(() {
+              _selectedIndex = isSelected ? null : i;
+            });
+          },
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Tooltip label
+              AnimatedOpacity(
+                opacity: isSelected ? 1.0 : 0.0,
+                duration: const Duration(milliseconds: 150),
+                child: Container(
+                  margin: const EdgeInsets.only(bottom: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 3,
+                  ),
+                  decoration: BoxDecoration(
+                    color: widget.barColor,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    _formatValue(val),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+              // Bar
+              Container(
+                width: 32,
+                height: barH,
+                decoration: BoxDecoration(
+                  color: isFuture
+                      ? Colors.grey.shade200
+                      : isToday
+                      ? widget.barColor
+                      : widget.barColor.withValues(alpha: 0.45),
+                  borderRadius: BorderRadius.circular(6),
+                  border: isSelected
+                      ? Border.all(color: widget.barColor, width: 1.5)
+                      : null,
+                ),
+              ),
+              const SizedBox(height: 5),
+              Text(
+                days[i],
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
+                  color: isToday
+                      ? widget.barColor
+                      : ColorConstant.grayTextColor,
+                ),
+              ),
+            ],
+          ),
+        );
+      }),
+    );
   }
 }

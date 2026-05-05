@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../utils/common_appbar.dart';
+import '../../../utils/constant/color_constants.dart';
 import '../../step_tracker/view/step_tracker_screen.dart';
 import '../controller/medicine_tracker_controller.dart';
 import 'medicine_tracker_day.dart';
@@ -8,7 +9,7 @@ import 'medicine_tracker_schedule.dart';
 import 'medicine_tracker_history.dart';
 import 'medicine_tracker_settings.dart';
 
-const Color medicineGreen = Color(0xFF4CAF50);
+const Color medicineGreen = ColorConstant.medicineGlobal;
 
 class MedicineTrackerScreen extends StatefulWidget {
   const MedicineTrackerScreen({super.key});

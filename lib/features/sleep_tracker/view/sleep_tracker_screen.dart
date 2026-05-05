@@ -49,7 +49,7 @@ class _SleepTrackerScreenState extends State<SleepTrackerScreen>
       appBar: CustomAppbar(title: "Sleep Tracking"),
       body: RoundedTabBarExample(
         controller: tabController,
-        color: ColorConstant.primaryColor,
+        color: ColorConstant.sleepGlobal,
         tabs: tabData.asMap().entries.map((entry) {
           int index = entry.key;
           String title = entry.value["title"]!;

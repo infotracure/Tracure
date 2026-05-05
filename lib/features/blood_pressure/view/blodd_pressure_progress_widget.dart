@@ -62,7 +62,7 @@ class _BloodPressureProgressWidgetState
                       style: const TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
-                        color: ColorConstant.primaryColor,
+                        color: ColorConstant.bloodPressureGlobal,
                       ),
                     ),
                     TextSpan(
@@ -85,7 +85,7 @@ class _BloodPressureProgressWidgetState
                       style: const TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
-                        color: ColorConstant.primaryColor,
+                        color: ColorConstant.bloodPressureGlobal,
                       ),
                     ),
                     TextSpan(
@@ -148,7 +148,7 @@ class CircleBorderPainter extends CustomPainter {
 
     final fgPaint = Paint()
       ..shader = LinearGradient(
-        colors: [Color(0xFFADC2E8), ColorConstant.primaryColor],
+        colors: [Color(0xFFADC2E8), ColorConstant.bloodPressureGlobal],
       ).createShader(Rect.fromCircle(center: center, radius: radius))
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round

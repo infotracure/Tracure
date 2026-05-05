@@ -373,7 +373,7 @@ class LeftRightIconButton extends StatelessWidget {
   const LeftRightIconButton({
     super.key,
     this.onTap,
-    this.iconColor = ColorConstant.verdigris,
+    this.iconColor = ColorConstant.stepGlobal,
   });
   final VoidCallback? onTap;
   final Color iconColor;
@@ -509,7 +509,7 @@ class DayBarChart extends StatelessWidget {
             barRods: [
               BarChartRodData(
                 toY: data[i].isFinite ? data[i] : 0,
-                color: Colors.teal,
+                color: ColorConstant.stepGlobal,
                 width: 6,
                 borderRadius: BorderRadius.circular(2),
               ),

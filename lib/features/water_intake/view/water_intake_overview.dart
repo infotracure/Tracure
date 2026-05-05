@@ -118,14 +118,14 @@ class _WaterIntakeOverviewState extends State<WaterIntakeOverview> {
       ),
       child: Row(
         children: [
-          Icon(icon, color: ColorConstant.primaryColor, size: 18),
+          Icon(icon, color: ColorConstant.waterGlobal, size: 18),
           const SizedBox(width: 8),
           Expanded(
             child: CustomText.title(
               text: text,
               isBold: true,
               size: 12,
-              color: ColorConstant.primaryColor,
+              color: ColorConstant.waterGlobal,
             ),
           ),
         ],
@@ -194,7 +194,7 @@ class WaterIntakeQuickAdd extends StatelessWidget {
               padding: EdgeInsets.all(6),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: ColorConstant.primaryColor,
+                color: ColorConstant.waterGlobal,
               ),
               child: Image.asset(
                 "assets/images/drop.png",
@@ -214,7 +214,7 @@ class WaterIntakeQuickAdd extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 10,
                   fontWeight: FontWeight.w500,
-                  color: ColorConstant.primaryColor,
+                  color: ColorConstant.waterGlobal,
                 ),
               ),
             ),
@@ -265,7 +265,7 @@ class WaterIntakeQuickAdd extends StatelessWidget {
                     TextSpan(
                       text: ml,
                       style: const TextStyle(
-                        color: ColorConstant.primaryColor,
+                        color: ColorConstant.waterGlobal,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -305,7 +305,7 @@ class WaterIntakeQuickAdd extends StatelessWidget {
                       child: Container(
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         decoration: BoxDecoration(
-                          color: ColorConstant.primaryColor,
+                          color: ColorConstant.waterGlobal,
                           borderRadius: BorderRadius.circular(25),
                         ),
                         child: const Center(
@@ -391,7 +391,7 @@ class _WaterDailyLogState extends State<WaterDailyLog> {
                   child: Container(
                     padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: ColorConstant.primaryColor,
+                      color: ColorConstant.waterGlobal,
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Row(
@@ -459,7 +459,7 @@ class _WaterDailyLogState extends State<WaterDailyLog> {
                                     : "",
                                 isBold: true,
                                 size: 14,
-                                color: ColorConstant.primaryColor,
+                                color: ColorConstant.waterGlobal,
                               ).padOnly(r: 12),
                             ],
                           ),
@@ -510,8 +510,8 @@ class _WaterDailyLogState extends State<WaterDailyLog> {
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      ColorConstant.primaryColor,
-                      ColorConstant.primaryColor.withAlpha(230),
+                      ColorConstant.waterGlobal,
+                      ColorConstant.waterGlobal.withAlpha(230),
                     ],
                     begin: Alignment.centerLeft,
                     end: Alignment.centerRight,
@@ -631,8 +631,8 @@ class _WaterDailyLogState extends State<WaterDailyLog> {
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         colors: [
-                          ColorConstant.primaryColor,
-                          ColorConstant.primaryColor.withAlpha(230),
+                          ColorConstant.waterGlobal,
+                          ColorConstant.waterGlobal.withAlpha(230),
                         ],
                       ),
                       borderRadius: BorderRadius.circular(12),

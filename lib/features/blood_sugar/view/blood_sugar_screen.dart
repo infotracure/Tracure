@@ -4,6 +4,7 @@ import 'package:tracure/features/blood_sugar/controller/blood_sugar_controller.d
 import 'package:tracure/features/blood_sugar/view/blood_sugar_overview.dart';
 import 'package:tracure/features/blood_sugar/view/blood_sugar_settings.dart';
 import 'package:tracure/features/blood_sugar/view/blood_sugar_activity.dart';
+import 'package:tracure/utils/constant/color_constants.dart';
 import 'package:tracure/utils/extensions.dart';
 
 import '../../../utils/common_appbar.dart';
@@ -18,7 +19,7 @@ class BloodSugarScreen extends StatelessWidget {
     return Scaffold(
       appBar: CustomAppbar(title: "Blood Sugar"),
       body: RoundedTabBarExample(
-        color: const Color(0xFF4CAF50),
+        color: ColorConstant.bloodSugarGlobal,
         tabs: const [
           Tab(text: 'Overview'),
           Tab(text: 'Activity'),

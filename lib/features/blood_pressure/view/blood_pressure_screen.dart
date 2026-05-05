@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:tracure/features/blood_pressure/view/blood_pressure_overview.dart';
 import 'package:tracure/features/blood_pressure/view/blood_pressure_settings.dart';
 import 'package:tracure/features/blood_pressure/view/blood_pressure_activity.dart';
+import 'package:tracure/utils/constant/color_constants.dart';
 import 'package:tracure/utils/extensions.dart';
 
 import '../../../utils/common_appbar.dart';
@@ -17,10 +18,10 @@ class BloodPressureScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFFFF0F0),
+      backgroundColor: ColorConstant.bloodPressureGlobal.withAlpha(15),
       appBar: CustomAppbar(title: "Blood Pressure"),
       body: RoundedTabBarExample(
-        color: const Color(0xFFE53935),
+        color: ColorConstant.bloodPressureGlobal,
         tabs: const [
           Tab(text: 'Overview'),
           Tab(text: 'Activity'),

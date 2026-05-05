@@ -74,7 +74,7 @@ class _StepTrackerSettingState extends State<StepTrackerSetting> {
         ),
         Spacer(),
         CommonWidget.roundedButton(
-          bgColor: ColorConstant.verdigris,
+          bgColor: ColorConstant.stepGlobal,
           title: "Save Changes",
           onTap: () async {
             await stepTrackerController.pushStepSettingData(_currentValue);
@@ -105,7 +105,7 @@ class _StepTrackerSettingState extends State<StepTrackerSetting> {
                 child: Switch(
                   value: value,
                   onChanged: onChanged,
-                  activeColor: ColorConstant.verdigris,
+                  activeColor: ColorConstant.stepGlobal,
                 ),
               ),
             ),
@@ -132,7 +132,7 @@ class _StepTrackerSettingState extends State<StepTrackerSetting> {
           ),
           child: Slider(
             padding: EdgeInsets.zero,
-            activeColor: ColorConstant.verdigris,
+            activeColor: ColorConstant.stepGlobal,
             inactiveColor: Colors.grey.shade200,
             value: _currentValue.toDouble(),
             min: 1000,

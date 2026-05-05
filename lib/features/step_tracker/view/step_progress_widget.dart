@@ -45,7 +45,7 @@ class _StepProgressWidgetState extends State<StepProgressWidget> {
           // 2. Circular Border (on top of wave)
           CustomPaint(
             size: const Size(200, 200),
-            painter: CircleBorderPainter(percentage, ColorConstant.verdigris),
+            painter: CircleBorderPainter(percentage, ColorConstant.stepGlobal),
           ),
 
           // 3. Text Content (centered)
@@ -57,7 +57,7 @@ class _StepProgressWidgetState extends State<StepProgressWidget> {
                 text: "${widget.current}".toFormattedNumber(),
                 isBold: true,
                 size: 25,
-                color: ColorConstant.verdigris,
+                color: ColorConstant.stepGlobal,
               ),
               const SizedBox(height: 5),
               CustomText.title(
@@ -68,7 +68,7 @@ class _StepProgressWidgetState extends State<StepProgressWidget> {
               const SizedBox(height: 10),
               CustomText.title(
                 text: "${getPercentageValue()}%",
-                color: ColorConstant.verdigris,
+                color: ColorConstant.stepGlobal,
                 isBold: true,
                 size: 14,
               ),

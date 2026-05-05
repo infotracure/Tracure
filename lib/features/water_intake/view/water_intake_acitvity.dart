@@ -48,7 +48,7 @@ class _WaterIntakeActivityState extends State<WaterIntakeActivity> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       LeftRightIconButton(
-                        iconColor: ColorConstant.primaryColor,
+                        iconColor: ColorConstant.waterGlobal,
                         onTap: () {
                           setState(() {
                             _selectedWeek = _selectedWeek.subtract(
@@ -66,7 +66,7 @@ class _WaterIntakeActivityState extends State<WaterIntakeActivity> {
                       _isCurrentWeek()
                           ? const SizedBox(width: 55)
                           : LeftRightIconButton(
-                              iconColor: ColorConstant.primaryColor,
+                              iconColor: ColorConstant.waterGlobal,
                               onTap: () {
                                 setState(() {
                                   _selectedWeek = _selectedWeek.add(
@@ -89,14 +89,14 @@ class _WaterIntakeActivityState extends State<WaterIntakeActivity> {
                         ),
                         CommonWidget.roundedButton(
                               context: context,
-                              titleColor: ColorConstant.primaryColor,
+                              titleColor: ColorConstant.waterGlobal,
                               bgColor: ColorConstant.backgroundColor,
                               title: "View Monthly Record",
                               padding: EdgeInsets.symmetric(vertical: 10),
                               elevation: 0,
                               prefixIcon: Icon(
                                 Icons.calendar_month,
-                                color: ColorConstant.primaryColor,
+                                color: ColorConstant.waterGlobal,
                                 size: 20,
                               ),
                               onTap: () async {
@@ -205,7 +205,7 @@ class _WaterIntakeActivityState extends State<WaterIntakeActivity> {
               child: iconLabelCard(
                 label: "Goal",
                 img: "assets/images/emojione_running-shoe.png",
-                color: ColorConstant.primaryColor,
+                color: ColorConstant.waterGlobal,
                 value: "$dailyTarget ml",
               ),
             ),
@@ -425,7 +425,7 @@ class _WeekBarChartState extends State<WeekBarChart> {
             barRods: [
               BarChartRodData(
                 toY: widget.data[i].isFinite ? widget.data[i] : 0,
-                color: ColorConstant.primaryColor,
+                color: ColorConstant.waterGlobal,
                 width: 16,
                 borderRadius: BorderRadius.circular(4),
               ),

@@ -111,7 +111,7 @@ class _WaterIntakeMonthState extends State<WaterIntakeMonth> {
 class CustomCalendar extends StatefulWidget {
   final DateTime initialMonth;
   final void Function(DateTime)? onDaySelected;
-  final Color headerColor = ColorConstant.primaryColor;
+  final Color headerColor = ColorConstant.waterGlobal;
   const CustomCalendar({
     super.key,
     required this.initialMonth,

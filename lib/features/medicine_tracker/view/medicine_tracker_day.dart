@@ -217,7 +217,7 @@ class _StatsRow extends StatelessWidget {
         _statCard(
           'Taken',
           '${controller.takenCount}',
-          const Color(0xFF4CAF50),
+          medicineGreen,
           Icons.check_circle_outline,
         ),
         const SizedBox(width: 10),

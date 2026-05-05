@@ -63,7 +63,7 @@ class _SleepTrackerInsightsState extends State<SleepTrackerInsights> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       LeftRightIconButton(
-                        iconColor: ColorConstant.primaryColor,
+                        iconColor: ColorConstant.sleepGlobal,
                         onTap: () {
                           setState(() {
                             _selectedWeek = _selectedWeek.subtract(
@@ -81,7 +81,7 @@ class _SleepTrackerInsightsState extends State<SleepTrackerInsights> {
                       _isCurrentWeek()
                           ? const SizedBox(width: 55)
                           : LeftRightIconButton(
-                              iconColor: ColorConstant.primaryColor,
+                              iconColor: ColorConstant.sleepGlobal,
                               onTap: () {
                                 setState(() {
                                   _selectedWeek = _selectedWeek.add(
@@ -104,14 +104,15 @@ class _SleepTrackerInsightsState extends State<SleepTrackerInsights> {
                         ),
                         CommonWidget.roundedButton(
                               context: context,
-                              titleColor: ColorConstant.primaryColor,
-                              bgColor: Color(0xffC8E2F9),
+                              titleColor: ColorConstant.sleepGlobal,
+
+                              bgColor: ColorConstant.sleepGlobal.withAlpha(30),
                               title: "View Monthly Record",
                               padding: EdgeInsets.symmetric(vertical: 10),
                               elevation: 0,
                               prefixIcon: Icon(
                                 Icons.calendar_month,
-                                color: ColorConstant.primaryColor,
+                                color: ColorConstant.sleepGlobal,
                                 size: 20,
                               ),
                               onTap: () async {
@@ -438,7 +439,7 @@ class _WeekBarChartState extends State<WeekBarChart> {
             barRods: [
               BarChartRodData(
                 toY: widget.data[i].isFinite ? widget.data[i] : 0,
-                color: ColorConstant.primaryColor,
+                color: ColorConstant.sleepGlobal,
                 width: 16,
                 borderRadius: BorderRadius.circular(4),
               ),

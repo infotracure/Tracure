@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:tracure/utils/common_widget.dart';
+import 'package:tracure/utils/constant/color_constants.dart';
 import 'package:tracure/utils/extensions.dart';
 
 import '../controller/blood_sugar_controller.dart';
@@ -76,7 +77,7 @@ class _BloodSugarSettingsState extends State<BloodSugarSettings> {
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(primary: Color(0xFF4CAF50)),
+            colorScheme: ColorScheme.light(primary: ColorConstant.bloodSugarGlobal),
           ),
           child: child!,
         );
@@ -122,8 +123,8 @@ class _BloodSugarSettingsState extends State<BloodSugarSettings> {
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      Color(0xFF4CAF50).withAlpha(150),
-                      Color(0xFF4CAF50),
+                   ColorConstant.bloodSugarGlobal.withAlpha(150),
+                      ColorConstant.bloodSugarGlobal,
                     ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
@@ -183,7 +184,7 @@ class _BloodSugarSettingsState extends State<BloodSugarSettings> {
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
                           borderSide: const BorderSide(
-                            color: Color(0xFF4CAF50),
+                            color: ColorConstant.bloodSugarGlobal,
                           ),
                         ),
                         contentPadding: const EdgeInsets.symmetric(
@@ -226,7 +227,7 @@ class _BloodSugarSettingsState extends State<BloodSugarSettings> {
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
                           borderSide: const BorderSide(
-                            color: Color(0xFF4CAF50),
+                            color: ColorConstant.bloodSugarGlobal,
                           ),
                         ),
                         contentPadding: const EdgeInsets.symmetric(
@@ -345,12 +346,12 @@ class _BloodSugarSettingsState extends State<BloodSugarSettings> {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF4CAF50).withValues(alpha: 0.2),
+                  color: ColorConstant.bloodSugarGlobal.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Icon(
                   Icons.notifications_outlined,
-                  color: Color(0xFF4CAF50),
+                  color: ColorConstant.bloodSugarGlobal,
                   size: 20,
                 ),
               ),
@@ -388,7 +389,7 @@ class _BloodSugarSettingsState extends State<BloodSugarSettings> {
                     _remindersEnabled = value;
                   });
                 },
-                activeColor: const Color(0xFF4CAF50),
+                activeColor: ColorConstant.bloodSugarGlobal,
               ),
             ],
           ),
@@ -434,7 +435,7 @@ class _BloodSugarSettingsState extends State<BloodSugarSettings> {
               decoration: BoxDecoration(
                 gradient: item.isEnabled
                     ? const LinearGradient(
-                        colors: [Color(0xFF4CAF50), Color(0xFF4CAF50)],
+                        colors: [ColorConstant.bloodSugarGlobal, ColorConstant.bloodSugarGlobal],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       )

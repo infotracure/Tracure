@@ -48,7 +48,7 @@ class _SleepProgressWidgetState extends State<SleepProgressWidget> {
             size: const Size(200, 200),
             painter: CircleBorderPainter(
               percentage,
-              ColorConstant.primaryColor,
+              ColorConstant.sleepGlobal,
             ),
           ),
 
@@ -63,14 +63,14 @@ class _SleepProgressWidgetState extends State<SleepProgressWidget> {
                 text: currentHours,
                 isBold: true,
                 size: 22,
-                color: ColorConstant.primaryColor,
+                color: ColorConstant.sleepGlobal,
               ),
               const SizedBox(height: 8),
               CustomText.title(text: goalHours, isBold: true, size: 12),
               const SizedBox(height: 10),
               CustomText.title(
                 text: "22:20 - 7:00",
-                color: ColorConstant.primaryColor,
+                color: ColorConstant.sleepGlobal,
                 isBold: true,
                 size: 14,
               ),

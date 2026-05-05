@@ -10,6 +10,13 @@ class ColorConstant {
   static const Color primaryTextColor = Color(0xFF323643);
   static const Color grayTextColor = Color(0xFF7E8392);
   static const Color verdigris = Color(0xff40b8b2);
+  static const Color stepGlobal = Color(0xFF00BFA5);
+  static const Color sleepGlobal = Color(0xFF7E57C2);
+  static const Color waterGlobal = Color(0xFF1E88E5);
+  static const Color medicineGlobal = Color(0xFF43A047);
+  static const Color bloodPressureGlobal = Color(0xFFE53935);
+  static const Color bloodSugarGlobal = Color(0xFF8E24AA);
+
 
 
   static LinearGradient loginBgLinearGradient = const LinearGradient(

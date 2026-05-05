@@ -293,7 +293,9 @@ class _SleepStepsCaloriesCard extends StatelessWidget {
                 iconColor: const Color(0xFFFF922B),
                 progress: caloriesProgress,
                 progressColor: const Color(0xFFFF922B),
-                onTap: () => Get.to(() => const StepTrackerScreen(initialShowCalories: true)),
+                onTap: () => Get.to(
+                  () => const StepTrackerScreen(initialShowCalories: true),
+                ),
               ),
             ),
           ],
@@ -1108,58 +1110,69 @@ class _WeeklyHealthHighlights extends StatelessWidget {
         ),
       ];
 
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Weekly Health Highlights',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 12),
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: items.length,
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              crossAxisSpacing: 12,
-              mainAxisSpacing: 12,
-              childAspectRatio: 1.45,
+      return Container(
+        decoration: CommonWidget.containerDecoration(),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 16),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16),
+              child: Text(
+                'Weekly Health Highlights',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
             ),
-            itemBuilder: (_, i) {
-              final item = items[i];
-              return Container(
-                padding: const EdgeInsets.all(14),
-                decoration: CommonWidget.containerDecoration(),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(item.icon, color: item.iconColor, size: 22),
-                    const SizedBox(height: 8),
-                    Text(
-                      item.label,
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
+            GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              itemCount: items.length,
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: 8,
+                mainAxisSpacing: 8,
+                childAspectRatio: 1.3,
+              ),
+              itemBuilder: (_, i) {
+                final item = items[i];
+                return Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Color(0xffF9F9FA),
+                    border: Border.all(color: Colors.grey.shade300),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(item.icon, color: item.iconColor, size: 22),
+                      const SizedBox(height: 8),
+                      Text(
+                        item.label,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 3),
-                    Text(
-                      item.desc,
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: Colors.grey.shade500,
-                        height: 1.3,
+                      const SizedBox(height: 3),
+                      Text(
+                        item.desc,
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: Colors.grey.shade500,
+                          height: 1.3,
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
-        ],
+                    ],
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
       );
     });
   }
@@ -1186,68 +1199,77 @@ class _OtherHighlights extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Other Highlights',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 12),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          decoration: CommonWidget.containerDecoration(),
-          child: Row(
-            children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: const BoxDecoration(
-                  color: Color(0xFFD3F9D8),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.sentiment_satisfied_alt_outlined,
-                  color: Color(0xFF2ECC71),
-                  size: 24,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Goal Achievement',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      'Workout goal completion by',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey.shade500,
-                      ),
-                    ),
-                    Text(
-                      '42%',
-                      style: TextStyle(
-                        fontSize: 26,
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFF2ECC71),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+    return Container(
+      decoration: CommonWidget.containerDecoration(),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Other Highlights',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
-        ),
-      ],
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            //  padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Color(0xffF9F9FA),
+              border: Border.all(color: Colors.grey.shade300),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFD3F9D8),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.sentiment_satisfied_alt_outlined,
+                    color: Color(0xFF2ECC71),
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Goal Achievement',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'Workout goal completion by',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey.shade500,
+                        ),
+                      ),
+                      Text(
+                        '42%',
+                        style: TextStyle(
+                          fontSize: 26,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF2ECC71),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

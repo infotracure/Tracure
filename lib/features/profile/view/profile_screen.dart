@@ -124,15 +124,8 @@ class ProfileScreen extends StatelessWidget {
       margin: EdgeInsets.symmetric(horizontal: 16),
       padding: EdgeInsets.symmetric(horizontal: 20, vertical: 24),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          stops: [0.6, 1],
-          colors: [
-            ColorConstant.primaryColor,
-            ColorConstant.primaryColor.withValues(alpha: 0.8),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        color: ColorConstant.primaryColor,
+
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(20),
           topRight: Radius.circular(20),

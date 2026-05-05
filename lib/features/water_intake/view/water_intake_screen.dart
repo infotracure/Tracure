@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:tracure/features/water_intake/view/water_intake_overview.dart';
 import 'package:tracure/features/water_intake/view/water_intake_settings.dart';
 import 'package:tracure/features/water_intake/view/water_intake_acitvity.dart';
+import 'package:tracure/utils/constant/color_constants.dart';
 import 'package:tracure/utils/extensions.dart';
 
 import '../../../utils/common_appbar.dart';
@@ -24,6 +25,7 @@ class _WaterIntakeScreenState extends State<WaterIntakeScreen> {
     return Scaffold(
       appBar: CustomAppbar(title: "Water Intake"),
       body: RoundedTabBarExample(
+        color: ColorConstant.waterGlobal,
         tabs: const [
           Tab(text: 'Overview'),
           Tab(text: 'Activity'),

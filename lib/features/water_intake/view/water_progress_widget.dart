@@ -92,7 +92,7 @@ class _WaterProgressWidgetState extends State<WaterProgressWidget>
                 '$percentageText%',
                 style: TextStyle(
                   fontSize: 24,
-                  color: ColorConstant.primaryColor,
+                  color: ColorConstant.waterGlobal,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -123,7 +123,7 @@ class CircleBorderPainter extends CustomPainter {
 
     final fgPaint = Paint()
       ..shader = LinearGradient(
-        colors: [ColorConstant.primaryColor, ColorConstant.primaryColor],
+        colors: [ColorConstant.waterGlobal, ColorConstant.waterGlobal],
       ).createShader(Rect.fromCircle(center: center, radius: radius))
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round

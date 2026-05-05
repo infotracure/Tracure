@@ -93,14 +93,14 @@ class _StepTrackerActivityState extends State<StepTrackerActivity> {
                         ),
                         CommonWidget.roundedButton(
                               context: context,
-                              titleColor: ColorConstant.verdigris,
-                              bgColor: Color(0xffCFEDEC),
+                              titleColor: ColorConstant.stepGlobal,
+                              bgColor: ColorConstant.stepGlobal.withAlpha(30),
                               title: "View Monthly Record",
                               padding: EdgeInsets.symmetric(vertical: 10),
                               elevation: 0,
                               prefixIcon: Icon(
                                 Icons.calendar_month,
-                                color: ColorConstant.verdigris,
+                                color: ColorConstant.stepGlobal,
                                 size: 20,
                               ),
                               onTap: () async {
@@ -425,7 +425,7 @@ class _WeekBarChartState extends State<WeekBarChart> {
             barRods: [
               BarChartRodData(
                 toY: widget.weeklySteps[i].isFinite ? widget.weeklySteps[i] : 0,
-                color: Colors.teal,
+                color: ColorConstant.stepGlobal,
                 width: 16,
                 borderRadius: BorderRadius.circular(4),
               ),

@@ -62,9 +62,9 @@ class _StepTrackerScreenState extends State<StepTrackerScreen>
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                _toggleTab('Steps', !isCalories, ColorConstant.verdigris,
+                _toggleTab('Steps', !isCalories, ColorConstant.stepGlobal,
                     () => stepTrackerController.showCalories.value = false),
-                _toggleTab('Calories', isCalories, ColorConstant.verdigris,
+                _toggleTab('Calories', isCalories, ColorConstant.stepGlobal,
                     () => stepTrackerController.showCalories.value = true),
               ],
             ),
@@ -73,7 +73,7 @@ class _StepTrackerScreenState extends State<StepTrackerScreen>
       ),
       body: RoundedTabBarExample(
         controller: tabController,
-        color: ColorConstant.verdigris,
+        color: ColorConstant.stepGlobal,
         tabs: tabData.asMap().entries.map((entry) {
           int index = entry.key;
           String title = entry.value["title"]!;

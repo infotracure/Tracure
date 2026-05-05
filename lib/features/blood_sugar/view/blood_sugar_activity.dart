@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:tracure/features/step_tracker/view/step_tracker_overview.dart';
 import 'package:tracure/utils/common_widget.dart';
+import 'package:tracure/utils/constant/color_constants.dart';
 import 'package:tracure/utils/custom_text.dart';
 import 'package:tracure/utils/extensions.dart';
 
@@ -25,9 +26,9 @@ class _BloodSugarActivityState extends State<BloodSugarActivity> {
   DateTime _selectedWeek = DateTime.now();
   List<double> _weeklyValues = List.filled(7, 0.0);
 
-  static const Color _primaryColor = Color(0xFF4CAF50);
-  static const Color _secondaryColor = Color(0xFF81C784);
-  static const Color _lightBgColor = Color(0xFFE8F5E9);
+  static const Color _primaryColor = ColorConstant.bloodSugarGlobal;
+  static const Color _secondaryColor = Color(0xFFBA68C8);
+  static const Color _lightBgColor = Color(0xFFF3E5F5);
 
   @override
   void initState() {
@@ -441,7 +442,7 @@ class _BloodSugarWeekBarChartState extends State<BloodSugarWeekBarChart> {
             barRods: [
               BarChartRodData(
                 toY: widget.data[i].isFinite ? widget.data[i] : 0,
-                color: const Color(0xFF4CAF50),
+                color: ColorConstant.bloodSugarGlobal,
                 width: 14,
                 borderRadius: BorderRadius.circular(3),
               ),
@@ -456,7 +457,7 @@ class _BloodSugarWeekBarChartState extends State<BloodSugarWeekBarChart> {
 class BloodSugarCalendar extends StatefulWidget {
   final DateTime initialMonth;
   final void Function(DateTime)? onDaySelected;
-  final Color headerColor = const Color(0xFF4CAF50);
+  final Color headerColor = ColorConstant.bloodSugarGlobal;
 
   const BloodSugarCalendar({
     super.key,

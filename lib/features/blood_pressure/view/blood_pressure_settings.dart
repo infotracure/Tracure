@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:tracure/features/blood_pressure/controller/blood_pressure_controller.dart';
 import 'package:tracure/utils/common_widget.dart';
+import 'package:tracure/utils/constant/color_constants.dart';
 import 'package:tracure/utils/extensions.dart';
 
 class BloodPressureSettings extends StatefulWidget {
@@ -72,7 +73,7 @@ class _BloodPressureSettingsState extends State<BloodPressureSettings> {
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(primary: Color(0xFFE53935)),
+            colorScheme: ColorScheme.light(primary: ColorConstant.bloodPressureGlobal),
           ),
           child: child!,
         );
@@ -106,7 +107,7 @@ class _BloodPressureSettingsState extends State<BloodPressureSettings> {
 
   @override
   Widget build(BuildContext context) {
-    const primaryColor = Color(0xFFE53935);
+    final primaryColor = ColorConstant.bloodPressureGlobal;
 
     return SingleChildScrollView(
       child: Column(
@@ -128,7 +129,7 @@ class _BloodPressureSettingsState extends State<BloodPressureSettings> {
                         color: primaryColor.withAlpha(30),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.track_changes,
                         color: primaryColor,
                         size: 20,
@@ -187,7 +188,7 @@ class _BloodPressureSettingsState extends State<BloodPressureSettings> {
                               ),
                               focusedBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(10),
-                                borderSide: const BorderSide(
+                                borderSide: BorderSide(
                                   color: primaryColor,
                                 ),
                               ),
@@ -234,7 +235,7 @@ class _BloodPressureSettingsState extends State<BloodPressureSettings> {
                               ),
                               focusedBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(10),
-                                borderSide: const BorderSide(
+                                borderSide: BorderSide(
                                   color: primaryColor,
                                 ),
                               ),
@@ -357,7 +358,7 @@ class _BloodPressureSettingsState extends State<BloodPressureSettings> {
                         color: primaryColor.withAlpha(30),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.notifications_outlined,
                         color: primaryColor,
                         size: 20,

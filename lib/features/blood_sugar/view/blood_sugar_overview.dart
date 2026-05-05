@@ -132,10 +132,10 @@ class _BloodSugarOverviewState extends State<BloodSugarOverview> {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
+        gradient: LinearGradient(
           begin: Alignment.centerLeft,
           end: Alignment.centerRight,
-          colors: [Color(0xFF4CAF50), Color(0xFF81C784)],
+          colors: [ColorConstant.bloodSugarGlobal, ColorConstant.bloodSugarGlobal.withAlpha(180)],
         ),
         borderRadius: BorderRadius.circular(16),
       ),
@@ -207,7 +207,7 @@ class _BloodSugarOverviewState extends State<BloodSugarOverview> {
                 ElevatedButton.icon(
                   onPressed: () => _showAddBloodSugarBottomSheet(context),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF4CAF50),
+                    backgroundColor: ColorConstant.bloodSugarGlobal,
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
@@ -260,14 +260,14 @@ class _BloodSugarOverviewState extends State<BloodSugarOverview> {
     final isElevated = category == 'Elevated' || category == 'High';
     final statusColor = isElevated
         ? const Color(0xFFFF9800)
-        : const Color(0xFF4CAF50);
+        : ColorConstant.bloodSugarGlobal;
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 12),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8),
-        color: const Color(0xFFE8F5E9),
+        color: const Color(0xFFF3E5F5),
       ),
       child: Row(
         children: [
@@ -368,9 +368,9 @@ class _BloodSugarOverviewState extends State<BloodSugarOverview> {
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(20),
-                    decoration: const BoxDecoration(
+                    decoration: BoxDecoration(
                       gradient: LinearGradient(
-                        colors: [Color(0xFF4CAF50), Color(0xFF81C784)],
+                        colors: [ColorConstant.bloodSugarGlobal, ColorConstant.bloodSugarGlobal.withAlpha(180)],
                         begin: Alignment.centerLeft,
                         end: Alignment.centerRight,
                       ),
@@ -545,8 +545,8 @@ class _BloodSugarOverviewState extends State<BloodSugarOverview> {
                         width: double.infinity,
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [Color(0xFF4CAF50), Color(0xFF81C784)],
+                          gradient: LinearGradient(
+                            colors: [ColorConstant.bloodSugarGlobal, ColorConstant.bloodSugarGlobal.withAlpha(180)],
                           ),
                           borderRadius: BorderRadius.circular(12),
                         ),

@@ -111,7 +111,7 @@ class _DrinkBottomSheetState extends State<DrinkBottomSheet> {
             ),
             child: Slider(
               padding: EdgeInsets.zero,
-              activeColor: ColorConstant.primaryColor,
+              activeColor: ColorConstant.waterGlobal,
               inactiveColor: Colors.grey.shade200,
               value: _value.toDouble(),
               min: minValue,
@@ -143,7 +143,7 @@ class _DrinkBottomSheetState extends State<DrinkBottomSheet> {
           CommonWidget.roundedButton(
             context: context,
             titleColor: Colors.white,
-            bgColor: ColorConstant.primaryColor,
+            bgColor: ColorConstant.waterGlobal,
             title: "Add",
             padding: EdgeInsets.symmetric(vertical: 10),
             elevation: 0,
