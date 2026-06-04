@@ -6,9 +6,11 @@ import 'package:tracure/features/homepage/view/activity_screen.dart';
 import 'package:tracure/features/homepage/view/homepage.dart';
 import 'package:tracure/features/loginpage/view/login_page.dart';
 import 'package:tracure/features/profile/view/profile_screen.dart';
+import 'package:tracure/features/shorts/view/shorts_screen.dart';
 import 'package:tracure/servies/hive_service.dart';
 import 'package:tracure/utils/common_widget.dart';
 import 'package:tracure/utils/constant/color_constants.dart';
+import 'package:tracure/utils/extensions.dart';
 
 class MainNavigation extends StatefulWidget {
   const MainNavigation({super.key});
@@ -25,6 +27,7 @@ class _MainNavigationState extends State<MainNavigation> {
   final List<Widget> _pages = [
     const Homepage(),
     const ActivityScreen(),
+    const ShortsScreen(),
     const ProfileScreen(),
   ];
 
@@ -81,17 +84,22 @@ class _MainNavigationState extends State<MainNavigation> {
                 _buildNavItem(
                   index: 0,
                   icon: Icons.home_rounded,
-                  label: 'Home',
+                  // label: 'Home',
                 ),
                 _buildNavItem(
                   index: 1,
                   icon: Icons.grid_view_rounded,
-                  label: 'Activities',
+                  // label: 'Activities',
                 ),
                 _buildNavItem(
                   index: 2,
+                  icon: Icons.play_circle_outline_rounded,
+                  // label: 'Shorts',
+                ),
+                _buildNavItem(
+                  index: 3,
                   icon: Icons.person_outline_rounded,
-                  label: 'Profile',
+                  // label: 'Profile',
                 ),
               ],
             ),
@@ -104,7 +112,7 @@ class _MainNavigationState extends State<MainNavigation> {
   Widget _buildNavItem({
     required int index,
     required IconData icon,
-    required String label,
+    String? label,
   }) {
     final isSelected = _selectedIndex == index;
 
@@ -135,15 +143,15 @@ class _MainNavigationState extends State<MainNavigation> {
               color: isSelected ? Colors.white : Colors.grey.shade600,
               size: 18,
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: 8).visible(isVisible: label != null),
             Text(
-              label,
+              label ?? '',
               style: TextStyle(
                 color: isSelected ? Colors.white : Colors.grey.shade600,
                 fontWeight: FontWeight.w600,
                 fontSize: 12,
               ),
-            ),
+            ).visible(isVisible: label != null),
           ],
         ),
       ),
